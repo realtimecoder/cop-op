@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Confirm booking" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="grid" style="grid-template-columns:1.6fr 1fr;gap:32px;align-items:start;">
+      <div class="form-card wide" style="margin:0;">
+        <h1 style="font-size:1.4rem;">{% trans "Confirm your booking" %}</h1>
+        <p class="muted">{{ service.name }} {% trans "with" %} {{ worker.user.get_full_name }}</p>
+
+        {% if form.non_field_errors %}
+          {% for error in form.non_field_errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+        {% endif %}
+
+        <form method="post" novalidate id="booking-form">
+          {% csrf_token %}
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label>{% trans "Date" %}</label>{{ form.scheduled_date }}
+              {% for error in form.scheduled_date.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+              <p class="help-text" id="date-availability-hint"></p>
+            </div>
+            <div class="form-group"><label>{% trans "Time" %}</label>{{ form.scheduled_time }}
+              {% for error in form.scheduled_time.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+            </div>
+          </div>
+          <div class="form-group"><label>{% trans "Service address" %}</label>{{ form.address }}
+            {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="grid grid-2">
+            <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
+            <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
+          </div>
+          <div class="form-group"><label>{% trans "Instructions (optional)" %}</label>{{ form.instructions }}</div>
+
+          {% if service.is_hourly %}
+          <div class="form-group">
+            <label>{% trans "Number of hours" %}</label>{{ form.hours_booked }}
+            <p class="help-text">{% trans "Minimum" %} {{ service.min_hours }} {% trans "hour(s)" %} · ₹{{ service.hourly_rate }}/{% trans "hour" %}</p>
+          </div>
+          {% endif %}
+
+          {% if service.category.name == "Construction Labourer" or service.variant == "builder" %}
+          <div class="grid grid-2">
+            <div class="form-group"><label>{% trans "Number of workers" %}</label>{{ form.workers_required }}</div>
+            <div class="form-group"><label>{% trans "Duration (days)" %}</label>{{ form.duration_days }}</div>
+          </div>
+          {% endif %}
+
+          <div class="form-group checkbox-row">{{ form.is_emergency }} <label class="mb-0">{% trans "This is an emergency booking" %}</label></div>
+          <div class="form-group checkbox-row">{{ form.is_recurring }} <label class="mb-0">{% trans "Make this a recurring booking" %}</label></div>
+          <div class="form-group" data-recurrence-row style="display:none;"><label>{% trans "Frequency" %}</label>{{ form.recurrence_frequency }}</div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="confirm-booking-btn">{% trans "Confirm booking" %}</button>
+        </form>
+      </div>
+
+      <div>
+        <div class="card worker-card">
+          <div class="worker-card-top">
+            <div class="worker-avatar">{{ worker.user.first_name|first|upper|default:"W" }}</div>
+            <div><h3 style="margin-bottom:2px;">{{ worker.user.get_full_name }}</h3><span class="badge badge-verified"><svg><use href="#icon-check"/></svg>{% trans "Verified" %}</span></div>
+          </div>
+          <div class="rating-row"><svg><use href="#icon-star"/></svg>{{ worker.average_rating }}</div>
+        </div>
+        <div class="price-ticket mt-2">
+          <div class="price-ticket-row"><span>{% trans "Visit charge" %}</span><span>₹{{ service.visit_charge }}</span></div>
+          {% if service.is_hourly %}
+          <div class="price-ticket-row"><span>{% trans "Rate per hour" %}</span><span>₹{{ service.hourly_rate }}</span></div>
+          {% else %}
+          <div class="price-ticket-row"><span>{% trans "Labour charge" %}</span><span>₹{{ service.fixed_labour_charge }}</span></div>
+          {% endif %}
+          <div class="price-ticket-row total"><span>{% trans "Estimated total" %}</span><span>₹{{ total }}</span></div>
+          <p class="price-ticket-note">{% trans "Material cost, if any, is paid directly by you to the shop." %}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var occupied = {{ occupied_dates_json|safe }};
+  var dateInput = document.getElementById('id_scheduled_date');
+  var hint = document.getElementById('date-availability-hint');
+  var submitBtn = document.getElementById('confirm-booking-btn');
+  var today = new Date().toISOString().split('T')[0];
+  if (dateInput) {
+    dateInput.setAttribute('min', today);
+    function checkDate() {
+      if (occupied.indexOf(dateInput.value) !== -1) {
+        hint.textContent = "{% trans 'This worker is already booked on this date. Please pick another date.' %}";
+        hint.style.color = 'var(--thread-red)';
+        submitBtn.disabled = true;
+      } else {
+        hint.textContent = dateInput.value ? "{% trans 'This date is available.' %}" : '';
+        hint.style.color = 'var(--teal)';
+        submitBtn.disabled = false;
+      }
+    }
+    dateInput.addEventListener('change', checkDate);
+    checkDate();
+  }
+});
+</script>
+{% endblock %}

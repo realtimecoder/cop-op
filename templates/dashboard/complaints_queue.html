@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Complaints" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Support" %}</span>
+    <h1>{% trans "Complaints queue" %}</h1>
+    {% for c in complaints %}
+    <div class="card mt-2">
+      <div class="flex justify-between items-center">
+        <h3 class="mb-0">{{ c.subject }}</h3><span class="status-pill">{{ c.get_status_display }}</span>
+      </div>
+      <p class="muted" style="font-size:.82rem;">{% trans "Booking" %} #{{ c.booking.id }} · {{ c.raised_by.get_full_name }} · {{ c.created_at|date:"d M Y" }}</p>
+      <p>{{ c.description }}</p>
+      {% if c.status != 'resolved' %}
+      <form method="post" action="{% url 'dashboard:resolve_complaint' c.id %}">
+        {% csrf_token %}
+        <textarea name="resolution_notes" class="input-field" rows="2" placeholder="{% trans 'Resolution notes' %}"></textarea>
+        <button class="btn btn-primary btn-sm mt-1" type="submit">{% trans "Mark resolved" %}</button>
+      </form>
+      {% else %}
+      <p class="muted mb-0"><b>{% trans "Resolution" %}:</b> {{ c.resolution_notes }}</p>
+      {% endif %}
+    </div>
+    {% empty %}<p class="muted">{% trans "No complaints filed yet." %}</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

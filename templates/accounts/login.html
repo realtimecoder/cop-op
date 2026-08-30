@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Log in" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card">
+      <div class="text-center mb-0" style="margin-bottom:20px;">
+        <div class="category-icon" style="margin:0 auto 14px;"><svg><use href="#icon-user"/></svg></div>
+        <h1 style="font-size:1.5rem;">{% trans "Log in or create an account" %}</h1>
+        <p class="muted">{% trans "Enter your mobile number to receive a one-time password." %}</p>
+      </div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="{{ form.phone_number.id_for_label }}">{% trans "Mobile number" %}</label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="muted" style="font-family:var(--font-mono)">+91</span>
+            {{ form.phone_number }}
+          </div>
+          {% for error in form.phone_number.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Send OTP" %}</button>
+      </form>
+      <p class="help-text text-center mt-3">{% trans "By continuing you agree to Co-opSeva's terms of service and privacy policy." %}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

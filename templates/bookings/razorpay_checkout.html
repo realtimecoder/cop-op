@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Pay" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card text-center">
+      <div class="category-icon" style="margin:0 auto 14px;"><svg><use href="#icon-receipt"/></svg></div>
+      <h1 style="font-size:1.4rem;">{% trans "Complete payment via Razorpay" %}</h1>
+      <span class="badge badge-warning">{% trans "Test mode" %}</span>
+      <p class="muted mt-2">₹{{ order.amount|floatformat:0 }}0 {% trans "paise" %} · {% trans "Booking" %} #{{ booking.id }}</p>
+      <p class="help-text">{% trans "Use Razorpay's test card 4111 1111 1111 1111, any future expiry, any CVV — or any test UPI ID." %}</p>
+      <button id="pay-btn" class="btn btn-primary btn-block mt-2">{% trans "Open Razorpay checkout" %}</button>
+      <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-ghost btn-block mt-1">{% trans "Cancel" %}</a>
+    </div>
+  </div>
+</section>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('pay-btn').addEventListener('click', function () {
+  var options = {
+    key: "{{ razorpay_key_id }}",
+    amount: "{{ order.amount }}",
+    currency: "{{ order.currency }}",
+    name: "Co-opSeva",
+    description: "Booking #{{ booking.id }} — {{ booking.service.name }}",
+    order_id: "{{ order.id }}",
+    handler: function (response) {
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = "{% url 'bookings:razorpay_callback' booking.id %}";
+      var fields = {
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature,
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+      };
+      for (var key in fields) {
+        var input = document.createElement('input');
+        input.type = 'hidden'; input.name = key; input.value = fields[key];
+        form.appendChild(input);
+      }
+      document.body.appendChild(form);
+      form.submit();
+    },
+    prefill: { name: "{{ booking.customer.get_full_name }}", contact: "{{ booking.customer.phone_number }}" },
+    theme: { color: "#0E4B49" },
+  };
+  var rzp = new Razorpay(options);
+  rzp.open();
+});
+
+function getCookie(name) {
+  var match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return match ? decodeURIComponent(match.pop()) : '';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Pricing policy" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Pricing policy" %}</span>
+    <h1>{% trans "One fixed price. No bidding. No quotations." %}</h1>
+    <p style="max-width:70ch;">{% trans "The federation administrator centrally configures a visit charge for every category and a labour charge (or hourly rate) for every service. Workers and customers cannot change these amounts. Material cost is always paid directly by the customer to the shop or supplier and never appears on the platform invoice." %}</p>
+
+    {% if user.is_authenticated and user.role == 'federation' or user.is_superuser %}
+    <a href="{% url 'dashboard:pricing_config' %}" class="btn btn-primary mt-1">{% trans "Edit pricing (federation admin)" %}</a>
+    {% endif %}
+
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead><tr><th>{% trans "Category" %}</th><th>{% trans "Visit charge" %}</th><th>{% trans "Service" %}</th><th>{% trans "Pricing" %}</th><th>{% trans "Rate" %}</th><th>{% trans "Est. total" %}</th></tr></thead>
+        <tbody>
+          {% for category in categories %}
+            {% for service in category.services.all %}
+            <tr>
+              <td>{{ category.name }}</td>
+              <td style="font-family:var(--font-mono)">₹{{ category.fixed_visit_charge }}</td>
+              <td>{{ service.name }}</td>
+              <td>{% if service.is_hourly %}{% trans "Per hour" %}{% else %}{% trans "Fixed" %}{% endif %}</td>
+              <td style="font-family:var(--font-mono)">{% if service.is_hourly %}₹{{ service.hourly_rate }}/{% trans "hr" %}{% else %}₹{{ service.fixed_labour_charge }}{% endif %}</td>
+              <td style="font-family:var(--font-mono);font-weight:700;">₹{{ service.total_charge }}{% if service.is_hourly %}+{% endif %}</td>
+            </tr>
+            {% endfor %}
+          {% empty %}
+          <tr><td colspan="6" class="muted">{% trans "Pricing will appear once the federation administrator configures the catalogue." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

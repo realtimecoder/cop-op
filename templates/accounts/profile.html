@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "My profile" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card wide">
+      <h1 style="font-size:1.5rem;">{% trans "My profile" %}</h1>
+      <div class="text-center" style="margin-bottom:18px;">
+        <div class="worker-avatar" style="width:84px;height:84px;font-size:1.8rem;margin:0 auto;">
+          {% if request.user.profile_photo %}
+            <img src="{{ request.user.profile_photo.url }}" alt="">
+          {% else %}
+            {{ request.user.first_name|first|upper|default:"U" }}
+          {% endif %}
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}<p class="error-text text-center">{{ error }}</p>{% endfor %}
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "First name" %}</label>{{ form.first_name }}
+            {% for error in form.first_name.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="form-group"><label>{% trans "Last name" %}</label>{{ form.last_name }}
+            {% for error in form.last_name.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group"><label>{% trans "Address" %}</label>{{ form.address }}
+          {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
+          <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
+        </div>
+        <div class="form-group"><label>{% trans "Emergency contact" %}</label>{{ form.emergency_contact }}</div>
+        <div class="form-group"><label>{% trans "Preferred language" %}</label>{{ form.preferred_language }}</div>
+        <div class="form-group">
+          <label>{% trans "Profile photo" %}</label>{{ form.profile_photo }}
+          <p class="help-text">{% trans "JPG, PNG or WEBP, up to 5 MB. iPhone HEIC photos aren't supported — switch to 'Most Compatible' in Camera settings, or share via WhatsApp first to auto-convert." %}</p>
+          {% for error in form.profile_photo.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Save changes" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

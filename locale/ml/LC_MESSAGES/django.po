@@ -1,0 +1,1926 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-30 01:12+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: accounts/views.py:39
+#, python-format
+msgid "Demo OTP for %(phone)s is %(code)s (valid 10 minutes)."
+msgstr ""
+
+#: accounts/views.py:61
+msgid "OTP session expired. Please request a new one."
+msgstr ""
+
+#: accounts/views.py:82
+#, python-format
+msgid "Welcome back, %(name)s!"
+msgstr ""
+
+#: accounts/views.py:86
+msgid "Incorrect or expired OTP. Please try again."
+msgstr ""
+
+#: accounts/views.py:98
+msgid "Profile completed. Welcome to Co-opSeva!"
+msgstr ""
+
+#: accounts/views.py:115
+msgid "Profile updated successfully."
+msgstr ""
+
+#: accounts/views.py:144
+msgid "You have been logged out."
+msgstr ""
+
+#: templates/accounts/complete_profile.html:3
+#: templates/accounts/complete_profile.html:8
+msgid "Complete your profile"
+msgstr "നിങ്ങളുടെ പ്രൊഫൈൽ പൂർത്തിയാക്കുക"
+
+#: templates/accounts/complete_profile.html:9
+msgid "Tell us a little about you to personalise your Co-opSeva experience."
+msgstr ""
+
+#: templates/accounts/complete_profile.html:13
+#: templates/accounts/profile.html:26
+msgid "First name"
+msgstr "ആദ്യ നാമം"
+
+#: templates/accounts/complete_profile.html:14
+#: templates/accounts/profile.html:29
+msgid "Last name"
+msgstr "അവസാന നാമം"
+
+#: templates/accounts/complete_profile.html:17
+msgid "I am a…"
+msgstr ""
+
+#: templates/accounts/complete_profile.html:19
+#: templates/accounts/profile.html:33 templates/bookings/booking_detail.html:37
+#: templates/dashboard/customer_detail.html:11
+#: templates/dashboard/worker_detail.html:21
+#: templates/workers/my_dashboard.html:66
+msgid "Address"
+msgstr "വിലാസം"
+
+#: templates/accounts/complete_profile.html:21
+#: templates/accounts/profile.html:37 templates/bookings/create_booking.html:32
+#: templates/dashboard/customer_list.html:11
+msgid "City"
+msgstr "നഗരം"
+
+#: templates/accounts/complete_profile.html:22
+#: templates/accounts/profile.html:38 templates/bookings/create_booking.html:33
+msgid "PIN code"
+msgstr "പിൻ കോഡ്"
+
+#: templates/accounts/complete_profile.html:25
+#: templates/accounts/profile.html:41
+msgid "Preferred language"
+msgstr "ഇഷ്ടപ്പെട്ട ഭാഷ"
+
+#: templates/accounts/complete_profile.html:27
+msgid "Save and continue"
+msgstr "സേവ് ചെയ്ത് തുടരുക"
+
+#: templates/accounts/login.html:3 templates/base.html:72
+msgid "Log in"
+msgstr "ലോഗിൻ ചെയ്യുക"
+
+#: templates/accounts/login.html:10
+msgid "Log in or create an account"
+msgstr ""
+
+#: templates/accounts/login.html:11
+msgid "Enter your mobile number to receive a one-time password."
+msgstr ""
+
+#: templates/accounts/login.html:16
+msgid "Mobile number"
+msgstr "മൊബൈൽ നമ്പർ"
+
+#: templates/accounts/login.html:23
+msgid "Send OTP"
+msgstr "OTP അയയ്ക്കുക"
+
+#: templates/accounts/login.html:25
+msgid ""
+"By continuing you agree to Co-opSeva's terms of service and privacy policy."
+msgstr ""
+
+#: templates/accounts/profile.html:3 templates/accounts/profile.html:8
+#: templates/workers/my_dashboard.html:61
+msgid "My profile"
+msgstr "എന്റെ പ്രൊഫൈൽ"
+
+#: templates/accounts/profile.html:40
+msgid "Emergency contact"
+msgstr ""
+
+#: templates/accounts/profile.html:43
+msgid "Profile photo"
+msgstr ""
+
+#: templates/accounts/profile.html:44
+msgid ""
+"JPG, PNG or WEBP, up to 5 MB. iPhone HEIC photos aren't supported — switch "
+"to 'Most Compatible' in Camera settings, or share via WhatsApp first to auto-"
+"convert."
+msgstr ""
+
+#: templates/accounts/profile.html:47 templates/workers/edit_profile.html:22
+msgid "Save changes"
+msgstr "മാറ്റങ്ങൾ സേവ് ചെയ്യുക"
+
+#: templates/accounts/verify_otp.html:3
+msgid "Verify OTP"
+msgstr ""
+
+#: templates/accounts/verify_otp.html:10
+msgid "Verify your number"
+msgstr "നിങ്ങളുടെ നമ്പർ പരിശോധിക്കുക"
+
+#: templates/accounts/verify_otp.html:11
+#, python-format
+msgid "Enter the 6-digit code sent to +91 %(phone)s"
+msgstr ""
+
+#: templates/accounts/verify_otp.html:16
+msgid "OTP code"
+msgstr ""
+
+#: templates/accounts/verify_otp.html:20
+msgid "Verify & continue"
+msgstr "പരിശോധിച്ച് തുടരുക"
+
+#: templates/accounts/verify_otp.html:22
+msgid "Change number or resend OTP"
+msgstr ""
+
+#: templates/base.html:7
+msgid "Co-opSeva"
+msgstr ""
+
+#: templates/base.html:7
+msgid "Verified Cooperative Labour Services"
+msgstr ""
+
+#: templates/base.html:8
+msgid ""
+"Co-opSeva connects verified cooperative workers with households, builders "
+"and institutions through fixed, transparent pricing."
+msgstr ""
+
+#: templates/base.html:19
+msgid "Delhi-NCR pilot"
+msgstr ""
+
+#: templates/base.html:19
+msgid "A cooperative-owned service marketplace"
+msgstr ""
+
+#: templates/base.html:24
+msgid "Choose language"
+msgstr ""
+
+#: templates/base.html:37
+msgid "Fair work, fixed price"
+msgstr "ന്യായമായ ജോലി, നിശ്ചിത വില"
+
+#: templates/base.html:40
+msgid "Toggle menu"
+msgstr ""
+
+#: templates/base.html:45 templates/base.html:101
+#: templates/bookings/my_bookings.html:25
+#: templates/catalog/category_list.html:3
+#: templates/catalog/category_list.html:8 templates/core/home.html:12
+msgid "Browse services"
+msgstr "സേവനങ്ങൾ കാണുക"
+
+#: templates/base.html:46 templates/base.html:102 templates/core/home.html:13
+#: templates/core/how_it_works.html:3 templates/core/how_it_works.html:7
+msgid "How it works"
+msgstr "ഇത് എങ്ങനെ പ്രവർത്തിക്കുന്നു"
+
+#: templates/base.html:47 templates/core/about.html:3
+msgid "About"
+msgstr "ഞങ്ങളെക്കുറിച്ച്"
+
+#: templates/base.html:49 templates/bookings/my_bookings.html:3
+#: templates/bookings/my_bookings.html:8 templates/core/contact.html:12
+#: templates/workers/my_dashboard.html:29
+msgid "My bookings"
+msgstr "എന്റെ ബുക്കിംഗുകൾ"
+
+#: templates/base.html:50 templates/workers/manage_availability.html:7
+#: templates/workers/my_dashboard.html:3 templates/workers/my_dashboard.html:8
+msgid "Worker dashboard"
+msgstr "തൊഴിലാളി ഡാഷ്‌ബോർഡ്"
+
+#: templates/base.html:52 templates/core/pricing_policy.html:3
+#: templates/core/pricing_policy.html:7
+msgid "Pricing policy"
+msgstr ""
+
+#: templates/base.html:55 templates/dashboard/overview.html:3
+msgid "Admin dashboard"
+msgstr "അഡ്മിൻ ഡാഷ്‌ബോർഡ്"
+
+#: templates/base.html:70
+msgid "Log out"
+msgstr "ലോഗ് ഔട്ട്"
+
+#: templates/base.html:96
+msgid ""
+"A cooperative-owned digital marketplace connecting verified labour-"
+"cooperative workers with households, builders and institutions."
+msgstr ""
+
+#: templates/base.html:100
+msgid "Platform"
+msgstr ""
+
+#: templates/base.html:105
+msgid "Company"
+msgstr ""
+
+#: templates/base.html:106
+msgid "About Co-opSeva"
+msgstr ""
+
+#: templates/base.html:107
+msgid "Contact support"
+msgstr "പിന്തുണയുമായി ബന്ധപ്പെടുക"
+
+#: templates/base.html:110 templates/core/about.html:13
+msgid "For workers"
+msgstr ""
+
+#: templates/base.html:111
+msgid "Register as a worker"
+msgstr ""
+
+#: templates/base.html:115
+msgid "All rights reserved."
+msgstr ""
+
+#: templates/base.html:116
+msgid "Session-based secure sign-in"
+msgstr ""
+
+#: templates/base.html:116
+msgid "No bidding · No quotation · Fixed price"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:3
+#: templates/bookings/booking_detail.html:10
+#: templates/bookings/file_complaint.html:10
+#: templates/bookings/razorpay_checkout.html:11
+#: templates/dashboard/complaints_queue.html:14
+msgid "Booking"
+msgstr "ബുക്കിംഗ്"
+
+#: templates/bookings/booking_detail.html:14
+msgid "Live status"
+msgstr "തത്സമയ നില"
+
+#: templates/bookings/booking_detail.html:20
+msgid "This booking was"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:35
+#: templates/bookings/my_bookings.html:11
+#: templates/dashboard/customer_detail.html:19
+#: templates/dashboard/worker_verification_queue.html:11
+msgid "Worker"
+msgstr "തൊഴിലാളി"
+
+#: templates/bookings/booking_detail.html:36
+msgid "Scheduled"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:38
+msgid "Instructions"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:46
+msgid "Accept booking"
+msgstr "ബുക്കിംഗ് സ്വീകരിക്കുക"
+
+#: templates/bookings/booking_detail.html:47
+#: templates/dashboard/category_change_queue.html:24
+#: templates/dashboard/worker_verification_queue.html:21
+msgid "Reject"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:49
+msgid "I'm heading there"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:51
+msgid "I have arrived"
+msgstr "ഞാൻ എത്തി"
+
+#: templates/bookings/booking_detail.html:53
+msgid "Start work"
+msgstr "ജോലി ആരംഭിക്കുക"
+
+#: templates/bookings/booking_detail.html:55
+msgid "Mark work completed"
+msgstr "ജോലി പൂർത്തിയായതായി അടയാളപ്പെടുത്തുക"
+
+#: templates/bookings/booking_detail.html:61
+msgid "Cancel booking"
+msgstr "ബുക്കിംഗ് റദ്ദാക്കുക"
+
+#: templates/bookings/booking_detail.html:64
+msgid "Confirm work is done"
+msgstr "ജോലി പൂർത്തിയായി എന്ന് സ്ഥിരീകരിക്കുക"
+
+#: templates/bookings/booking_detail.html:67
+#: templates/bookings/make_payment.html:34
+msgid "Pay now"
+msgstr "ഇപ്പോൾ പണമടയ്ക്കുക"
+
+#: templates/bookings/booking_detail.html:70
+#: templates/bookings/submit_review.html:8
+msgid "Rate this service"
+msgstr "ഈ സേവനത്തെ റേറ്റ് ചെയ്യുക"
+
+#: templates/bookings/booking_detail.html:74
+msgid "Book again with this worker"
+msgstr "ഈ തൊഴിലാളിയുമായി വീണ്ടും ബുക്ക് ചെയ്യുക"
+
+#: templates/bookings/booking_detail.html:77
+#: templates/bookings/file_complaint.html:3
+#: templates/bookings/file_complaint.html:9
+msgid "Raise a complaint"
+msgstr "പരാതി ഉന്നയിക്കുക"
+
+#: templates/bookings/booking_detail.html:82
+#: templates/dashboard/complaints_queue.html:3
+#: templates/dashboard/customer_detail.html:28
+#: templates/dashboard/overview.html:24
+msgid "Complaints"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:91
+#: templates/bookings/create_booking.html:68
+#: templates/bookings/make_payment.html:15
+#: templates/catalog/service_detail.html:38 templates/core/home.html:29
+#: templates/core/home.html:54 templates/core/pricing_policy.html:17
+#: templates/dashboard/pricing_config.html:18
+msgid "Visit charge"
+msgstr "സന്ദർശന ചാർജ്"
+
+#: templates/bookings/booking_detail.html:93
+#: templates/bookings/create_booking.html:70
+#: templates/bookings/make_payment.html:17
+#: templates/catalog/service_detail.html:40
+msgid "Rate per hour"
+msgstr "മണിക്കൂർ നിരക്ക്"
+
+#: templates/bookings/booking_detail.html:95
+#: templates/bookings/create_booking.html:72
+#: templates/bookings/make_payment.html:19
+#: templates/catalog/service_detail.html:45 templates/core/home.html:30
+msgid "Labour charge"
+msgstr "കൂലി ചാർജ്"
+
+#: templates/bookings/booking_detail.html:97
+#: templates/catalog/service_detail.html:46 templates/core/home.html:31
+msgid "Total payable"
+msgstr "ആകെ അടയ്‌ക്കേണ്ടത്"
+
+#: templates/bookings/booking_detail.html:98
+msgid "Material cost is not included and is paid directly to the shop."
+msgstr ""
+
+#: templates/bookings/booking_detail.html:102
+msgid "Invoice"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:105
+msgid "Paid via"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:106
+msgid "Simulated (Razorpay test keys not set)"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:106
+msgid "Verified via Razorpay (test mode)"
+msgstr ""
+
+#: templates/bookings/create_booking.html:3
+#: templates/bookings/create_booking.html:55
+msgid "Confirm booking"
+msgstr "ബുക്കിംഗ് സ്ഥിരീകരിക്കുക"
+
+#: templates/bookings/create_booking.html:9
+msgid "Confirm your booking"
+msgstr "നിങ്ങളുടെ ബുക്കിംഗ് സ്ഥിരീകരിക്കുക"
+
+#: templates/bookings/create_booking.html:10
+msgid "with"
+msgstr ""
+
+#: templates/bookings/create_booking.html:20
+#: templates/bookings/my_bookings.html:11
+#: templates/dashboard/customer_detail.html:19
+#: templates/dashboard/worker_detail.html:34
+#: templates/workers/manage_availability.html:15
+#: templates/workers/manage_availability.html:27
+#: templates/workers/manage_availability.html:42
+#: templates/workers/my_dashboard.html:33
+msgid "Date"
+msgstr "തീയതി"
+
+#: templates/bookings/create_booking.html:24
+msgid "Time"
+msgstr "സമയം"
+
+#: templates/bookings/create_booking.html:28
+msgid "Service address"
+msgstr "സേവന വിലാസം"
+
+#: templates/bookings/create_booking.html:35
+msgid "Instructions (optional)"
+msgstr ""
+
+#: templates/bookings/create_booking.html:39
+msgid "Number of hours"
+msgstr ""
+
+#: templates/bookings/create_booking.html:40
+msgid "Minimum"
+msgstr ""
+
+#: templates/bookings/create_booking.html:40
+msgid "hour(s)"
+msgstr ""
+
+#: templates/bookings/create_booking.html:40
+msgid "hour"
+msgstr ""
+
+#: templates/bookings/create_booking.html:46
+msgid "Number of workers"
+msgstr ""
+
+#: templates/bookings/create_booking.html:47
+msgid "Duration (days)"
+msgstr ""
+
+#: templates/bookings/create_booking.html:51
+msgid "This is an emergency booking"
+msgstr ""
+
+#: templates/bookings/create_booking.html:52
+msgid "Make this a recurring booking"
+msgstr ""
+
+#: templates/bookings/create_booking.html:53
+msgid "Frequency"
+msgstr ""
+
+#: templates/bookings/create_booking.html:63 templates/core/home.html:106
+#: templates/workers/worker_list.html:56
+#: templates/workers/worker_profile.html:13
+msgid "Verified"
+msgstr "പരിശോധിച്ചുറപ്പിച്ചു"
+
+#: templates/bookings/create_booking.html:74
+#: templates/catalog/service_detail.html:42
+msgid "Estimated total"
+msgstr "കണക്കാക്കിയ ആകെ"
+
+#: templates/bookings/create_booking.html:75
+#: templates/catalog/service_detail.html:47
+msgid "Material cost, if any, is paid directly by you to the shop."
+msgstr ""
+
+#: templates/bookings/create_booking.html:95
+msgid "This worker is already booked on this date. Please pick another date."
+msgstr ""
+
+#: templates/bookings/create_booking.html:99
+msgid "This date is available."
+msgstr ""
+
+#: templates/bookings/file_complaint.html:13
+msgid "Subject"
+msgstr ""
+
+#: templates/bookings/file_complaint.html:14
+msgid "Description"
+msgstr ""
+
+#: templates/bookings/file_complaint.html:15
+msgid "Submit complaint"
+msgstr ""
+
+#: templates/bookings/make_payment.html:3
+#: templates/bookings/razorpay_checkout.html:3
+msgid "Pay"
+msgstr ""
+
+#: templates/bookings/make_payment.html:8
+msgid "Complete payment"
+msgstr "പണമടയ്ക്കൽ പൂർത്തിയാക്കുക"
+
+#: templates/bookings/make_payment.html:10
+msgid "Secured by Razorpay — Test mode"
+msgstr ""
+
+#: templates/bookings/make_payment.html:12
+msgid "Simulated payment (Razorpay test keys not configured)"
+msgstr ""
+
+#: templates/bookings/make_payment.html:21
+msgid "Amount to pay"
+msgstr ""
+
+#: templates/bookings/make_payment.html:26
+msgid "Payment method"
+msgstr "പണമടയ്ക്കൽ രീതി"
+
+#: templates/bookings/make_payment.html:28
+msgid "UPI"
+msgstr ""
+
+#: templates/bookings/make_payment.html:29
+msgid "Debit / credit card"
+msgstr ""
+
+#: templates/bookings/make_payment.html:30
+msgid "Net banking"
+msgstr ""
+
+#: templates/bookings/make_payment.html:31
+msgid "Wallet"
+msgstr ""
+
+#: templates/bookings/make_payment.html:34
+msgid "Continue to Razorpay"
+msgstr ""
+
+#: templates/bookings/make_payment.html:37
+msgid ""
+"This is a simulated secure payment for demonstration purposes. Set "
+"RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to enable real Razorpay test-mode "
+"checkout."
+msgstr ""
+
+#: templates/bookings/my_bookings.html:7
+msgid "Account"
+msgstr ""
+
+#: templates/bookings/my_bookings.html:11 templates/core/pricing_policy.html:17
+#: templates/dashboard/customer_detail.html:19
+#: templates/dashboard/pricing_config.html:25
+#: templates/dashboard/worker_detail.html:34
+#: templates/workers/manage_availability.html:42
+#: templates/workers/my_dashboard.html:33
+msgid "Service"
+msgstr "സേവനം"
+
+#: templates/bookings/my_bookings.html:11
+#: templates/dashboard/customer_detail.html:19
+msgid "Amount"
+msgstr ""
+
+#: templates/bookings/my_bookings.html:11
+#: templates/dashboard/customer_detail.html:19
+#: templates/dashboard/worker_detail.html:11
+#: templates/dashboard/worker_detail.html:34
+#: templates/dashboard/worker_list.html:11
+#: templates/dashboard/worker_verification_queue.html:11
+#: templates/workers/manage_availability.html:42
+#: templates/workers/my_dashboard.html:34
+msgid "Status"
+msgstr "നില"
+
+#: templates/bookings/my_bookings.html:20
+#: templates/workers/my_dashboard.html:51
+msgid "View"
+msgstr ""
+
+#: templates/bookings/my_bookings.html:24
+msgid "You have no bookings yet."
+msgstr ""
+
+#: templates/bookings/razorpay_checkout.html:9
+msgid "Complete payment via Razorpay"
+msgstr ""
+
+#: templates/bookings/razorpay_checkout.html:10
+msgid "Test mode"
+msgstr ""
+
+#: templates/bookings/razorpay_checkout.html:11
+msgid "paise"
+msgstr ""
+
+#: templates/bookings/razorpay_checkout.html:12
+msgid ""
+"Use Razorpay's test card 4111 1111 1111 1111, any future expiry, any CVV — "
+"or any test UPI ID."
+msgstr ""
+
+#: templates/bookings/razorpay_checkout.html:13
+msgid "Open Razorpay checkout"
+msgstr ""
+
+#: templates/bookings/razorpay_checkout.html:14
+msgid "Cancel"
+msgstr ""
+
+#: templates/bookings/submit_review.html:3
+msgid "Rate service"
+msgstr ""
+
+#: templates/bookings/submit_review.html:9
+msgid "by"
+msgstr ""
+
+#: templates/bookings/submit_review.html:13
+#: templates/dashboard/worker_detail.html:12
+#: templates/dashboard/worker_list.html:11
+#: templates/workers/my_dashboard.html:21
+msgid "Rating"
+msgstr "റേറ്റിംഗ്"
+
+#: templates/bookings/submit_review.html:15
+msgid "Excellent"
+msgstr ""
+
+#: templates/bookings/submit_review.html:16
+msgid "Good"
+msgstr ""
+
+#: templates/bookings/submit_review.html:17
+msgid "Average"
+msgstr ""
+
+#: templates/bookings/submit_review.html:18
+msgid "Below average"
+msgstr ""
+
+#: templates/bookings/submit_review.html:19
+msgid "Poor"
+msgstr ""
+
+#: templates/bookings/submit_review.html:22
+msgid "Comment (optional)"
+msgstr ""
+
+#: templates/bookings/submit_review.html:23
+msgid "Submit rating"
+msgstr "റേറ്റിംഗ് സമർപ്പിക്കുക"
+
+#: templates/catalog/category_detail.html:9
+#: templates/core/pricing_policy.html:17
+msgid "Category"
+msgstr "വിഭാഗം"
+
+#: templates/catalog/category_detail.html:14
+msgid "Visit charge (all workers)"
+msgstr ""
+
+#: templates/catalog/category_detail.html:15
+msgid "Same for every verified worker in this category."
+msgstr ""
+
+#: templates/catalog/category_detail.html:26
+#: templates/catalog/category_list.html:21
+#: templates/workers/worker_list.html:38
+msgid "Visit"
+msgstr ""
+
+#: templates/catalog/category_detail.html:28
+#: templates/core/pricing_policy.html:17
+#: templates/dashboard/pricing_config.html:25
+#: templates/workers/worker_list.html:40
+msgid "Rate"
+msgstr ""
+
+#: templates/catalog/category_detail.html:28
+#: templates/core/pricing_policy.html:26
+#: templates/dashboard/pricing_config.html:49
+#: templates/workers/worker_list.html:40
+msgid "hr"
+msgstr ""
+
+#: templates/catalog/category_detail.html:29
+#: templates/core/pricing_policy.html:17
+#: templates/dashboard/pricing_config.html:25
+msgid "Est. total"
+msgstr ""
+
+#: templates/catalog/category_detail.html:29
+#: templates/workers/worker_list.html:40
+msgid "h min"
+msgstr ""
+
+#: templates/catalog/category_detail.html:31
+#: templates/workers/worker_list.html:42
+msgid "Labour"
+msgstr ""
+
+#: templates/catalog/category_detail.html:32
+msgid "Total"
+msgstr "ആകെ"
+
+#: templates/catalog/category_detail.html:38
+msgid "No services configured in this category yet."
+msgstr ""
+
+#: templates/catalog/category_list.html:8
+msgid "Catalogue"
+msgstr ""
+
+#: templates/catalog/category_list.html:10
+msgid "Search services…"
+msgstr "സേവനങ്ങൾ തിരയുക…"
+
+#: templates/catalog/category_list.html:21 templates/core/home.html:54
+msgid "services"
+msgstr ""
+
+#: templates/catalog/category_list.html:27
+msgid "No categories match your search yet."
+msgstr ""
+
+#: templates/catalog/service_detail.html:16
+msgid "Required skill"
+msgstr "ആവശ്യമായ വൈദഗ്ദ്ധ്യം"
+
+#: templates/catalog/service_detail.html:17
+msgid "Estimated duration"
+msgstr ""
+
+#: templates/catalog/service_detail.html:17
+msgid "minutes"
+msgstr ""
+
+#: templates/catalog/service_detail.html:18
+msgid "Tools required"
+msgstr ""
+
+#: templates/catalog/service_detail.html:19
+msgid "Warranty"
+msgstr "വാറന്റി"
+
+#: templates/catalog/service_detail.html:19
+msgid "days"
+msgstr ""
+
+#: templates/catalog/service_detail.html:20
+msgid "Service area"
+msgstr ""
+
+#: templates/catalog/service_detail.html:21
+msgid "Cancellation policy"
+msgstr ""
+
+#: templates/catalog/service_detail.html:27
+msgid "Related services"
+msgstr ""
+
+#: templates/catalog/service_detail.html:41
+#: templates/dashboard/pricing_config.html:50
+msgid "Minimum hours"
+msgstr ""
+
+#: templates/catalog/service_detail.html:43
+msgid "Final amount depends on the number of hours you book."
+msgstr ""
+
+#: templates/catalog/service_detail.html:51
+msgid "View verified workers"
+msgstr "പരിശോധിച്ചുറപ്പിച്ച തൊഴിലാളികളെ കാണുക"
+
+#: templates/core/about.html:7
+msgid "About us"
+msgstr ""
+
+#: templates/core/about.html:8
+msgid "A cooperative-owned marketplace, built for fairness"
+msgstr ""
+
+#: templates/core/about.html:9
+msgid ""
+"Co-opSeva is a cooperative-owned digital service marketplace that connects "
+"verified labour-cooperative workers with households, builders, institutions "
+"and communities across the Delhi-NCR pilot region."
+msgstr ""
+
+#: templates/core/about.html:10
+msgid ""
+"The platform uses a simple, fixed pricing model with a federation-configured "
+"visit charge and labour charge. Material cost is always paid directly by the "
+"customer to the supplier — the platform never touches it."
+msgstr ""
+
+#: templates/core/about.html:11
+msgid ""
+"Co-opSeva provides secure booking, geo-location matching, digital payment, "
+"invoicing, ratings, grievance handling, worker welfare, insurance "
+"integration, and AI-based demand forecasting — all governed by the labour "
+"cooperative federation."
+msgstr ""
+
+#: templates/core/about.html:13
+msgid "Fair, predictable payouts and welfare support."
+msgstr ""
+
+#: templates/core/about.html:14
+msgid "For households"
+msgstr ""
+
+#: templates/core/about.html:14
+msgid "Verified help, transparent pricing, no surprises."
+msgstr ""
+
+#: templates/core/about.html:15
+msgid "For federations"
+msgstr ""
+
+#: templates/core/about.html:15
+msgid "Full control over pricing, verification and quality."
+msgstr ""
+
+#: templates/core/contact.html:3
+msgid "Contact"
+msgstr ""
+
+#: templates/core/contact.html:7 templates/dashboard/complaints_queue.html:7
+msgid "Support"
+msgstr "പിന്തുണ"
+
+#: templates/core/contact.html:8
+msgid "We're here to help"
+msgstr ""
+
+#: templates/core/contact.html:10
+msgid "Helpline"
+msgstr ""
+
+#: templates/core/contact.html:10
+msgid "toll-free, 8am–8pm"
+msgstr ""
+
+#: templates/core/contact.html:11
+msgid "Email"
+msgstr ""
+
+#: templates/core/contact.html:12
+msgid "For an existing booking"
+msgstr ""
+
+#: templates/core/contact.html:12
+msgid "Open the booking from"
+msgstr ""
+
+#: templates/core/contact.html:12
+msgid "and use Raise a complaint."
+msgstr ""
+
+#: templates/core/home.html:8
+msgid "Verified · Cooperative-owned · Fixed price"
+msgstr ""
+
+#: templates/core/home.html:9
+msgid "Book verified workers. Pay one honest, fixed price."
+msgstr "പരിശോധിച്ചുറപ്പിച്ച തൊഴിലാളികളെ ബുക്ക് ചെയ്യുക. സത്യസന്ധമായ, നിശ്ചിത വില നൽകുക."
+
+#: templates/core/home.html:10
+msgid ""
+"Co-opSeva connects your household or project with verified cooperative "
+"electricians, plumbers, carpenters, painters, helpers and more — no bidding, "
+"no quotations, ever."
+msgstr ""
+
+#: templates/core/home.html:16 templates/workers/my_dashboard.html:82
+msgid "Service categories"
+msgstr "സേവന വിഭാഗങ്ങൾ"
+
+#: templates/core/home.html:17
+msgid "Verified workers"
+msgstr "പരിശോധിച്ചുറപ്പിച്ച തൊഴിലാളികൾ"
+
+#: templates/core/home.html:18
+msgid "Charges — visit + labour, nothing else"
+msgstr ""
+
+#: templates/core/home.html:23
+msgid "What do you need help with?"
+msgstr "നിങ്ങൾക്ക് എന്ത് സഹായം വേണം?"
+
+#: templates/core/home.html:25
+msgid "Try: electrician, fan installation, plumber…"
+msgstr ""
+
+#: templates/core/home.html:32
+msgid ""
+"Material cost is paid directly to the shop — never through the platform."
+msgstr ""
+
+#: templates/core/home.html:42
+msgid "Service catalogue"
+msgstr ""
+
+#: templates/core/home.html:43
+msgid "Popular categories near you"
+msgstr ""
+
+#: templates/core/home.html:45
+msgid "View all categories"
+msgstr ""
+
+#: templates/core/home.html:58
+msgid ""
+"Categories will appear here once the federation administrator configures the "
+"catalogue."
+msgstr ""
+
+#: templates/core/home.html:68
+msgid "Trust & transparency"
+msgstr ""
+
+#: templates/core/home.html:69
+msgid "Why families and builders choose Co-opSeva"
+msgstr ""
+
+#: templates/core/home.html:75
+msgid "Verified, not anonymous"
+msgstr ""
+
+#: templates/core/home.html:76
+msgid ""
+"Every worker is identity-checked, cooperative-registered, and skill-graded "
+"before appearing on the platform."
+msgstr ""
+
+#: templates/core/home.html:80
+msgid "Only two charges"
+msgstr ""
+
+#: templates/core/home.html:81
+msgid ""
+"A fixed visit charge and a fixed labour charge — set centrally by the "
+"federation. No worker or customer can change them."
+msgstr ""
+
+#: templates/core/home.html:85
+msgid "Worker welfare built in"
+msgstr ""
+
+#: templates/core/home.html:86
+msgid ""
+"Fair, predefined payouts and cooperative-backed insurance and welfare "
+"records for every registered worker."
+msgstr ""
+
+#: templates/core/home.html:96
+msgid "Top rated"
+msgstr ""
+
+#: templates/core/home.html:96
+msgid "Highly rated verified workers"
+msgstr ""
+
+#: templates/core/home.html:109 templates/workers/worker_profile.html:14
+msgid "jobs"
+msgstr ""
+
+#: templates/core/home.html:120
+msgid "Process"
+msgstr ""
+
+#: templates/core/home.html:120
+msgid "From search to service in four steps"
+msgstr ""
+
+#: templates/core/home.html:122
+msgid "Choose a service"
+msgstr ""
+
+#: templates/core/home.html:122
+msgid "See the fixed price upfront, before you book anything."
+msgstr ""
+
+#: templates/core/home.html:123
+msgid "Compare workers"
+msgstr ""
+
+#: templates/core/home.html:123
+msgid ""
+"Rating, experience and arrival time — never price, because price never "
+"changes."
+msgstr ""
+
+#: templates/core/home.html:124
+msgid "Book & pay digitally"
+msgstr ""
+
+#: templates/core/home.html:124
+msgid "Confirm your slot and pay the visit and labour charge securely."
+msgstr ""
+
+#: templates/core/home.html:125 templates/core/how_it_works.html:16
+msgid "Rate the service"
+msgstr ""
+
+#: templates/core/home.html:125
+msgid "Help the cooperative keep quality high for the next customer."
+msgstr ""
+
+#: templates/core/how_it_works.html:8
+msgid "Simple, transparent, fixed-price service booking"
+msgstr ""
+
+#: templates/core/how_it_works.html:10
+msgid "Search for a service"
+msgstr ""
+
+#: templates/core/how_it_works.html:10
+msgid ""
+"Browse categories like electrician, plumber, carpenter, painter, domestic "
+"help, and more — no account needed to browse."
+msgstr ""
+
+#: templates/core/how_it_works.html:11
+msgid "See the fixed price immediately"
+msgstr ""
+
+#: templates/core/how_it_works.html:11
+msgid ""
+"Every service shows its fixed visit charge and fixed labour charge upfront. "
+"All verified workers charge the exact same price for the same service."
+msgstr ""
+
+#: templates/core/how_it_works.html:12
+msgid "Compare and choose a worker"
+msgstr ""
+
+#: templates/core/how_it_works.html:12
+msgid ""
+"Compare workers by rating, experience, distance and arrival time — never by "
+"price."
+msgstr ""
+
+#: templates/core/how_it_works.html:13
+msgid "Log in to confirm your booking"
+msgstr ""
+
+#: templates/core/how_it_works.html:13
+msgid "A quick mobile OTP sign-in secures your booking, schedule and address."
+msgstr ""
+
+#: templates/core/how_it_works.html:14
+msgid "Worker arrives and completes the job"
+msgstr ""
+
+#: templates/core/how_it_works.html:14
+msgid ""
+"Track status from acceptance to arrival to work completion, with optional "
+"before/after photos."
+msgstr ""
+
+#: templates/core/how_it_works.html:15
+msgid "Pay digitally and download your invoice"
+msgstr ""
+
+#: templates/core/how_it_works.html:15
+msgid ""
+"Pay only the visit charge and labour charge. Material, if any, is purchased "
+"directly by you from the shop."
+msgstr ""
+
+#: templates/core/how_it_works.html:16
+msgid ""
+"Your verified rating helps the cooperative maintain quality across the "
+"platform."
+msgstr ""
+
+#: templates/core/pricing_policy.html:8
+msgid "One fixed price. No bidding. No quotations."
+msgstr ""
+
+#: templates/core/pricing_policy.html:9
+msgid ""
+"The federation administrator centrally configures a visit charge for every "
+"category and a labour charge (or hourly rate) for every service. Workers and "
+"customers cannot change these amounts. Material cost is always paid directly "
+"by the customer to the shop or supplier and never appears on the platform "
+"invoice."
+msgstr ""
+
+#: templates/core/pricing_policy.html:12
+msgid "Edit pricing (federation admin)"
+msgstr ""
+
+#: templates/core/pricing_policy.html:17
+msgid "Pricing"
+msgstr ""
+
+#: templates/core/pricing_policy.html:25
+#: templates/dashboard/pricing_config.html:39
+msgid "Per hour"
+msgstr "ഒരു മണിക്കൂറിന്"
+
+#: templates/core/pricing_policy.html:25
+msgid "Fixed"
+msgstr ""
+
+#: templates/core/pricing_policy.html:31
+msgid ""
+"Pricing will appear once the federation administrator configures the "
+"catalogue."
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:3
+#: templates/dashboard/overview.html:19
+msgid "Category change requests"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:7
+#: templates/dashboard/pricing_config.html:7
+msgid "Federation administrator"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:8
+msgid "Worker category change requests"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:16
+msgid "Current categories:"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:17
+msgid "Requested categories:"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:18
+msgid "Reason:"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:21
+msgid "Admin note (optional)"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:23
+#: templates/dashboard/worker_verification_queue.html:20
+msgid "Approve"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:28
+msgid "No pending category-change requests."
+msgstr ""
+
+#: templates/dashboard/complaints_queue.html:8
+msgid "Complaints queue"
+msgstr ""
+
+#: templates/dashboard/complaints_queue.html:19
+msgid "Resolution notes"
+msgstr ""
+
+#: templates/dashboard/complaints_queue.html:20
+msgid "Mark resolved"
+msgstr ""
+
+#: templates/dashboard/complaints_queue.html:23
+msgid "Resolution"
+msgstr ""
+
+#: templates/dashboard/complaints_queue.html:26
+msgid "No complaints filed yet."
+msgstr ""
+
+#: templates/dashboard/customer_detail.html:7
+#: templates/dashboard/customer_list.html:3
+#: templates/dashboard/overview.html:25
+msgid "Customer history"
+msgstr ""
+
+#: templates/dashboard/customer_detail.html:10
+#: templates/dashboard/customer_list.html:11
+#: templates/dashboard/worker_detail.html:20
+#: templates/dashboard/worker_list.html:11
+#: templates/dashboard/worker_verification_queue.html:11
+#: templates/workers/my_dashboard.html:65
+msgid "Phone"
+msgstr ""
+
+#: templates/dashboard/customer_detail.html:12
+#: templates/dashboard/overview.html:10
+msgid "Total bookings"
+msgstr ""
+
+#: templates/dashboard/customer_detail.html:13
+msgid "Total spend"
+msgstr ""
+
+#: templates/dashboard/customer_detail.html:16
+msgid "Booking history"
+msgstr ""
+
+#: templates/dashboard/customer_detail.html:23
+#: templates/dashboard/worker_detail.html:39
+#: templates/workers/my_dashboard.html:53
+msgid "No bookings yet."
+msgstr ""
+
+#: templates/dashboard/customer_detail.html:31
+msgid "No complaints filed."
+msgstr ""
+
+#: templates/dashboard/customer_list.html:7 templates/dashboard/overview.html:7
+#: templates/dashboard/worker_list.html:7
+msgid "Administration"
+msgstr ""
+
+#: templates/dashboard/customer_list.html:8
+msgid "Customers"
+msgstr ""
+
+#: templates/dashboard/customer_list.html:11
+#: templates/dashboard/worker_list.html:11
+#: templates/workers/my_dashboard.html:64
+msgid "Name"
+msgstr ""
+
+#: templates/dashboard/customer_list.html:11
+#: templates/dashboard/worker_list.html:11
+msgid "Bookings"
+msgstr ""
+
+#: templates/dashboard/customer_list.html:11
+msgid "Joined"
+msgstr ""
+
+#: templates/dashboard/customer_list.html:17
+#: templates/dashboard/worker_list.html:19
+msgid "View history"
+msgstr ""
+
+#: templates/dashboard/customer_list.html:19
+msgid "No customers yet."
+msgstr ""
+
+#: templates/dashboard/overview.html:8
+msgid "Dashboard overview"
+msgstr ""
+
+#: templates/dashboard/overview.html:11
+msgid "Registered workers"
+msgstr ""
+
+#: templates/dashboard/overview.html:12
+msgid "Registered customers"
+msgstr ""
+
+#: templates/dashboard/overview.html:13
+msgid "Open complaints"
+msgstr ""
+
+#: templates/dashboard/overview.html:18
+msgid "Fixed & hourly pricing"
+msgstr ""
+
+#: templates/dashboard/overview.html:18
+msgid ""
+"Set visit charges, fixed labour charges and hourly rates (federation admin "
+"only)."
+msgstr ""
+
+#: templates/dashboard/overview.html:19
+msgid "pending approval"
+msgstr ""
+
+#: templates/dashboard/overview.html:22
+#: templates/dashboard/worker_verification_queue.html:8
+msgid "Worker verification queue"
+msgstr ""
+
+#: templates/dashboard/overview.html:22
+msgid "pending review"
+msgstr ""
+
+#: templates/dashboard/overview.html:24
+msgid "Track and resolve customer complaints."
+msgstr ""
+
+#: templates/dashboard/overview.html:25
+msgid "Full booking and spend history for every customer."
+msgstr ""
+
+#: templates/dashboard/overview.html:26
+#: templates/dashboard/worker_detail.html:7
+#: templates/dashboard/worker_list.html:3
+msgid "Worker history"
+msgstr ""
+
+#: templates/dashboard/overview.html:26
+msgid "Full profile, bookings, earnings and reviews for every worker."
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:3
+msgid "Pricing configuration"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:8
+msgid "Fixed & hourly pricing configuration"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:9
+msgid ""
+"Only the federation administrator can change prices here. Workers and "
+"customers cannot set or negotiate prices. Choose Fixed price for one-time "
+"jobs, or Per hour for time-based work like domestic help, caregiving, or "
+"driving."
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:20
+msgid "Update"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:25
+msgid "Pricing type"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:38
+msgid "Fixed price"
+msgstr "നിശ്ചിത വില"
+
+#: templates/dashboard/pricing_config.html:44
+msgid "labour charge"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:51
+msgid "min. hrs"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:54
+msgid "Save"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:59
+msgid "No services in this category."
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:13
+#: templates/workers/my_dashboard.html:22
+msgid "Jobs completed"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:14
+#: templates/workers/my_dashboard.html:23
+msgid "Total income earned"
+msgstr "ആകെ വരുമാനം"
+
+#: templates/dashboard/worker_detail.html:22
+#: templates/dashboard/worker_list.html:11
+#: templates/workers/my_dashboard.html:67
+msgid "Categories"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:23
+#: templates/dashboard/worker_verification_queue.html:11
+#: templates/workers/edit_profile.html:13
+#: templates/workers/my_dashboard.html:70 templates/workers/onboarding.html:17
+msgid "Skill grade"
+msgstr "വൈദഗ്ദ്ധ്യ നിലവാരം"
+
+#: templates/dashboard/worker_detail.html:24
+#: templates/workers/my_dashboard.html:71
+msgid "Experience"
+msgstr "പരിചയം"
+
+#: templates/dashboard/worker_detail.html:24
+#: templates/workers/my_dashboard.html:71
+msgid "years"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:25
+#: templates/workers/my_dashboard.html:75
+msgid "Society"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:26
+#, python-format
+msgid "Payout %%"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:31
+msgid "Booking & earnings history"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:34
+#: templates/workers/my_dashboard.html:33
+msgid "Customer"
+msgstr "ഉപഭോക്താവ്"
+
+#: templates/dashboard/worker_detail.html:34
+msgid "Payout"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:44
+msgid "Reviews received"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:47
+#: templates/workers/worker_profile.html:39
+msgid "No reviews yet."
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:49 templates/workers/documents.html:3
+msgid "Documents"
+msgstr "രേഖകൾ"
+
+#: templates/dashboard/worker_detail.html:52
+#: templates/workers/documents.html:29
+msgid "Preview"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:52
+#: templates/workers/documents.html:29
+msgid "Type"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:52
+#: templates/workers/documents.html:29
+msgid "Uploaded"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:52
+#: templates/workers/documents.html:29
+msgid "Approved"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:60
+#: templates/workers/documents.html:37
+msgid "View file"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:63
+#: templates/workers/documents.html:40
+msgid "Yes"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:63
+#: templates/workers/documents.html:40
+msgid "Pending"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:65
+msgid "No documents uploaded."
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:70
+msgid "Category change history"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:72
+#: templates/workers/my_dashboard.html:86
+msgid "Requested:"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:73
+msgid "No category-change requests."
+msgstr ""
+
+#: templates/dashboard/worker_list.html:8
+msgid "Workers"
+msgstr ""
+
+#: templates/dashboard/worker_list.html:21
+msgid "No workers yet."
+msgstr ""
+
+#: templates/dashboard/worker_verification_queue.html:3
+msgid "Worker verification"
+msgstr ""
+
+#: templates/dashboard/worker_verification_queue.html:7
+msgid "Society operator"
+msgstr ""
+
+#: templates/dashboard/worker_verification_queue.html:11
+msgid "Action"
+msgstr ""
+
+#: templates/dashboard/worker_verification_queue.html:24
+msgid "No pending verifications."
+msgstr ""
+
+#: templates/workers/documents.html:9
+msgid "Upload verification documents"
+msgstr ""
+
+#: templates/workers/documents.html:10
+msgid ""
+"Your society operator will review these before your profile is verified."
+msgstr ""
+
+#: templates/workers/documents.html:13
+msgid "Document type"
+msgstr ""
+
+#: templates/workers/documents.html:15
+msgid "File"
+msgstr ""
+
+#: templates/workers/documents.html:16
+msgid "JPG, PNG, WEBP or PDF, up to 8 MB. iPhone HEIC photos aren't supported."
+msgstr ""
+
+#: templates/workers/documents.html:19
+msgid "Expiry date (if applicable)"
+msgstr ""
+
+#: templates/workers/documents.html:20
+msgid "Upload document"
+msgstr ""
+
+#: templates/workers/documents.html:24
+msgid "Verification status"
+msgstr ""
+
+#: templates/workers/documents.html:26
+msgid "Uploaded documents"
+msgstr ""
+
+#: templates/workers/documents.html:42
+msgid "No documents uploaded yet."
+msgstr ""
+
+#: templates/workers/edit_profile.html:3 templates/workers/my_dashboard.html:78
+msgid "Edit profile"
+msgstr "പ്രൊഫൈൽ എഡിറ്റ് ചെയ്യുക"
+
+#: templates/workers/edit_profile.html:8
+msgid "Edit my profile"
+msgstr ""
+
+#: templates/workers/edit_profile.html:9
+msgid "Category changes are handled separately and require admin approval."
+msgstr ""
+
+#: templates/workers/edit_profile.html:9
+#: templates/workers/request_category_change.html:9
+msgid "Request a category change"
+msgstr ""
+
+#: templates/workers/edit_profile.html:14 templates/workers/onboarding.html:18
+msgid "Years of experience"
+msgstr ""
+
+#: templates/workers/edit_profile.html:16
+#: templates/workers/my_dashboard.html:74 templates/workers/onboarding.html:20
+msgid "Bio"
+msgstr "പരിചയപ്പെടുത്തൽ"
+
+#: templates/workers/edit_profile.html:18 templates/workers/onboarding.html:22
+msgid "Languages spoken"
+msgstr ""
+
+#: templates/workers/edit_profile.html:19 templates/workers/onboarding.html:23
+msgid "Service radius (km)"
+msgstr ""
+
+#: templates/workers/edit_profile.html:21
+msgid "I am currently available for new bookings"
+msgstr ""
+
+#: templates/workers/manage_availability.html:3
+#: templates/workers/my_dashboard.html:98
+msgid "Manage availability"
+msgstr "ലഭ്യത നിയന്ത്രിക്കുക"
+
+#: templates/workers/manage_availability.html:8
+msgid "Manage my availability"
+msgstr ""
+
+#: templates/workers/manage_availability.html:11
+msgid "Block a date"
+msgstr "ഒരു തീയതി ബ്ലോക്ക് ചെയ്യുക"
+
+#: templates/workers/manage_availability.html:12
+msgid "Customers will not be able to book you on blocked dates."
+msgstr ""
+
+#: templates/workers/manage_availability.html:18
+#: templates/workers/request_category_change.html:21
+msgid "Reason (optional)"
+msgstr ""
+
+#: templates/workers/manage_availability.html:19
+msgid "Block this date"
+msgstr ""
+
+#: templates/workers/manage_availability.html:24
+msgid "Blocked dates"
+msgstr ""
+
+#: templates/workers/manage_availability.html:27
+msgid "Reason"
+msgstr ""
+
+#: templates/workers/manage_availability.html:32
+msgid "Remove"
+msgstr ""
+
+#: templates/workers/manage_availability.html:34
+msgid "No blocked dates."
+msgstr ""
+
+#: templates/workers/manage_availability.html:39
+msgid "Already booked (occupied automatically)"
+msgstr ""
+
+#: templates/workers/manage_availability.html:46
+msgid "No upcoming bookings."
+msgstr ""
+
+#: templates/workers/my_dashboard.html:8
+msgid "My work"
+msgstr "എന്റെ ജോലി"
+
+#: templates/workers/my_dashboard.html:14
+msgid "Your profile is not visible to customers yet."
+msgstr ""
+
+#: templates/workers/my_dashboard.html:15
+msgid ""
+"Customers can only see and book verified workers. Upload your documents and "
+"wait for your cooperative society to verify your profile."
+msgstr ""
+
+#: templates/workers/my_dashboard.html:16
+msgid "Upload documents"
+msgstr ""
+
+#: templates/workers/my_dashboard.html:24
+msgid "Payout share"
+msgstr ""
+
+#: templates/workers/my_dashboard.html:34
+msgid "Income"
+msgstr "വരുമാനം"
+
+#: templates/workers/my_dashboard.html:34
+msgid "Review"
+msgstr "അവലോകനം"
+
+#: templates/workers/my_dashboard.html:68
+#: templates/workers/request_category_change.html:13
+msgid "None set"
+msgstr ""
+
+#: templates/workers/my_dashboard.html:72
+msgid "Languages"
+msgstr "ഭാഷകൾ"
+
+#: templates/workers/my_dashboard.html:73
+msgid "Service radius"
+msgstr ""
+
+#: templates/workers/my_dashboard.html:84
+msgid "Change request pending admin approval"
+msgstr ""
+
+#: templates/workers/my_dashboard.html:90
+msgid ""
+"Category changes require federation-admin approval before they take effect."
+msgstr ""
+
+#: templates/workers/my_dashboard.html:91
+#: templates/workers/request_category_change.html:3
+msgid "Request category change"
+msgstr "വിഭാഗം മാറ്റം അഭ്യർത്ഥിക്കുക"
+
+#: templates/workers/my_dashboard.html:96
+msgid "Availability"
+msgstr ""
+
+#: templates/workers/my_dashboard.html:97
+msgid "Upcoming blocked dates:"
+msgstr ""
+
+#: templates/workers/my_dashboard.html:102
+msgid "Documents & verification"
+msgstr ""
+
+#: templates/workers/my_dashboard.html:103
+msgid "Manage documents"
+msgstr ""
+
+#: templates/workers/onboarding.html:3
+msgid "Worker onboarding"
+msgstr ""
+
+#: templates/workers/onboarding.html:8
+msgid "Set up your worker profile"
+msgstr ""
+
+#: templates/workers/onboarding.html:9
+msgid ""
+"This information helps customers find and trust you. Pricing is always fixed "
+"by the federation — you never set your own rates."
+msgstr ""
+
+#: templates/workers/onboarding.html:13
+msgid "Service categories you can perform"
+msgstr ""
+
+#: templates/workers/onboarding.html:27
+msgid "Your base location"
+msgstr ""
+
+#: templates/workers/onboarding.html:30 templates/workers/onboarding.html:69
+#: templates/workers/onboarding.html:72 templates/workers/onboarding.html:76
+msgid "Use my current location"
+msgstr ""
+
+#: templates/workers/onboarding.html:33 templates/workers/onboarding.html:70
+msgid "Saved"
+msgstr ""
+
+#: templates/workers/onboarding.html:33
+msgid "Not set yet"
+msgstr ""
+
+#: templates/workers/onboarding.html:36
+msgid ""
+"This lets customers see accurate distance and arrival time to your location. "
+"Your browser will ask for permission."
+msgstr ""
+
+#: templates/workers/onboarding.html:39
+msgid "Save and continue to documents"
+msgstr ""
+
+#: templates/workers/onboarding.html:56 templates/workers/worker_list.html:96
+msgid "Location is not supported by this browser."
+msgstr ""
+
+#: templates/workers/onboarding.html:59 templates/workers/worker_list.html:99
+msgid "Locating…"
+msgstr ""
+
+#: templates/workers/onboarding.html:70 templates/workers/onboarding.html:73
+msgid "Could not save location"
+msgstr ""
+
+#: templates/workers/onboarding.html:77
+msgid "Location permission was denied."
+msgstr ""
+
+#: templates/workers/request_category_change.html:10
+msgid ""
+"Your current categories stay active until a federation administrator reviews "
+"and approves this request."
+msgstr ""
+
+#: templates/workers/request_category_change.html:12
+msgid "Current categories"
+msgstr ""
+
+#: templates/workers/request_category_change.html:18
+msgid "Select the categories you want to work in"
+msgstr ""
+
+#: templates/workers/request_category_change.html:22
+msgid "Submit for approval"
+msgstr ""
+
+#: templates/workers/worker_list.html:3
+msgid "Choose a worker"
+msgstr ""
+
+#: templates/workers/worker_list.html:10
+msgid "Compare verified workers"
+msgstr "പരിശോധിച്ചുറപ്പിച്ച തൊഴിലാളികളെ താരതമ്യം ചെയ്യുക"
+
+#: templates/workers/worker_list.html:11
+msgid "Every worker below charges the exact same fixed price for this service."
+msgstr ""
+
+#: templates/workers/worker_list.html:15 templates/workers/worker_list.html:122
+msgid "Find nearest to me"
+msgstr "എനിക്ക് ഏറ്റവും അടുത്തുള്ളത് കണ്ടെത്തുക"
+
+#: templates/workers/worker_list.html:18
+msgid "Recommended"
+msgstr "ശുപാർശ ചെയ്തത്"
+
+#: templates/workers/worker_list.html:19
+msgid "Nearest"
+msgstr "ഏറ്റവും അടുത്തുള്ളത്"
+
+#: templates/workers/worker_list.html:20
+msgid "Highest rating"
+msgstr "ഉയർന്ന റേറ്റിംഗ്"
+
+#: templates/workers/worker_list.html:21
+msgid "Most experienced"
+msgstr "ഏറ്റവും പരിചയസമ്പന്നൻ"
+
+#: templates/workers/worker_list.html:22 templates/workers/worker_list.html:70
+msgid "Available now"
+msgstr "ഇപ്പോൾ ലഭ്യമാണ്"
+
+#: templates/workers/worker_list.html:29
+msgid ""
+"Live distance and travel time will appear here once the platform's Google "
+"Maps API key is configured. Sorting by rating, experience and availability "
+"still works normally."
+msgstr ""
+
+#: templates/workers/worker_list.html:33
+msgid ""
+"Couldn't calculate distances right now — showing the recommended order "
+"instead."
+msgstr ""
+
+#: templates/workers/worker_list.html:44
+msgid "Same for every worker"
+msgstr ""
+
+#: templates/workers/worker_list.html:59
+msgid "jobs completed"
+msgstr ""
+
+#: templates/workers/worker_list.html:62
+msgid "yrs experience"
+msgstr ""
+
+#: templates/workers/worker_list.html:64
+msgid "away"
+msgstr ""
+
+#: templates/workers/worker_list.html:66
+msgid "within"
+msgstr ""
+
+#: templates/workers/worker_list.html:70
+msgid "Busy"
+msgstr ""
+
+#: templates/workers/worker_list.html:72
+msgid "View profile"
+msgstr ""
+
+#: templates/workers/worker_list.html:73
+msgid "Book"
+msgstr "ബുക്ക് ചെയ്യുക"
+
+#: templates/workers/worker_list.html:79
+msgid ""
+"No verified workers are available for this service yet. Please check back "
+"shortly."
+msgstr ""
+
+#: templates/workers/worker_list.html:123
+msgid ""
+"Location permission was denied. You can still sort by rating or experience."
+msgstr ""
+
+#: templates/workers/worker_profile.html:18
+msgid "yrs"
+msgstr ""
+
+#: templates/workers/worker_profile.html:24
+msgid "Services offered"
+msgstr ""
+
+#: templates/workers/worker_profile.html:30
+msgid "No services listed yet."
+msgstr ""
+
+#: templates/workers/worker_profile.html:33
+msgid "Recent reviews"
+msgstr ""
+
+#: templates/workers/worker_profile.html:36
+msgid "Verified booking"
+msgstr ""

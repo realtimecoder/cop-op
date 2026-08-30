@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Verify OTP" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card">
+      <div class="text-center" style="margin-bottom:20px;">
+        <div class="category-icon" style="margin:0 auto 14px;"><svg><use href="#icon-shield"/></svg></div>
+        <h1 style="font-size:1.5rem;">{% trans "Verify your number" %}</h1>
+        <p class="muted">{% blocktrans %}Enter the 6-digit code sent to +91 {{ phone }}{% endblocktrans %}</p>
+      </div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="{{ form.code.id_for_label }}" class="visually-hidden">{% trans "OTP code" %}</label>
+          {{ form.code }}
+          {% for error in form.code.errors %}<p class="error-text text-center">{{ error }}</p>{% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Verify & continue" %}</button>
+      </form>
+      <p class="help-text text-center mt-3"><a href="{% url 'accounts:login' %}" style="color:var(--teal);text-decoration:underline;">{% trans "Change number or resend OTP" %}</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

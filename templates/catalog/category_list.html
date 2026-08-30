@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Browse services" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">{% trans "Catalogue" %}</span><h1 style="margin-bottom:0;">{% trans "Browse services" %}</h1></div>
+      <form method="get" style="display:flex;gap:8px;">
+        <input type="text" name="q" value="{{ query }}" class="input-field" placeholder="{% trans 'Search services…' %}">
+        <button class="btn btn-primary btn-sm" type="submit"><svg><use href="#icon-search"/></svg></button>
+      </form>
+    </div>
+
+    <div class="grid grid-4">
+      {% for category in categories %}
+      <a href="{{ category.get_absolute_url }}" class="card-link">
+        <div class="card category-card">
+          <div class="category-icon"><svg><use href="#icon-{{ category.icon }}"/></svg></div>
+          <h3>{{ category.name }}</h3>
+          <p class="category-meta">{{ category.services.count }} {% trans "services" %} · {% trans "Visit" %} ₹{{ category.fixed_visit_charge }}</p>
+        </div>
+      </a>
+      {% empty %}
+      <div class="empty-state" style="grid-column:1/-1;">
+        <svg><use href="#icon-empty"/></svg>
+        <p>{% trans "No categories match your search yet." %}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

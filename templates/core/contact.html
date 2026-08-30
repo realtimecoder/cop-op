@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Contact" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:640px;">
+    <span class="eyebrow">{% trans "Support" %}</span>
+    <h1>{% trans "We're here to help" %}</h1>
+    <div class="form-card wide">
+      <div class="form-group"><label>{% trans "Helpline" %}</label><p class="mb-0">1800-XXX-XXXX ({% trans "toll-free, 8am–8pm" %})</p></div>
+      <div class="form-group"><label>{% trans "Email" %}</label><p class="mb-0">support@coopseva.example</p></div>
+      <div class="form-group"><label>{% trans "For an existing booking" %}</label><p class="mb-0">{% trans "Open the booking from" %} <a href="{% url 'bookings:my_bookings' %}" style="color:var(--teal);text-decoration:underline;">{% trans "My bookings" %}</a> {% trans "and use Raise a complaint." %}</p></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

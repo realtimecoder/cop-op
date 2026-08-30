@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Edit profile" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card wide">
+      <h1 style="font-size:1.4rem;">{% trans "Edit my profile" %}</h1>
+      <p class="muted">{% trans "Category changes are handled separately and require admin approval." %} <a href="{% url 'workers:request_category_change' %}" style="color:var(--teal);text-decoration:underline;">{% trans "Request a category change" %}</a></p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "Skill grade" %}</label>{{ form.skill_grade }}</div>
+          <div class="form-group"><label>{% trans "Years of experience" %}</label>{{ form.years_experience }}</div>
+        </div>
+        <div class="form-group"><label>{% trans "Bio" %}</label>{{ form.bio }}</div>
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "Languages spoken" %}</label>{{ form.languages_spoken }}</div>
+          <div class="form-group"><label>{% trans "Service radius (km)" %}</label>{{ form.service_radius_km }}</div>
+        </div>
+        <div class="form-group checkbox-row">{{ form.is_available_now }} <label class="mb-0">{% trans "I am currently available for new bookings" %}</label></div>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Save changes" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

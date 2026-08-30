@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ service.name }} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="grid" style="grid-template-columns:1.6fr 1fr;gap:32px;align-items:start;">
+      <div>
+        <span class="eyebrow">{{ service.category.name }}</span>
+        <h1>{{ service.name }}</h1>
+        <p>{{ service.description|default:"Professional, verified service delivered by cooperative-registered workers." }}</p>
+
+        <div class="table-wrap mt-3">
+          <table class="data-table">
+            <tbody>
+              <tr><th>{% trans "Required skill" %}</th><td>{{ service.required_skill|default:"—" }}</td></tr>
+              <tr><th>{% trans "Estimated duration" %}</th><td>{{ service.estimated_duration_minutes }} {% trans "minutes" %}</td></tr>
+              <tr><th>{% trans "Tools required" %}</th><td>{{ service.tools_required|default:"—" }}</td></tr>
+              <tr><th>{% trans "Warranty" %}</th><td>{{ service.warranty_days }} {% trans "days" %}</td></tr>
+              <tr><th>{% trans "Service area" %}</th><td>{{ service.service_area }}</td></tr>
+              <tr><th>{% trans "Cancellation policy" %}</th><td>{{ service.cancellation_policy }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        {% if related %}
+        <h3 class="mt-4">{% trans "Related services" %}</h3>
+        <div class="grid grid-4">
+          {% for r in related %}
+          <a href="{{ r.get_absolute_url }}" class="card-link"><div class="card"><h3 style="font-size:1rem;">{{ r.name }}</h3><p class="muted" style="font-size:.8rem;">₹{{ r.total_charge }}</p></div></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div>
+        <div class="price-ticket">
+          <div class="price-ticket-row"><span>{% trans "Visit charge" %}</span><span>₹{{ service.visit_charge }}</span></div>
+          {% if service.is_hourly %}
+          <div class="price-ticket-row"><span>{% trans "Rate per hour" %}</span><span>₹{{ service.hourly_rate }}</span></div>
+          <div class="price-ticket-row"><span>{% trans "Minimum hours" %}</span><span>{{ service.min_hours }}</span></div>
+          <div class="price-ticket-row total"><span>{% trans "Estimated total" %}</span><span>₹{{ service.total_charge }}</span></div>
+          <p class="price-ticket-note">{% trans "Final amount depends on the number of hours you book." %}</p>
+          {% else %}
+          <div class="price-ticket-row"><span>{% trans "Labour charge" %}</span><span>₹{{ service.fixed_labour_charge }}</span></div>
+          <div class="price-ticket-row total"><span>{% trans "Total payable" %}</span><span>₹{{ service.total_charge }}</span></div>
+          <p class="price-ticket-note">{% trans "Material cost, if any, is paid directly by you to the shop." %}</p>
+          {% endif %}
+        </div>
+        <a href="{% url 'workers:worker_list_for_service' service.id %}" class="btn btn-primary btn-block mt-3">
+          {% trans "View verified workers" %} <svg><use href="#icon-arrow-right"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

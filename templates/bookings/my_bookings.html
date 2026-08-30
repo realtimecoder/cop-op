@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "My bookings" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Account" %}</span>
+    <h1>{% trans "My bookings" %}</h1>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>{% trans "Service" %}</th><th>{% trans "Worker" %}</th><th>{% trans "Date" %}</th><th>{% trans "Amount" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
+        <tbody>
+          {% for b in bookings %}
+          <tr>
+            <td>{{ b.service.name }}</td>
+            <td>{{ b.worker.user.get_full_name|default:"—" }}</td>
+            <td>{{ b.scheduled_date }}</td>
+            <td style="font-family:var(--font-mono)">₹{{ b.total_amount }}</td>
+            <td><span class="status-pill">{{ b.get_status_display }}</span></td>
+            <td><a href="{% url 'bookings:booking_detail' b.id %}" class="btn btn-outline btn-sm">{% trans "View" %}</a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6">
+            <div class="empty-state"><svg><use href="#icon-empty"/></svg><p>{% trans "You have no bookings yet." %}</p>
+            <a href="{% url 'catalog:category_list' %}" class="btn btn-accent">{% trans "Browse services" %}</a></div>
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Choose a worker" %} — {{ service.name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">{{ service.category.name }} · {{ service.name }}</span>
+        <h1 style="margin-bottom:0;">{% trans "Compare verified workers" %}</h1>
+        <p class="muted">{% trans "Every worker below charges the exact same fixed price for this service." %}</p>
+      </div>
+      <div class="flex gap-1" style="flex-wrap:wrap;">
+        <button type="button" id="locate-btn" class="btn btn-outline btn-sm">
+          <svg><use href="#icon-map-pin"/></svg><span id="locate-btn-label">{% trans "Find nearest to me" %}</span>
+        </button>
+        <select data-sort-control class="input-field" style="max-width:220px;">
+          <option value="recommended" {% if sort == 'recommended' %}selected{% endif %}>{% trans "Recommended" %}</option>
+          <option value="nearest" {% if sort == 'nearest' %}selected{% endif %}>{% trans "Nearest" %}</option>
+          <option value="rating" {% if sort == 'rating' %}selected{% endif %}>{% trans "Highest rating" %}</option>
+          <option value="experience" {% if sort == 'experience' %}selected{% endif %}>{% trans "Most experienced" %}</option>
+          <option value="available" {% if sort == 'available' %}selected{% endif %}>{% trans "Available now" %}</option>
+        </select>
+      </div>
+    </div>
+
+    {% if not maps_configured %}
+    <div class="alert alert-info" style="position:static;margin-bottom:20px;max-width:640px;">
+      {% trans "Live distance and travel time will appear here once the platform's Google Maps API key is configured. Sorting by rating, experience and availability still works normally." %}
+    </div>
+    {% elif used_saved_address and geo_available %}
+    <div class="alert alert-info" style="position:static;margin-bottom:20px;max-width:640px;">
+      {% trans "Showing distance from your saved profile address. Click 'Find nearest to me' to use your current location instead." %}
+    </div>
+    {% elif customer_lat and not geo_available %}
+    <div class="alert alert-warning" style="position:static;margin-bottom:20px;max-width:640px;">
+      {% trans "Couldn't calculate distances right now — showing the recommended order instead." %}
+    </div>
+    {% endif %}
+
+    <div class="price-ticket mb-0" style="max-width:340px;margin-bottom:28px;">
+      <div class="price-ticket-row"><span>{% trans "Visit" %}</span><span>₹{{ service.visit_charge }}</span></div>
+      {% if service.is_hourly %}
+      <div class="price-ticket-row"><span>{% trans "Rate" %}</span><span>₹{{ service.hourly_rate }}/{% trans "hr" %} ({{ service.min_hours }}{% trans "h min" %})</span></div>
+      {% else %}
+      <div class="price-ticket-row"><span>{% trans "Labour" %}</span><span>₹{{ service.fixed_labour_charge }}</span></div>
+      {% endif %}
+      <div class="price-ticket-row total"><span>{% trans "Same for every worker" %}</span><span>₹{{ service.total_charge }}{% if service.is_hourly %}+{% endif %}</span></div>
+    </div>
+
+    <div class="grid grid-3">
+      {% for worker in workers %}
+      <div class="card worker-card">
+        <div class="worker-card-top">
+          <div class="worker-avatar">
+            {% if worker.user.profile_photo %}<img src="{{ worker.user.profile_photo.url }}" alt="">{% else %}{{ worker.user.first_name|first|upper|default:"W" }}{% endif %}
+          </div>
+          <div>
+            <h3 style="margin-bottom:2px;">{{ worker.user.get_full_name|default:"Worker" }}</h3>
+            <span class="badge badge-verified"><svg><use href="#icon-check"/></svg>{% trans "Verified" %}</span>
+          </div>
+        </div>
+        <div class="rating-row"><svg><use href="#icon-star"/></svg>{{ worker.average_rating }} · {{ worker.completed_jobs }} {% trans "jobs completed" %}</div>
+        <ul class="worker-meta-list">
+          <li><svg><use href="#icon-sparkle"/></svg>{{ worker.get_skill_grade_display }}</li>
+          <li><svg><use href="#icon-clock"/></svg>{{ worker.years_experience }} {% trans "yrs experience" %}</li>
+          {% if worker.distance_km is not None %}
+          <li><svg><use href="#icon-map-pin"/></svg>{{ worker.distance_km }} km · {{ worker.duration_text }} {% trans "away" %}</li>
+          {% else %}
+          <li><svg><use href="#icon-map-pin"/></svg>{% trans "within" %} {{ worker.service_radius_km }} km</li>
+          {% endif %}
+          <li><svg><use href="#icon-language"/></svg>{{ worker.languages_spoken }}</li>
+        </ul>
+        {% if worker.is_available_now %}<span class="badge badge-verified">{% trans "Available now" %}</span>{% else %}<span class="badge badge-warning">{% trans "Busy" %}</span>{% endif %}
+        <div class="flex gap-1 mt-2">
+          <a href="{% url 'workers:worker_public_profile' worker.id %}" class="btn btn-outline btn-sm" style="flex:1;">{% trans "View profile" %}</a>
+          <a href="{% url 'bookings:create_booking' service.id worker.id %}" class="btn btn-accent btn-sm" style="flex:1;">{% trans "Book" %}</a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state" style="grid-column:1/-1;">
+        <svg><use href="#icon-empty"/></svg>
+        <p>{% trans "No verified workers are available for this service yet. Please check back shortly." %}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var btn = document.getElementById('locate-btn');
+  var label = document.getElementById('locate-btn-label');
+  if (!btn) return;
+
+  btn.addEventListener('click', function () {
+    if (!navigator.geolocation) {
+      alert("{% trans 'Location is not supported by this browser.' %}");
+      return;
+    }
+    label.textContent = "{% trans 'Locating…' %}";
+    navigator.geolocation.getCurrentPosition(function (position) {
+      var lat = position.coords.latitude;
+      var lng = position.coords.longitude;
+
+      {% if user.is_authenticated %}
+      // Save to the profile so future pages (booking, dashboard) can reuse it.
+      var form = new FormData();
+      form.append('lat', lat);
+      form.append('lng', lng);
+      fetch("{% url 'accounts:update_location' %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: form,
+      }).catch(function () {});
+      {% endif %}
+
+      var url = new URL(window.location.href);
+      url.searchParams.set('lat', lat.toFixed(6));
+      url.searchParams.set('lng', lng.toFixed(6));
+      url.searchParams.set('sort', 'nearest');
+      window.location.href = url.toString();
+    }, function () {
+      label.textContent = "{% trans 'Find nearest to me' %}";
+      alert("{% trans 'Location permission was denied. You can still sort by rating or experience.' %}");
+    });
+  });
+});
+</script>
+{% endblock %}

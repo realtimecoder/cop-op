@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Admin dashboard" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Administration" %}</span>
+    <h1>{% trans "Dashboard overview" %}</h1>
+    <div class="grid grid-4">
+      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Total bookings" %}</h3><p style="font-family:var(--font-mono);font-size:1.8rem;font-weight:700;color:var(--teal-deep);margin:0;">{{ total_bookings }}</p></div>
+      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Registered workers" %}</h3><p style="font-family:var(--font-mono);font-size:1.8rem;font-weight:700;color:var(--teal-deep);margin:0;">{{ total_workers }}</p></div>
+      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Registered customers" %}</h3><p style="font-family:var(--font-mono);font-size:1.8rem;font-weight:700;color:var(--teal-deep);margin:0;">{{ total_customers }}</p></div>
+      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Open complaints" %}</h3><p style="font-family:var(--font-mono);font-size:1.8rem;font-weight:700;color:var(--thread-red);margin:0;">{{ open_complaints }}</p></div>
+    </div>
+
+    <div class="grid grid-3 mt-4">
+      {% if is_federation_admin %}
+      <a href="{% url 'dashboard:pricing_config' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-receipt"/></svg></div><h3>{% trans "Fixed & hourly pricing" %}</h3><p class="mb-0 muted">{% trans "Set visit charges, fixed labour charges and hourly rates (federation admin only)." %}</p></div></a>
+      <a href="{% url 'dashboard:category_change_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-workers"/></svg></div><h3>{% trans "Category change requests" %}</h3><p class="mb-0 muted">{{ pending_category_requests }} {% trans "pending approval" %}</p></div></a>
+      {% endif %}
+      {% if is_society_operator %}
+      <a href="{% url 'dashboard:worker_verification_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-shield"/></svg></div><h3>{% trans "Worker verification queue" %}</h3><p class="mb-0 muted">{{ pending_verifications }} {% trans "pending review" %}</p></div></a>
+      {% endif %}
+      <a href="{% url 'dashboard:complaints_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-alert"/></svg></div><h3>{% trans "Complaints" %}</h3><p class="mb-0 muted">{% trans "Track and resolve customer complaints." %}</p></div></a>
+      <a href="{% url 'dashboard:customer_list' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-user"/></svg></div><h3>{% trans "Customer history" %}</h3><p class="mb-0 muted">{% trans "Full booking and spend history for every customer." %}</p></div></a>
+      <a href="{% url 'dashboard:worker_list' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-workers"/></svg></div><h3>{% trans "Worker history" %}</h3><p class="mb-0 muted">{% trans "Full profile, bookings, earnings and reviews for every worker." %}</p></div></a>
+    </div>
+  </div>
+</section>
+{% endblock %}

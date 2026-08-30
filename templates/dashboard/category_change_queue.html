@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Category change requests" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Federation administrator" %}</span>
+    <h1>{% trans "Worker category change requests" %}</h1>
+    {% for req in requests %}
+    <div class="card mt-2">
+      <div class="flex justify-between items-center" style="flex-wrap:wrap;">
+        <h3 class="mb-0">{{ req.worker.user.get_full_name|default:req.worker.user.phone_number }}</h3>
+        <span class="status-pill">{{ req.get_status_display }}</span>
+      </div>
+      <p class="muted" style="font-size:.82rem;">{{ req.worker.user.phone_number }} · {{ req.created_at|date:"d M Y" }}</p>
+      <p><b>{% trans "Current categories:" %}</b> {% for c in req.worker.categories.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</p>
+      <p><b>{% trans "Requested categories:" %}</b> {% for c in req.requested_categories.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+      {% if req.reason %}<p class="muted">{% trans "Reason:" %} {{ req.reason }}</p>{% endif %}
+      <form method="post" action="{% url 'dashboard:decide_category_change' req.id %}">
+        {% csrf_token %}
+        <textarea name="admin_note" class="input-field" rows="2" placeholder="{% trans 'Admin note (optional)' %}"></textarea>
+        <div class="flex gap-1 mt-1">
+          <button class="btn btn-primary btn-sm" type="submit" name="decision" value="approve">{% trans "Approve" %}</button>
+          <button class="btn btn-danger btn-sm" type="submit" name="decision" value="reject">{% trans "Reject" %}</button>
+        </div>
+      </form>
+    </div>
+    {% empty %}<p class="muted">{% trans "No pending category-change requests." %}</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

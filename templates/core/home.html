@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+
+<section class="hero">
+  <div class="container">
+    <div>
+      <span class="hero-eyebrow"><svg style="width:14px;height:14px"><use href="#icon-shield"/></svg>{% trans "Verified · Cooperative-owned · Fixed price" %}</span>
+      <h1>{% trans "Book verified workers. Pay one honest, fixed price." %}</h1>
+      <p class="lead">{% trans "Co-opSeva connects your household or project with verified cooperative electricians, plumbers, carpenters, painters, helpers and more — no bidding, no quotations, ever." %}</p>
+      <div class="hero-actions">
+        <a href="{% url 'catalog:category_list' %}" class="btn btn-accent">{% trans "Browse services" %} <svg><use href="#icon-arrow-right"/></svg></a>
+        <a href="{% url 'core:how_it_works' %}" class="btn btn-outline" style="border-color:rgba(251,249,244,.5);color:#FBF9F4;">{% trans "How it works" %}</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>18+</b><span>{% trans "Service categories" %}</span></div>
+        <div class="hero-stat"><b>100%</b><span>{% trans "Verified workers" %}</span></div>
+        <div class="hero-stat"><b>2</b><span>{% trans "Charges — visit + labour, nothing else" %}</span></div>
+      </div>
+    </div>
+
+    <div class="hero-search">
+      <h3>{% trans "What do you need help with?" %}</h3>
+      <form action="{% url 'catalog:category_list' %}" method="get">
+        <input type="text" name="q" class="input-field" placeholder="{% trans 'Try: electrician, fan installation, plumber…' %}">
+        <button class="btn btn-primary" type="submit"><svg><use href="#icon-search"/></svg></button>
+      </form>
+      <div class="price-ticket mt-3">
+        <div class="price-ticket-row"><span>{% trans "Visit charge" %}</span><span>₹150</span></div>
+        <div class="price-ticket-row"><span>{% trans "Labour charge" %}</span><span>₹1,000</span></div>
+        <div class="price-ticket-row total"><span>{% trans "Total payable" %}</span><span>₹1,150</span></div>
+        <p class="price-ticket-note">{% trans "Material cost is paid directly to the shop — never through the platform." %}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">{% trans "Service catalogue" %}</span>
+        <h2>{% trans "Popular categories near you" %}</h2>
+      </div>
+      <a href="{% url 'catalog:category_list' %}" class="btn btn-outline btn-sm">{% trans "View all categories" %}</a>
+    </div>
+
+    <div class="grid grid-4">
+      {% for category in categories %}
+      <a href="{{ category.get_absolute_url }}" class="card-link">
+        <div class="card category-card">
+          <div class="category-icon"><svg><use href="#icon-{{ category.icon }}"/></svg></div>
+          <h3>{{ category.name }}</h3>
+          <p class="category-meta">{{ category.services.count }} {% trans "services" %} · {% trans "Visit charge" %} ₹{{ category.fixed_visit_charge }}</p>
+        </div>
+      </a>
+      {% empty %}
+      <p class="muted">{% trans "Categories will appear here once the federation administrator configures the catalogue." %}</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">{% trans "Trust & transparency" %}</span>
+        <h2>{% trans "Why families and builders choose Co-opSeva" %}</h2>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="category-icon"><svg><use href="#icon-shield"/></svg></div>
+        <h3>{% trans "Verified, not anonymous" %}</h3>
+        <p>{% trans "Every worker is identity-checked, cooperative-registered, and skill-graded before appearing on the platform." %}</p>
+      </div>
+      <div class="card">
+        <div class="category-icon"><svg><use href="#icon-receipt"/></svg></div>
+        <h3>{% trans "Only two charges" %}</h3>
+        <p>{% trans "A fixed visit charge and a fixed labour charge — set centrally by the federation. No worker or customer can change them." %}</p>
+      </div>
+      <div class="card">
+        <div class="category-icon"><svg><use href="#icon-heart"/></svg></div>
+        <h3>{% trans "Worker welfare built in" %}</h3>
+        <p>{% trans "Fair, predefined payouts and cooperative-backed insurance and welfare records for every registered worker." %}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if top_workers %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">{% trans "Top rated" %}</span><h2>{% trans "Highly rated verified workers" %}</h2></div>
+    </div>
+    <div class="grid grid-3">
+      {% for w in top_workers %}
+      <a href="{% url 'workers:worker_public_profile' w.id %}" class="card-link">
+        <div class="card worker-card">
+          <div class="worker-card-top">
+            <div class="worker-avatar">{{ w.user.first_name|first|upper|default:"W" }}</div>
+            <div>
+              <h3 style="margin-bottom:2px;">{{ w.user.get_full_name|default:"Worker" }}</h3>
+              <span class="badge badge-verified"><svg><use href="#icon-check"/></svg>{% trans "Verified" %}</span>
+            </div>
+          </div>
+          <div class="rating-row"><svg><use href="#icon-star"/></svg>{{ w.average_rating }} · {{ w.completed_jobs }} {% trans "jobs" %}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head"><div><span class="eyebrow">{% trans "Process" %}</span><h2>{% trans "From search to service in four steps" %}</h2></div></div>
+    <div class="steps">
+      <div class="step"><span class="step-num">01</span><h3>{% trans "Choose a service" %}</h3><p>{% trans "See the fixed price upfront, before you book anything." %}</p></div>
+      <div class="step"><span class="step-num">02</span><h3>{% trans "Compare workers" %}</h3><p>{% trans "Rating, experience and arrival time — never price, because price never changes." %}</p></div>
+      <div class="step"><span class="step-num">03</span><h3>{% trans "Book & pay digitally" %}</h3><p>{% trans "Confirm your slot and pay the visit and labour charge securely." %}</p></div>
+      <div class="step"><span class="step-num">04</span><h3>{% trans "Rate the service" %}</h3><p>{% trans "Help the cooperative keep quality high for the next customer." %}</p></div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

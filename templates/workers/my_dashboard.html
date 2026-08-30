@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Worker dashboard" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">{% trans "Worker dashboard" %}</span><h1 style="margin-bottom:0;">{% trans "My work" %}</h1></div>
+      <span class="badge {% if profile.is_verified %}badge-verified{% else %}badge-warning{% endif %}">{{ profile.get_verification_status_display }}</span>
+    </div>
+
+    {% if not profile.is_verified %}
+    <div class="alert alert-warning" style="position:static;margin-bottom:20px;">
+      <b>{% trans "Your profile is not visible to customers yet." %}</b>
+      {% trans "Customers can only see and book verified workers. Upload your documents and wait for your cooperative society to verify your profile." %}
+      <a href="{% url 'workers:documents' %}" style="text-decoration:underline;">{% trans "Upload documents" %}</a>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-4">
+      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Rating" %}</h3><p style="font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:var(--teal-deep);margin:0;">{{ profile.average_rating }}</p></div>
+      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Jobs completed" %}</h3><p style="font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:var(--teal-deep);margin:0;">{{ profile.completed_jobs }}</p></div>
+      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Total income earned" %}</h3><p style="font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:var(--marigold-deep);margin:0;">₹{{ total_income }}</p></div>
+      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Payout share" %}</h3><p style="font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:var(--teal-deep);margin:0;">{{ profile.payout_percentage }}%</p></div>
+    </div>
+
+    <div class="grid" style="grid-template-columns:1.7fr 1fr;gap:24px;margin-top:8px;align-items:start;">
+      <div>
+        <h3 class="mt-4">{% trans "My bookings" %}</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>{% trans "Service" %}</th><th>{% trans "Customer" %}</th><th>{% trans "Date" %}</th>
+              <th>{% trans "Status" %}</th><th>{% trans "Income" %}</th><th>{% trans "Review" %}</th><th></th>
+            </tr></thead>
+            <tbody>
+              {% for b in bookings %}
+              <tr>
+                <td>{{ b.service.name }}</td>
+                <td>{{ b.customer.get_full_name|default:b.customer.phone_number }}</td>
+                <td>{{ b.scheduled_date }}</td>
+                <td><span class="status-pill">{{ b.get_status_display }}</span></td>
+                <td style="font-family:var(--font-mono);">
+                  {% if b.payment %}₹{{ b.payment.worker_payout }}{% else %}—{% endif %}
+                </td>
+                <td>
+                  {% if b.review %}
+                    <span class="rating-row" style="justify-content:flex-start;"><svg><use href="#icon-star"/></svg>{{ b.review.rating }}/5</span>
+                  {% else %}<span class="muted">—</span>{% endif %}
+                </td>
+                <td><a href="{% url 'bookings:booking_detail' b.id %}" class="btn btn-outline btn-sm">{% trans "View" %}</a></td>
+              </tr>
+              {% empty %}<tr><td colspan="7" class="muted">{% trans "No bookings yet." %}</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;">{% trans "My profile" %}</h3>
+          <table class="data-table" style="border:none;">
+            <tbody>
+              <tr><th>{% trans "Name" %}</th><td>{{ profile.user.get_full_name|default:"—" }}</td></tr>
+              <tr><th>{% trans "Phone" %}</th><td>{{ profile.user.phone_number }}</td></tr>
+              <tr><th>{% trans "Address" %}</th><td>{{ profile.user.address|default:"—" }}, {{ profile.user.city }} {{ profile.user.pincode }}</td></tr>
+              <tr><th>{% trans "Categories" %}</th><td>
+                {% for cat in profile.categories.all %}<span class="badge badge-verified">{{ cat.name }}</span> {% empty %}<span class="muted">{% trans "None set" %}</span>{% endfor %}
+              </td></tr>
+              <tr><th>{% trans "Skill grade" %}</th><td>{{ profile.get_skill_grade_display }}</td></tr>
+              <tr><th>{% trans "Experience" %}</th><td>{{ profile.years_experience }} {% trans "years" %}</td></tr>
+              <tr><th>{% trans "Languages" %}</th><td>{{ profile.languages_spoken|default:"—" }}</td></tr>
+              <tr><th>{% trans "Service radius" %}</th><td>{{ profile.service_radius_km }} km</td></tr>
+              <tr><th>{% trans "Bio" %}</th><td>{{ profile.bio|default:"—" }}</td></tr>
+              <tr><th>{% trans "Society" %}</th><td>{{ profile.society|default:"—" }}</td></tr>
+            </tbody>
+          </table>
+          <a href="{% url 'workers:edit_profile' %}" class="btn btn-primary btn-block mt-2">{% trans "Edit profile" %}</a>
+        </div>
+
+        <div class="card mt-2">
+          <h3 style="margin-bottom:10px;">{% trans "Service categories" %}</h3>
+          {% if pending_category_request %}
+            <span class="badge badge-warning">{% trans "Change request pending admin approval" %}</span>
+            <p class="muted mt-1" style="font-size:.82rem;">
+              {% trans "Requested:" %}
+              {% for cat in pending_category_request.requested_categories.all %}{{ cat.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </p>
+          {% else %}
+            <p class="muted" style="font-size:.85rem;">{% trans "Category changes require federation-admin approval before they take effect." %}</p>
+            <a href="{% url 'workers:request_category_change' %}" class="btn btn-outline btn-block">{% trans "Request category change" %}</a>
+          {% endif %}
+        </div>
+
+        <div class="card mt-2">
+          <h3 style="margin-bottom:10px;">{% trans "Availability" %}</h3>
+          <p class="muted" style="font-size:.85rem;">{% trans "Upcoming blocked dates:" %} {{ blocked_dates.count }}</p>
+          <a href="{% url 'workers:manage_availability' %}" class="btn btn-outline btn-block">{% trans "Manage availability" %}</a>
+        </div>
+
+        <div class="card mt-2">
+          <h3 style="margin-bottom:10px;">{% trans "Documents & verification" %}</h3>
+          <a href="{% url 'workers:documents' %}" class="btn btn-outline btn-block">{% trans "Manage documents" %}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

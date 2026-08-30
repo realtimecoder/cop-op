@@ -1,0 +1,124 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANGUAGE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}{% trans "Co-opSeva" %} — {% trans "Verified Cooperative Labour Services" %}{% endblock %}</title>
+<meta name="description" content="{% trans 'Co-opSeva connects verified cooperative workers with households, builders and institutions through fixed, transparent pricing.' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+{% include 'partials/icons.html' %}
+
+<div class="topbar">
+  <div class="container">
+    <span class="topbar-note">{% trans "Delhi-NCR pilot" %} · {% trans "A cooperative-owned service marketplace" %}</span>
+    <form action="{% url 'set_language' %}" method="post" class="lang-switcher">
+      {% csrf_token %}
+      <input name="next" type="hidden" value="{{ request.path }}">
+      <svg style="width:14px;height:14px;vertical-align:-2px;margin-right:2px"><use href="#icon-language"/></svg>
+      <select name="language" aria-label="{% trans 'Choose language' %}">
+        {% for code, name in AVAILABLE_LANGUAGES %}
+          <option value="{{ code }}" {% if code == CURRENT_LANGUAGE %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="container">
+    <a href="{% url 'core:home' %}" class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#0E4B49"/><path d="M13 27l6-6M20 21l7-7 4 4-7 7M13 27l3 3 4-4" stroke="#E2A33D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Co-opSeva<span class="brand-sub">{% trans "Fair work, fixed price" %}</span></span>
+    </a>
+
+    <button class="nav-toggle" aria-label="{% trans 'Toggle menu' %}" aria-expanded="false">
+      <svg><use href="#icon-menu"/></svg>
+    </button>
+
+    <nav class="main-nav">
+      <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
+      <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
+      <a href="{% url 'core:about' %}">{% trans "About" %}</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'bookings:my_bookings' %}">{% trans "My bookings" %}</a>
+        {% if user.role == 'worker' %}<a href="{% url 'workers:my_dashboard' %}">{% trans "Worker dashboard" %}</a>{% endif %}
+        {% if user.role == 'federation' or user.is_superuser %}
+          <a href="{% url 'core:pricing_policy' %}">{% trans "Pricing policy" %}</a>
+        {% endif %}
+        {% if user.role in 'federation,society,support,finance,welfare,platform_admin' or user.is_superuser %}
+          <a href="{% url 'dashboard:overview' %}">{% trans "Admin dashboard" %}</a>
+        {% endif %}
+      {% endif %}
+    </nav>
+
+    <div class="header-actions">
+      {% if user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}" class="btn btn-ghost btn-sm">
+          {% if user.profile_photo %}
+            <img src="{{ user.profile_photo.url }}" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">
+          {% else %}
+            <svg><use href="#icon-user"/></svg>
+          {% endif %}
+          <span class="btn-label-desktop">{{ user.first_name|default:user.phone_number }}</span>
+        </a>
+        <a href="{% url 'accounts:logout' %}" class="btn btn-outline btn-sm">{% trans "Log out" %}</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-sm">{% trans "Log in" %}</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+{% if messages %}
+<div class="messages">
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>Co-opSeva</h4>
+        <p style="color:rgba(251,249,244,.75);font-size:.9rem;max-width:32ch;">
+          {% trans "A cooperative-owned digital marketplace connecting verified labour-cooperative workers with households, builders and institutions." %}
+        </p>
+      </div>
+      <div>
+        <h4>{% trans "Platform" %}</h4>
+        <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
+        <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
+      </div>
+      <div>
+        <h4>{% trans "Company" %}</h4>
+        <a href="{% url 'core:about' %}">{% trans "About Co-opSeva" %}</a>
+        <a href="{% url 'core:contact' %}">{% trans "Contact support" %}</a>
+      </div>
+      <div>
+        <h4>{% trans "For workers" %}</h4>
+        <a href="{% url 'accounts:login' %}">{% trans "Register as a worker" %}</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; {% now "Y" %} Co-opSeva Cooperative Federation. {% trans "All rights reserved." %}</span>
+      <span>{% trans "Session-based secure sign-in" %} · {% trans "No bidding · No quotation · Fixed price" %}</span>
+    </div>
+  </div>
+</footer>
+
+<script src="{% static 'js/app.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

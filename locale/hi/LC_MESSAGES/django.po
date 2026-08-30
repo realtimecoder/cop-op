@@ -1,0 +1,1826 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-28 11:18+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: accounts/views.py:39
+#, python-format
+msgid "Demo OTP for %(phone)s is %(code)s (valid 10 minutes)."
+msgstr ""
+
+#: accounts/views.py:61
+msgid "OTP session expired. Please request a new one."
+msgstr ""
+
+#: accounts/views.py:82
+#, python-format
+msgid "Welcome back, %(name)s!"
+msgstr ""
+
+#: accounts/views.py:86
+msgid "Incorrect or expired OTP. Please try again."
+msgstr ""
+
+#: accounts/views.py:98
+msgid "Profile completed. Welcome to Co-opSeva!"
+msgstr ""
+
+#: accounts/views.py:115
+msgid "Profile updated successfully."
+msgstr ""
+
+#: accounts/views.py:144
+msgid "You have been logged out."
+msgstr ""
+
+#: templates/accounts/complete_profile.html:3
+#: templates/accounts/complete_profile.html:8
+msgid "Complete your profile"
+msgstr "अपनी प्रोफ़ाइल पूरी करें"
+
+#: templates/accounts/complete_profile.html:9
+msgid "Tell us a little about you to personalise your Co-opSeva experience."
+msgstr ""
+
+#: templates/accounts/complete_profile.html:13
+#: templates/accounts/profile.html:21
+msgid "First name"
+msgstr "पहला नाम"
+
+#: templates/accounts/complete_profile.html:14
+#: templates/accounts/profile.html:22
+msgid "Last name"
+msgstr "अंतिम नाम"
+
+#: templates/accounts/complete_profile.html:17
+msgid "I am a…"
+msgstr "मैं हूँ…"
+
+#: templates/accounts/complete_profile.html:19
+#: templates/accounts/profile.html:24 templates/bookings/booking_detail.html:22
+#: templates/dashboard/customer_detail.html:11
+#: templates/dashboard/worker_detail.html:21
+#: templates/workers/my_dashboard.html:58
+msgid "Address"
+msgstr "पता"
+
+#: templates/accounts/complete_profile.html:21
+#: templates/accounts/profile.html:26 templates/bookings/create_booking.html:32
+#: templates/dashboard/customer_list.html:11
+msgid "City"
+msgstr "शहर"
+
+#: templates/accounts/complete_profile.html:22
+#: templates/accounts/profile.html:27 templates/bookings/create_booking.html:33
+msgid "PIN code"
+msgstr "पिन कोड"
+
+#: templates/accounts/complete_profile.html:25
+#: templates/accounts/profile.html:30
+msgid "Preferred language"
+msgstr "पसंदीदा भाषा"
+
+#: templates/accounts/complete_profile.html:27
+msgid "Save and continue"
+msgstr "सहेजें और जारी रखें"
+
+#: templates/accounts/login.html:3 templates/base.html:70
+msgid "Log in"
+msgstr "लॉग इन करें"
+
+#: templates/accounts/login.html:10
+msgid "Log in or create an account"
+msgstr "लॉग इन करें या खाता बनाएं"
+
+#: templates/accounts/login.html:11
+msgid "Enter your mobile number to receive a one-time password."
+msgstr ""
+
+#: templates/accounts/login.html:16
+msgid "Mobile number"
+msgstr "मोबाइल नंबर"
+
+#: templates/accounts/login.html:23
+msgid "Send OTP"
+msgstr "OTP भेजें"
+
+#: templates/accounts/login.html:25
+msgid ""
+"By continuing you agree to Co-opSeva's terms of service and privacy policy."
+msgstr ""
+
+#: templates/accounts/profile.html:3 templates/accounts/profile.html:8
+#: templates/workers/my_dashboard.html:53
+msgid "My profile"
+msgstr "मेरी प्रोफ़ाइल"
+
+#: templates/accounts/profile.html:29
+msgid "Emergency contact"
+msgstr "आपातकालीन संपर्क"
+
+#: templates/accounts/profile.html:31
+msgid "Profile photo"
+msgstr "प्रोफ़ाइल फोटो"
+
+#: templates/accounts/profile.html:32 templates/workers/edit_profile.html:22
+msgid "Save changes"
+msgstr "परिवर्तन सहेजें"
+
+#: templates/accounts/verify_otp.html:3
+msgid "Verify OTP"
+msgstr ""
+
+#: templates/accounts/verify_otp.html:10
+msgid "Verify your number"
+msgstr "अपना नंबर सत्यापित करें"
+
+#: templates/accounts/verify_otp.html:11
+#, python-format
+msgid "Enter the 6-digit code sent to +91 %(phone)s"
+msgstr ""
+
+#: templates/accounts/verify_otp.html:16
+msgid "OTP code"
+msgstr ""
+
+#: templates/accounts/verify_otp.html:20
+msgid "Verify & continue"
+msgstr "सत्यापित करें और जारी रखें"
+
+#: templates/accounts/verify_otp.html:22
+msgid "Change number or resend OTP"
+msgstr ""
+
+#: templates/base.html:7
+msgid "Co-opSeva"
+msgstr ""
+
+#: templates/base.html:7
+msgid "Verified Cooperative Labour Services"
+msgstr ""
+
+#: templates/base.html:8
+msgid ""
+"Co-opSeva connects verified cooperative workers with households, builders "
+"and institutions through fixed, transparent pricing."
+msgstr ""
+
+#: templates/base.html:19
+msgid "Delhi-NCR pilot"
+msgstr "दिल्ली-एनसीआर पायलट"
+
+#: templates/base.html:19
+msgid "A cooperative-owned service marketplace"
+msgstr "एक सहकारी-स्वामित्व वाला सेवा बाज़ार"
+
+#: templates/base.html:24
+msgid "Choose language"
+msgstr "भाषा चुनें"
+
+#: templates/base.html:37
+msgid "Fair work, fixed price"
+msgstr "उचित काम, तय कीमत"
+
+#: templates/base.html:40
+msgid "Toggle menu"
+msgstr ""
+
+#: templates/base.html:45 templates/base.html:99
+#: templates/bookings/my_bookings.html:25
+#: templates/catalog/category_list.html:3
+#: templates/catalog/category_list.html:8 templates/core/home.html:12
+msgid "Browse services"
+msgstr "सेवाएं देखें"
+
+#: templates/base.html:46 templates/base.html:100 templates/core/home.html:13
+#: templates/core/how_it_works.html:3 templates/core/how_it_works.html:7
+msgid "How it works"
+msgstr "यह कैसे काम करता है"
+
+#: templates/base.html:47 templates/base.html:101
+#: templates/core/pricing_policy.html:3 templates/core/pricing_policy.html:7
+msgid "Pricing policy"
+msgstr "मूल्य नीति"
+
+#: templates/base.html:48 templates/core/about.html:3
+msgid "About"
+msgstr "हमारे बारे में"
+
+#: templates/base.html:50 templates/bookings/my_bookings.html:3
+#: templates/bookings/my_bookings.html:8 templates/core/contact.html:12
+#: templates/workers/my_dashboard.html:21
+msgid "My bookings"
+msgstr "मेरी बुकिंग"
+
+#: templates/base.html:51 templates/workers/manage_availability.html:7
+#: templates/workers/my_dashboard.html:3 templates/workers/my_dashboard.html:8
+msgid "Worker dashboard"
+msgstr "कर्मचारी डैशबोर्ड"
+
+#: templates/base.html:53 templates/dashboard/overview.html:3
+msgid "Admin dashboard"
+msgstr "एडमिन डैशबोर्ड"
+
+#: templates/base.html:68
+msgid "Log out"
+msgstr "लॉग आउट करें"
+
+#: templates/base.html:94
+msgid ""
+"A cooperative-owned digital marketplace connecting verified labour-"
+"cooperative workers with households, builders and institutions."
+msgstr ""
+
+#: templates/base.html:98
+msgid "Platform"
+msgstr "प्लेटफ़ॉर्म"
+
+#: templates/base.html:104
+msgid "Company"
+msgstr "कंपनी"
+
+#: templates/base.html:105
+msgid "About Co-opSeva"
+msgstr "Co-opSeva के बारे में"
+
+#: templates/base.html:106
+msgid "Contact support"
+msgstr "सहायता से संपर्क करें"
+
+#: templates/base.html:109 templates/core/about.html:13
+msgid "For workers"
+msgstr "कर्मचारियों के लिए"
+
+#: templates/base.html:110
+msgid "Register as a worker"
+msgstr "कर्मचारी के रूप में पंजीकरण करें"
+
+#: templates/base.html:111
+msgid "Fixed payout policy"
+msgstr "तय भुगतान नीति"
+
+#: templates/base.html:115
+msgid "All rights reserved."
+msgstr "सर्वाधिकार सुरक्षित।"
+
+#: templates/base.html:116
+msgid "Session-based secure sign-in"
+msgstr ""
+
+#: templates/base.html:116
+msgid "No bidding · No quotation · Fixed price"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:3
+#: templates/bookings/booking_detail.html:10
+#: templates/bookings/file_complaint.html:10
+#: templates/dashboard/complaints_queue.html:14
+msgid "Booking"
+msgstr "बुकिंग"
+
+#: templates/bookings/booking_detail.html:15
+msgid "complete"
+msgstr "पूर्ण"
+
+#: templates/bookings/booking_detail.html:20
+#: templates/bookings/my_bookings.html:11
+#: templates/dashboard/customer_detail.html:19
+#: templates/dashboard/worker_verification_queue.html:11
+msgid "Worker"
+msgstr "कर्मचारी"
+
+#: templates/bookings/booking_detail.html:21
+msgid "Scheduled"
+msgstr "निर्धारित"
+
+#: templates/bookings/booking_detail.html:23
+msgid "Instructions"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:31
+msgid "Simulate: advance status"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:36
+msgid "Cancel booking"
+msgstr "बुकिंग रद्द करें"
+
+#: templates/bookings/booking_detail.html:40
+#: templates/bookings/make_payment.html:29
+msgid "Pay now"
+msgstr "अभी भुगतान करें"
+
+#: templates/bookings/booking_detail.html:42
+#: templates/bookings/submit_review.html:8
+msgid "Rate this service"
+msgstr "इस सेवा को रेट करें"
+
+#: templates/bookings/booking_detail.html:43
+#: templates/bookings/file_complaint.html:3
+#: templates/bookings/file_complaint.html:9
+msgid "Raise a complaint"
+msgstr "शिकायत दर्ज करें"
+
+#: templates/bookings/booking_detail.html:47
+#: templates/dashboard/complaints_queue.html:3
+#: templates/dashboard/customer_detail.html:28
+#: templates/dashboard/overview.html:24
+msgid "Complaints"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:56
+#: templates/bookings/create_booking.html:68
+#: templates/bookings/make_payment.html:10
+#: templates/catalog/service_detail.html:38 templates/core/home.html:29
+#: templates/core/home.html:54 templates/core/pricing_policy.html:17
+#: templates/dashboard/pricing_config.html:18
+msgid "Visit charge"
+msgstr "विज़िट शुल्क"
+
+#: templates/bookings/booking_detail.html:58
+#: templates/bookings/create_booking.html:70
+#: templates/bookings/make_payment.html:12
+#: templates/catalog/service_detail.html:40
+msgid "Rate per hour"
+msgstr "प्रति घंटा दर"
+
+#: templates/bookings/booking_detail.html:60
+#: templates/bookings/create_booking.html:72
+#: templates/bookings/make_payment.html:14
+#: templates/catalog/service_detail.html:45 templates/core/home.html:30
+msgid "Labour charge"
+msgstr "श्रम शुल्क"
+
+#: templates/bookings/booking_detail.html:62
+#: templates/catalog/service_detail.html:46 templates/core/home.html:31
+msgid "Total payable"
+msgstr "कुल देय राशि"
+
+#: templates/bookings/booking_detail.html:63
+msgid "Material cost is not included and is paid directly to the shop."
+msgstr ""
+
+#: templates/bookings/booking_detail.html:67
+msgid "Invoice"
+msgstr ""
+
+#: templates/bookings/booking_detail.html:69
+msgid "Paid via"
+msgstr ""
+
+#: templates/bookings/create_booking.html:3
+#: templates/bookings/create_booking.html:55
+msgid "Confirm booking"
+msgstr "बुकिंग की पुष्टि करें"
+
+#: templates/bookings/create_booking.html:9
+msgid "Confirm your booking"
+msgstr "अपनी बुकिंग की पुष्टि करें"
+
+#: templates/bookings/create_booking.html:10
+msgid "with"
+msgstr ""
+
+#: templates/bookings/create_booking.html:20
+#: templates/bookings/my_bookings.html:11
+#: templates/dashboard/customer_detail.html:19
+#: templates/dashboard/worker_detail.html:34
+#: templates/workers/manage_availability.html:15
+#: templates/workers/manage_availability.html:27
+#: templates/workers/manage_availability.html:42
+#: templates/workers/my_dashboard.html:25
+msgid "Date"
+msgstr "तारीख़"
+
+#: templates/bookings/create_booking.html:24
+msgid "Time"
+msgstr "समय"
+
+#: templates/bookings/create_booking.html:28
+msgid "Service address"
+msgstr "सेवा का पता"
+
+#: templates/bookings/create_booking.html:35
+msgid "Instructions (optional)"
+msgstr "निर्देश (वैकल्पिक)"
+
+#: templates/bookings/create_booking.html:39
+msgid "Number of hours"
+msgstr "घंटों की संख्या"
+
+#: templates/bookings/create_booking.html:40
+msgid "Minimum"
+msgstr ""
+
+#: templates/bookings/create_booking.html:40
+msgid "hour(s)"
+msgstr ""
+
+#: templates/bookings/create_booking.html:40
+msgid "hour"
+msgstr "घंटा"
+
+#: templates/bookings/create_booking.html:46
+msgid "Number of workers"
+msgstr ""
+
+#: templates/bookings/create_booking.html:47
+msgid "Duration (days)"
+msgstr ""
+
+#: templates/bookings/create_booking.html:51
+msgid "This is an emergency booking"
+msgstr "यह एक आपातकालीन बुकिंग है"
+
+#: templates/bookings/create_booking.html:52
+msgid "Make this a recurring booking"
+msgstr "इसे आवर्ती बुकिंग बनाएं"
+
+#: templates/bookings/create_booking.html:53
+msgid "Frequency"
+msgstr ""
+
+#: templates/bookings/create_booking.html:63 templates/core/home.html:106
+#: templates/workers/worker_list.html:56
+#: templates/workers/worker_profile.html:13
+msgid "Verified"
+msgstr "सत्यापित"
+
+#: templates/bookings/create_booking.html:74
+#: templates/catalog/service_detail.html:42
+msgid "Estimated total"
+msgstr "अनुमानित कुल"
+
+#: templates/bookings/create_booking.html:75
+#: templates/catalog/service_detail.html:47
+msgid "Material cost, if any, is paid directly by you to the shop."
+msgstr ""
+
+#: templates/bookings/create_booking.html:95
+msgid "This worker is already booked on this date. Please pick another date."
+msgstr "यह कर्मचारी इस तारीख़ को पहले से बुक है। कृपया दूसरी तारीख़ चुनें।"
+
+#: templates/bookings/create_booking.html:99
+msgid "This date is available."
+msgstr "यह तारीख़ उपलब्ध है।"
+
+#: templates/bookings/file_complaint.html:13
+msgid "Subject"
+msgstr "विषय"
+
+#: templates/bookings/file_complaint.html:14
+msgid "Description"
+msgstr "विवरण"
+
+#: templates/bookings/file_complaint.html:15
+msgid "Submit complaint"
+msgstr "शिकायत सबमिट करें"
+
+#: templates/bookings/make_payment.html:3
+msgid "Pay"
+msgstr ""
+
+#: templates/bookings/make_payment.html:8
+msgid "Complete payment"
+msgstr "भुगतान पूरा करें"
+
+#: templates/bookings/make_payment.html:16
+msgid "Amount to pay"
+msgstr "देय राशि"
+
+#: templates/bookings/make_payment.html:21
+msgid "Payment method"
+msgstr "भुगतान का तरीका"
+
+#: templates/bookings/make_payment.html:23
+msgid "UPI"
+msgstr "यूपीआई"
+
+#: templates/bookings/make_payment.html:24
+msgid "Debit / credit card"
+msgstr "डेबिट / क्रेडिट कार्ड"
+
+#: templates/bookings/make_payment.html:25
+msgid "Net banking"
+msgstr "नेट बैंकिंग"
+
+#: templates/bookings/make_payment.html:26
+msgid "Wallet"
+msgstr "वॉलेट"
+
+#: templates/bookings/make_payment.html:31
+msgid "This is a simulated secure payment for demonstration purposes."
+msgstr ""
+
+#: templates/bookings/my_bookings.html:7
+msgid "Account"
+msgstr ""
+
+#: templates/bookings/my_bookings.html:11 templates/core/pricing_policy.html:17
+#: templates/dashboard/customer_detail.html:19
+#: templates/dashboard/pricing_config.html:25
+#: templates/dashboard/worker_detail.html:34
+#: templates/workers/manage_availability.html:42
+#: templates/workers/my_dashboard.html:25
+msgid "Service"
+msgstr "सेवा"
+
+#: templates/bookings/my_bookings.html:11
+#: templates/dashboard/customer_detail.html:19
+msgid "Amount"
+msgstr ""
+
+#: templates/bookings/my_bookings.html:11
+#: templates/dashboard/customer_detail.html:19
+#: templates/dashboard/worker_detail.html:11
+#: templates/dashboard/worker_detail.html:34
+#: templates/dashboard/worker_list.html:11
+#: templates/dashboard/worker_verification_queue.html:11
+#: templates/workers/manage_availability.html:42
+#: templates/workers/my_dashboard.html:26
+msgid "Status"
+msgstr "स्थिति"
+
+#: templates/bookings/my_bookings.html:20
+#: templates/workers/my_dashboard.html:43
+msgid "View"
+msgstr ""
+
+#: templates/bookings/my_bookings.html:24
+msgid "You have no bookings yet."
+msgstr "अभी आपकी कोई बुकिंग नहीं है।"
+
+#: templates/bookings/submit_review.html:3
+msgid "Rate service"
+msgstr ""
+
+#: templates/bookings/submit_review.html:9
+msgid "by"
+msgstr ""
+
+#: templates/bookings/submit_review.html:13
+#: templates/dashboard/worker_detail.html:12
+#: templates/dashboard/worker_list.html:11
+#: templates/workers/my_dashboard.html:13
+msgid "Rating"
+msgstr "रेटिंग"
+
+#: templates/bookings/submit_review.html:15
+msgid "Excellent"
+msgstr "उत्कृष्ट"
+
+#: templates/bookings/submit_review.html:16
+msgid "Good"
+msgstr "अच्छा"
+
+#: templates/bookings/submit_review.html:17
+msgid "Average"
+msgstr "औसत"
+
+#: templates/bookings/submit_review.html:18
+msgid "Below average"
+msgstr "औसत से कम"
+
+#: templates/bookings/submit_review.html:19
+msgid "Poor"
+msgstr "खराब"
+
+#: templates/bookings/submit_review.html:22
+msgid "Comment (optional)"
+msgstr "टिप्पणी (वैकल्पिक)"
+
+#: templates/bookings/submit_review.html:23
+msgid "Submit rating"
+msgstr "रेटिंग सबमिट करें"
+
+#: templates/catalog/category_detail.html:9
+#: templates/core/pricing_policy.html:17
+msgid "Category"
+msgstr "श्रेणी"
+
+#: templates/catalog/category_detail.html:14
+msgid "Visit charge (all workers)"
+msgstr ""
+
+#: templates/catalog/category_detail.html:15
+msgid "Same for every verified worker in this category."
+msgstr ""
+
+#: templates/catalog/category_detail.html:26
+#: templates/catalog/category_list.html:21
+#: templates/workers/worker_list.html:38
+msgid "Visit"
+msgstr ""
+
+#: templates/catalog/category_detail.html:28
+#: templates/core/pricing_policy.html:17
+#: templates/dashboard/pricing_config.html:25
+#: templates/workers/worker_list.html:40
+msgid "Rate"
+msgstr "दर"
+
+#: templates/catalog/category_detail.html:28
+#: templates/core/pricing_policy.html:26
+#: templates/dashboard/pricing_config.html:49
+#: templates/workers/worker_list.html:40
+msgid "hr"
+msgstr "घंटा"
+
+#: templates/catalog/category_detail.html:29
+#: templates/core/pricing_policy.html:17
+#: templates/dashboard/pricing_config.html:25
+msgid "Est. total"
+msgstr "अनुमानित कुल"
+
+#: templates/catalog/category_detail.html:29
+#: templates/workers/worker_list.html:40
+msgid "h min"
+msgstr ""
+
+#: templates/catalog/category_detail.html:31
+#: templates/workers/worker_list.html:42
+msgid "Labour"
+msgstr ""
+
+#: templates/catalog/category_detail.html:32
+msgid "Total"
+msgstr "कुल"
+
+#: templates/catalog/category_detail.html:38
+msgid "No services configured in this category yet."
+msgstr ""
+
+#: templates/catalog/category_list.html:8
+msgid "Catalogue"
+msgstr "सूची"
+
+#: templates/catalog/category_list.html:10
+msgid "Search services…"
+msgstr "सेवाएं खोजें…"
+
+#: templates/catalog/category_list.html:21 templates/core/home.html:54
+msgid "services"
+msgstr "सेवाएं"
+
+#: templates/catalog/category_list.html:27
+msgid "No categories match your search yet."
+msgstr ""
+
+#: templates/catalog/service_detail.html:16
+msgid "Required skill"
+msgstr "आवश्यक कौशल"
+
+#: templates/catalog/service_detail.html:17
+msgid "Estimated duration"
+msgstr "अनुमानित समय"
+
+#: templates/catalog/service_detail.html:17
+msgid "minutes"
+msgstr "मिनट"
+
+#: templates/catalog/service_detail.html:18
+msgid "Tools required"
+msgstr "आवश्यक उपकरण"
+
+#: templates/catalog/service_detail.html:19
+msgid "Warranty"
+msgstr "वारंटी"
+
+#: templates/catalog/service_detail.html:19
+msgid "days"
+msgstr "दिन"
+
+#: templates/catalog/service_detail.html:20
+msgid "Service area"
+msgstr "सेवा क्षेत्र"
+
+#: templates/catalog/service_detail.html:21
+msgid "Cancellation policy"
+msgstr "रद्दीकरण नीति"
+
+#: templates/catalog/service_detail.html:27
+msgid "Related services"
+msgstr "संबंधित सेवाएं"
+
+#: templates/catalog/service_detail.html:41
+#: templates/dashboard/pricing_config.html:50
+msgid "Minimum hours"
+msgstr "न्यूनतम घंटे"
+
+#: templates/catalog/service_detail.html:43
+msgid "Final amount depends on the number of hours you book."
+msgstr "अंतिम राशि आपके द्वारा बुक किए गए घंटों की संख्या पर निर्भर करती है।"
+
+#: templates/catalog/service_detail.html:51
+msgid "View verified workers"
+msgstr "सत्यापित कर्मचारी देखें"
+
+#: templates/core/about.html:7
+msgid "About us"
+msgstr ""
+
+#: templates/core/about.html:8
+msgid "A cooperative-owned marketplace, built for fairness"
+msgstr ""
+
+#: templates/core/about.html:9
+msgid ""
+"Co-opSeva is a cooperative-owned digital service marketplace that connects "
+"verified labour-cooperative workers with households, builders, institutions "
+"and communities across the Delhi-NCR pilot region."
+msgstr ""
+
+#: templates/core/about.html:10
+msgid ""
+"The platform uses a simple, fixed pricing model with a federation-configured "
+"visit charge and labour charge. Material cost is always paid directly by the "
+"customer to the supplier — the platform never touches it."
+msgstr ""
+
+#: templates/core/about.html:11
+msgid ""
+"Co-opSeva provides secure booking, geo-location matching, digital payment, "
+"invoicing, ratings, grievance handling, worker welfare, insurance "
+"integration, and AI-based demand forecasting — all governed by the labour "
+"cooperative federation."
+msgstr ""
+
+#: templates/core/about.html:13
+msgid "Fair, predictable payouts and welfare support."
+msgstr ""
+
+#: templates/core/about.html:14
+msgid "For households"
+msgstr ""
+
+#: templates/core/about.html:14
+msgid "Verified help, transparent pricing, no surprises."
+msgstr ""
+
+#: templates/core/about.html:15
+msgid "For federations"
+msgstr ""
+
+#: templates/core/about.html:15
+msgid "Full control over pricing, verification and quality."
+msgstr ""
+
+#: templates/core/contact.html:3
+msgid "Contact"
+msgstr ""
+
+#: templates/core/contact.html:7 templates/dashboard/complaints_queue.html:7
+msgid "Support"
+msgstr "सहायता"
+
+#: templates/core/contact.html:8
+msgid "We're here to help"
+msgstr "हम मदद के लिए यहां हैं"
+
+#: templates/core/contact.html:10
+msgid "Helpline"
+msgstr ""
+
+#: templates/core/contact.html:10
+msgid "toll-free, 8am–8pm"
+msgstr ""
+
+#: templates/core/contact.html:11
+msgid "Email"
+msgstr ""
+
+#: templates/core/contact.html:12
+msgid "For an existing booking"
+msgstr ""
+
+#: templates/core/contact.html:12
+msgid "Open the booking from"
+msgstr ""
+
+#: templates/core/contact.html:12
+msgid "and use Raise a complaint."
+msgstr ""
+
+#: templates/core/home.html:8
+msgid "Verified · Cooperative-owned · Fixed price"
+msgstr ""
+
+#: templates/core/home.html:9
+msgid "Book verified workers. Pay one honest, fixed price."
+msgstr "सत्यापित कर्मचारी बुक करें। एक ईमानदार, तय कीमत चुकाएं।"
+
+#: templates/core/home.html:10
+msgid ""
+"Co-opSeva connects your household or project with verified cooperative "
+"electricians, plumbers, carpenters, painters, helpers and more — no bidding, "
+"no quotations, ever."
+msgstr ""
+
+#: templates/core/home.html:16 templates/workers/my_dashboard.html:74
+msgid "Service categories"
+msgstr "सेवा श्रेणियां"
+
+#: templates/core/home.html:17
+msgid "Verified workers"
+msgstr "सत्यापित कर्मचारी"
+
+#: templates/core/home.html:18
+msgid "Charges — visit + labour, nothing else"
+msgstr ""
+
+#: templates/core/home.html:23
+msgid "What do you need help with?"
+msgstr "आपको किस चीज़ में मदद चाहिए?"
+
+#: templates/core/home.html:25
+msgid "Try: electrician, fan installation, plumber…"
+msgstr ""
+
+#: templates/core/home.html:32
+msgid ""
+"Material cost is paid directly to the shop — never through the platform."
+msgstr ""
+
+#: templates/core/home.html:42
+msgid "Service catalogue"
+msgstr "सेवा सूची"
+
+#: templates/core/home.html:43
+msgid "Popular categories near you"
+msgstr "आपके आस-पास लोकप्रिय श्रेणियां"
+
+#: templates/core/home.html:45
+msgid "View all categories"
+msgstr "सभी श्रेणियां देखें"
+
+#: templates/core/home.html:58
+msgid ""
+"Categories will appear here once the federation administrator configures the "
+"catalogue."
+msgstr ""
+
+#: templates/core/home.html:68
+msgid "Trust & transparency"
+msgstr "विश्वास और पारदर्शिता"
+
+#: templates/core/home.html:69
+msgid "Why families and builders choose Co-opSeva"
+msgstr ""
+
+#: templates/core/home.html:75
+msgid "Verified, not anonymous"
+msgstr "सत्यापित, गुमनाम नहीं"
+
+#: templates/core/home.html:76
+msgid ""
+"Every worker is identity-checked, cooperative-registered, and skill-graded "
+"before appearing on the platform."
+msgstr ""
+
+#: templates/core/home.html:80
+msgid "Only two charges"
+msgstr "केवल दो शुल्क"
+
+#: templates/core/home.html:81
+msgid ""
+"A fixed visit charge and a fixed labour charge — set centrally by the "
+"federation. No worker or customer can change them."
+msgstr ""
+
+#: templates/core/home.html:85
+msgid "Worker welfare built in"
+msgstr "कर्मचारी कल्याण अंतर्निहित"
+
+#: templates/core/home.html:86
+msgid ""
+"Fair, predefined payouts and cooperative-backed insurance and welfare "
+"records for every registered worker."
+msgstr ""
+
+#: templates/core/home.html:96
+msgid "Top rated"
+msgstr "सर्वश्रेष्ठ रेटेड"
+
+#: templates/core/home.html:96
+msgid "Highly rated verified workers"
+msgstr ""
+
+#: templates/core/home.html:109 templates/workers/worker_profile.html:14
+msgid "jobs"
+msgstr "काम"
+
+#: templates/core/home.html:120
+msgid "Process"
+msgstr "प्रक्रिया"
+
+#: templates/core/home.html:120
+msgid "From search to service in four steps"
+msgstr ""
+
+#: templates/core/home.html:122
+msgid "Choose a service"
+msgstr "एक सेवा चुनें"
+
+#: templates/core/home.html:122
+msgid "See the fixed price upfront, before you book anything."
+msgstr ""
+
+#: templates/core/home.html:123
+msgid "Compare workers"
+msgstr "कर्मचारियों की तुलना करें"
+
+#: templates/core/home.html:123
+msgid ""
+"Rating, experience and arrival time — never price, because price never "
+"changes."
+msgstr ""
+
+#: templates/core/home.html:124
+msgid "Book & pay digitally"
+msgstr "बुक करें और डिजिटल भुगतान करें"
+
+#: templates/core/home.html:124
+msgid "Confirm your slot and pay the visit and labour charge securely."
+msgstr ""
+
+#: templates/core/home.html:125 templates/core/how_it_works.html:16
+msgid "Rate the service"
+msgstr "सेवा को रेट करें"
+
+#: templates/core/home.html:125
+msgid "Help the cooperative keep quality high for the next customer."
+msgstr ""
+
+#: templates/core/how_it_works.html:8
+msgid "Simple, transparent, fixed-price service booking"
+msgstr ""
+
+#: templates/core/how_it_works.html:10
+msgid "Search for a service"
+msgstr ""
+
+#: templates/core/how_it_works.html:10
+msgid ""
+"Browse categories like electrician, plumber, carpenter, painter, domestic "
+"help, and more — no account needed to browse."
+msgstr ""
+
+#: templates/core/how_it_works.html:11
+msgid "See the fixed price immediately"
+msgstr ""
+
+#: templates/core/how_it_works.html:11
+msgid ""
+"Every service shows its fixed visit charge and fixed labour charge upfront. "
+"All verified workers charge the exact same price for the same service."
+msgstr ""
+
+#: templates/core/how_it_works.html:12
+msgid "Compare and choose a worker"
+msgstr ""
+
+#: templates/core/how_it_works.html:12
+msgid ""
+"Compare workers by rating, experience, distance and arrival time — never by "
+"price."
+msgstr ""
+
+#: templates/core/how_it_works.html:13
+msgid "Log in to confirm your booking"
+msgstr ""
+
+#: templates/core/how_it_works.html:13
+msgid "A quick mobile OTP sign-in secures your booking, schedule and address."
+msgstr ""
+
+#: templates/core/how_it_works.html:14
+msgid "Worker arrives and completes the job"
+msgstr ""
+
+#: templates/core/how_it_works.html:14
+msgid ""
+"Track status from acceptance to arrival to work completion, with optional "
+"before/after photos."
+msgstr ""
+
+#: templates/core/how_it_works.html:15
+msgid "Pay digitally and download your invoice"
+msgstr ""
+
+#: templates/core/how_it_works.html:15
+msgid ""
+"Pay only the visit charge and labour charge. Material, if any, is purchased "
+"directly by you from the shop."
+msgstr ""
+
+#: templates/core/how_it_works.html:16
+msgid ""
+"Your verified rating helps the cooperative maintain quality across the "
+"platform."
+msgstr ""
+
+#: templates/core/pricing_policy.html:8
+msgid "One fixed price. No bidding. No quotations."
+msgstr "एक तय कीमत। कोई बोली नहीं। कोई कोटेशन नहीं।"
+
+#: templates/core/pricing_policy.html:9
+msgid ""
+"The federation administrator centrally configures a visit charge for every "
+"category and a labour charge (or hourly rate) for every service. Workers and "
+"customers cannot change these amounts. Material cost is always paid directly "
+"by the customer to the shop or supplier and never appears on the platform "
+"invoice."
+msgstr ""
+
+#: templates/core/pricing_policy.html:12
+msgid "Edit pricing (federation admin)"
+msgstr "मूल्य संपादित करें (फेडरेशन एडमिन)"
+
+#: templates/core/pricing_policy.html:17
+msgid "Pricing"
+msgstr ""
+
+#: templates/core/pricing_policy.html:25
+#: templates/dashboard/pricing_config.html:39
+msgid "Per hour"
+msgstr "प्रति घंटा"
+
+#: templates/core/pricing_policy.html:25
+msgid "Fixed"
+msgstr ""
+
+#: templates/core/pricing_policy.html:31
+msgid ""
+"Pricing will appear once the federation administrator configures the "
+"catalogue."
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:3
+#: templates/dashboard/overview.html:19
+msgid "Category change requests"
+msgstr "श्रेणी परिवर्तन अनुरोध"
+
+#: templates/dashboard/category_change_queue.html:7
+#: templates/dashboard/pricing_config.html:7
+msgid "Federation administrator"
+msgstr "फेडरेशन प्रशासक"
+
+#: templates/dashboard/category_change_queue.html:8
+msgid "Worker category change requests"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:16
+msgid "Current categories:"
+msgstr "वर्तमान श्रेणियां:"
+
+#: templates/dashboard/category_change_queue.html:17
+msgid "Requested categories:"
+msgstr "अनुरोधित श्रेणियां:"
+
+#: templates/dashboard/category_change_queue.html:18
+msgid "Reason:"
+msgstr "कारण:"
+
+#: templates/dashboard/category_change_queue.html:21
+msgid "Admin note (optional)"
+msgstr ""
+
+#: templates/dashboard/category_change_queue.html:23
+#: templates/dashboard/worker_verification_queue.html:20
+msgid "Approve"
+msgstr "स्वीकृत करें"
+
+#: templates/dashboard/category_change_queue.html:24
+#: templates/dashboard/worker_verification_queue.html:21
+msgid "Reject"
+msgstr "अस्वीकार करें"
+
+#: templates/dashboard/category_change_queue.html:28
+msgid "No pending category-change requests."
+msgstr "कोई लंबित श्रेणी-परिवर्तन अनुरोध नहीं।"
+
+#: templates/dashboard/complaints_queue.html:8
+msgid "Complaints queue"
+msgstr ""
+
+#: templates/dashboard/complaints_queue.html:19
+msgid "Resolution notes"
+msgstr ""
+
+#: templates/dashboard/complaints_queue.html:20
+msgid "Mark resolved"
+msgstr ""
+
+#: templates/dashboard/complaints_queue.html:23
+msgid "Resolution"
+msgstr ""
+
+#: templates/dashboard/complaints_queue.html:26
+msgid "No complaints filed yet."
+msgstr ""
+
+#: templates/dashboard/customer_detail.html:7
+#: templates/dashboard/customer_list.html:3
+#: templates/dashboard/overview.html:25
+msgid "Customer history"
+msgstr "ग्राहक इतिहास"
+
+#: templates/dashboard/customer_detail.html:10
+#: templates/dashboard/customer_list.html:11
+#: templates/dashboard/worker_detail.html:20
+#: templates/dashboard/worker_list.html:11
+#: templates/dashboard/worker_verification_queue.html:11
+#: templates/workers/my_dashboard.html:57
+msgid "Phone"
+msgstr "फ़ोन"
+
+#: templates/dashboard/customer_detail.html:12
+#: templates/dashboard/overview.html:10
+msgid "Total bookings"
+msgstr "कुल बुकिंग"
+
+#: templates/dashboard/customer_detail.html:13
+msgid "Total spend"
+msgstr "कुल खर्च"
+
+#: templates/dashboard/customer_detail.html:16
+msgid "Booking history"
+msgstr "बुकिंग इतिहास"
+
+#: templates/dashboard/customer_detail.html:23
+#: templates/dashboard/worker_detail.html:39
+#: templates/workers/my_dashboard.html:45
+msgid "No bookings yet."
+msgstr ""
+
+#: templates/dashboard/customer_detail.html:31
+msgid "No complaints filed."
+msgstr "कोई शिकायत दर्ज नहीं।"
+
+#: templates/dashboard/customer_list.html:7 templates/dashboard/overview.html:7
+#: templates/dashboard/worker_list.html:7
+msgid "Administration"
+msgstr ""
+
+#: templates/dashboard/customer_list.html:8
+msgid "Customers"
+msgstr "ग्राहक"
+
+#: templates/dashboard/customer_list.html:11
+#: templates/dashboard/worker_list.html:11
+#: templates/workers/my_dashboard.html:56
+msgid "Name"
+msgstr "नाम"
+
+#: templates/dashboard/customer_list.html:11
+#: templates/dashboard/worker_list.html:11
+msgid "Bookings"
+msgstr ""
+
+#: templates/dashboard/customer_list.html:11
+msgid "Joined"
+msgstr "शामिल हुए"
+
+#: templates/dashboard/customer_list.html:17
+#: templates/dashboard/worker_list.html:19
+msgid "View history"
+msgstr "इतिहास देखें"
+
+#: templates/dashboard/customer_list.html:19
+msgid "No customers yet."
+msgstr "अभी कोई ग्राहक नहीं।"
+
+#: templates/dashboard/overview.html:8
+msgid "Dashboard overview"
+msgstr "डैशबोर्ड अवलोकन"
+
+#: templates/dashboard/overview.html:11
+msgid "Registered workers"
+msgstr "पंजीकृत कर्मचारी"
+
+#: templates/dashboard/overview.html:12
+msgid "Registered customers"
+msgstr "पंजीकृत ग्राहक"
+
+#: templates/dashboard/overview.html:13
+msgid "Open complaints"
+msgstr "खुली शिकायतें"
+
+#: templates/dashboard/overview.html:18
+msgid "Fixed & hourly pricing"
+msgstr "तय व प्रति-घंटा मूल्य निर्धारण"
+
+#: templates/dashboard/overview.html:18
+msgid ""
+"Set visit charges, fixed labour charges and hourly rates (federation admin "
+"only)."
+msgstr ""
+
+#: templates/dashboard/overview.html:19
+msgid "pending approval"
+msgstr "स्वीकृति लंबित"
+
+#: templates/dashboard/overview.html:22
+#: templates/dashboard/worker_verification_queue.html:8
+msgid "Worker verification queue"
+msgstr "कर्मचारी सत्यापन कतार"
+
+#: templates/dashboard/overview.html:22
+msgid "pending review"
+msgstr "समीक्षा लंबित"
+
+#: templates/dashboard/overview.html:24
+msgid "Track and resolve customer complaints."
+msgstr ""
+
+#: templates/dashboard/overview.html:25
+msgid "Full booking and spend history for every customer."
+msgstr "हर ग्राहक का पूरा बुकिंग और खर्च इतिहास।"
+
+#: templates/dashboard/overview.html:26
+#: templates/dashboard/worker_detail.html:7
+#: templates/dashboard/worker_list.html:3
+msgid "Worker history"
+msgstr "कर्मचारी इतिहास"
+
+#: templates/dashboard/overview.html:26
+msgid "Full profile, bookings, earnings and reviews for every worker."
+msgstr "हर कर्मचारी की पूरी प्रोफ़ाइल, बुकिंग, कमाई और समीक्षाएं।"
+
+#: templates/dashboard/pricing_config.html:3
+msgid "Pricing configuration"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:8
+msgid "Fixed & hourly pricing configuration"
+msgstr "तय व प्रति-घंटा मूल्य निर्धारण सेटअप"
+
+#: templates/dashboard/pricing_config.html:9
+msgid ""
+"Only the federation administrator can change prices here. Workers and "
+"customers cannot set or negotiate prices. Choose Fixed price for one-time "
+"jobs, or Per hour for time-based work like domestic help, caregiving, or "
+"driving."
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:20
+msgid "Update"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:25
+msgid "Pricing type"
+msgstr "मूल्य निर्धारण प्रकार"
+
+#: templates/dashboard/pricing_config.html:38
+msgid "Fixed price"
+msgstr "तय कीमत"
+
+#: templates/dashboard/pricing_config.html:44
+msgid "labour charge"
+msgstr "श्रम शुल्क"
+
+#: templates/dashboard/pricing_config.html:51
+msgid "min. hrs"
+msgstr "न्यू. घंटे"
+
+#: templates/dashboard/pricing_config.html:54
+msgid "Save"
+msgstr ""
+
+#: templates/dashboard/pricing_config.html:59
+msgid "No services in this category."
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:13
+#: templates/workers/my_dashboard.html:14
+msgid "Jobs completed"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:14
+#: templates/workers/my_dashboard.html:15
+msgid "Total income earned"
+msgstr "कुल अर्जित आय"
+
+#: templates/dashboard/worker_detail.html:22
+#: templates/dashboard/worker_list.html:11
+#: templates/workers/my_dashboard.html:59
+msgid "Categories"
+msgstr "श्रेणियां"
+
+#: templates/dashboard/worker_detail.html:23
+#: templates/dashboard/worker_verification_queue.html:11
+#: templates/workers/edit_profile.html:13
+#: templates/workers/my_dashboard.html:62 templates/workers/onboarding.html:17
+msgid "Skill grade"
+msgstr "कौशल श्रेणी"
+
+#: templates/dashboard/worker_detail.html:24
+#: templates/workers/my_dashboard.html:63
+msgid "Experience"
+msgstr "अनुभव"
+
+#: templates/dashboard/worker_detail.html:24
+#: templates/workers/my_dashboard.html:63
+msgid "years"
+msgstr "वर्ष"
+
+#: templates/dashboard/worker_detail.html:25
+#: templates/workers/my_dashboard.html:67
+msgid "Society"
+msgstr "सोसाइटी"
+
+#: templates/dashboard/worker_detail.html:26
+#, python-format
+msgid "Payout %%"
+msgstr ""
+
+#: templates/dashboard/worker_detail.html:31
+msgid "Booking & earnings history"
+msgstr "बुकिंग और आय इतिहास"
+
+#: templates/dashboard/worker_detail.html:34
+#: templates/workers/my_dashboard.html:25
+msgid "Customer"
+msgstr "ग्राहक"
+
+#: templates/dashboard/worker_detail.html:34
+msgid "Payout"
+msgstr "भुगतान"
+
+#: templates/dashboard/worker_detail.html:44
+msgid "Reviews received"
+msgstr "प्राप्त समीक्षाएं"
+
+#: templates/dashboard/worker_detail.html:47
+#: templates/workers/worker_profile.html:39
+msgid "No reviews yet."
+msgstr "अभी कोई समीक्षा नहीं।"
+
+#: templates/dashboard/worker_detail.html:49 templates/workers/documents.html:3
+msgid "Documents"
+msgstr "दस्तावेज़"
+
+#: templates/dashboard/worker_detail.html:52
+#: templates/workers/documents.html:25
+msgid "Preview"
+msgstr "पूर्वावलोकन"
+
+#: templates/dashboard/worker_detail.html:52
+#: templates/workers/documents.html:25
+msgid "Type"
+msgstr "प्रकार"
+
+#: templates/dashboard/worker_detail.html:52
+#: templates/workers/documents.html:25
+msgid "Uploaded"
+msgstr "अपलोड किया गया"
+
+#: templates/dashboard/worker_detail.html:52
+#: templates/workers/documents.html:25
+msgid "Approved"
+msgstr "स्वीकृत"
+
+#: templates/dashboard/worker_detail.html:60
+#: templates/workers/documents.html:33
+msgid "View file"
+msgstr "फ़ाइल देखें"
+
+#: templates/dashboard/worker_detail.html:63
+#: templates/workers/documents.html:36
+msgid "Yes"
+msgstr "हाँ"
+
+#: templates/dashboard/worker_detail.html:63
+#: templates/workers/documents.html:36
+msgid "Pending"
+msgstr "लंबित"
+
+#: templates/dashboard/worker_detail.html:65
+msgid "No documents uploaded."
+msgstr "कोई दस्तावेज़ अपलोड नहीं हुआ।"
+
+#: templates/dashboard/worker_detail.html:70
+msgid "Category change history"
+msgstr "श्रेणी परिवर्तन इतिहास"
+
+#: templates/dashboard/worker_detail.html:72
+#: templates/workers/my_dashboard.html:78
+msgid "Requested:"
+msgstr "अनुरोधित:"
+
+#: templates/dashboard/worker_detail.html:73
+msgid "No category-change requests."
+msgstr "कोई श्रेणी-परिवर्तन अनुरोध नहीं।"
+
+#: templates/dashboard/worker_list.html:8
+msgid "Workers"
+msgstr "कर्मचारी"
+
+#: templates/dashboard/worker_list.html:21
+msgid "No workers yet."
+msgstr "अभी कोई कर्मचारी नहीं।"
+
+#: templates/dashboard/worker_verification_queue.html:3
+msgid "Worker verification"
+msgstr ""
+
+#: templates/dashboard/worker_verification_queue.html:7
+msgid "Society operator"
+msgstr ""
+
+#: templates/dashboard/worker_verification_queue.html:11
+msgid "Action"
+msgstr ""
+
+#: templates/dashboard/worker_verification_queue.html:24
+msgid "No pending verifications."
+msgstr ""
+
+#: templates/workers/documents.html:9
+msgid "Upload verification documents"
+msgstr ""
+
+#: templates/workers/documents.html:10
+msgid ""
+"Your society operator will review these before your profile is verified."
+msgstr ""
+
+#: templates/workers/documents.html:13
+msgid "Document type"
+msgstr ""
+
+#: templates/workers/documents.html:14
+msgid "File"
+msgstr ""
+
+#: templates/workers/documents.html:15
+msgid "Expiry date (if applicable)"
+msgstr ""
+
+#: templates/workers/documents.html:16
+msgid "Upload document"
+msgstr ""
+
+#: templates/workers/documents.html:20
+msgid "Verification status"
+msgstr ""
+
+#: templates/workers/documents.html:22
+msgid "Uploaded documents"
+msgstr ""
+
+#: templates/workers/documents.html:38
+msgid "No documents uploaded yet."
+msgstr "अभी कोई दस्तावेज़ अपलोड नहीं हुआ।"
+
+#: templates/workers/edit_profile.html:3 templates/workers/my_dashboard.html:70
+msgid "Edit profile"
+msgstr "प्रोफ़ाइल संपादित करें"
+
+#: templates/workers/edit_profile.html:8
+msgid "Edit my profile"
+msgstr "मेरी प्रोफ़ाइल संपादित करें"
+
+#: templates/workers/edit_profile.html:9
+msgid "Category changes are handled separately and require admin approval."
+msgstr ""
+
+#: templates/workers/edit_profile.html:9
+#: templates/workers/request_category_change.html:9
+msgid "Request a category change"
+msgstr "श्रेणी परिवर्तन का अनुरोध करें"
+
+#: templates/workers/edit_profile.html:14 templates/workers/onboarding.html:18
+msgid "Years of experience"
+msgstr ""
+
+#: templates/workers/edit_profile.html:16
+#: templates/workers/my_dashboard.html:66 templates/workers/onboarding.html:20
+msgid "Bio"
+msgstr "परिचय"
+
+#: templates/workers/edit_profile.html:18 templates/workers/onboarding.html:22
+msgid "Languages spoken"
+msgstr ""
+
+#: templates/workers/edit_profile.html:19 templates/workers/onboarding.html:23
+msgid "Service radius (km)"
+msgstr ""
+
+#: templates/workers/edit_profile.html:21
+msgid "I am currently available for new bookings"
+msgstr "मैं नई बुकिंग के लिए वर्तमान में उपलब्ध हूं"
+
+#: templates/workers/manage_availability.html:3
+#: templates/workers/my_dashboard.html:90
+msgid "Manage availability"
+msgstr "उपलब्धता प्रबंधित करें"
+
+#: templates/workers/manage_availability.html:8
+msgid "Manage my availability"
+msgstr "मेरी उपलब्धता प्रबंधित करें"
+
+#: templates/workers/manage_availability.html:11
+msgid "Block a date"
+msgstr "एक तारीख़ ब्लॉक करें"
+
+#: templates/workers/manage_availability.html:12
+msgid "Customers will not be able to book you on blocked dates."
+msgstr ""
+
+#: templates/workers/manage_availability.html:18
+#: templates/workers/request_category_change.html:21
+msgid "Reason (optional)"
+msgstr "कारण (वैकल्पिक)"
+
+#: templates/workers/manage_availability.html:19
+msgid "Block this date"
+msgstr "इस तारीख़ को ब्लॉक करें"
+
+#: templates/workers/manage_availability.html:24
+msgid "Blocked dates"
+msgstr "ब्लॉक की गई तारीखें"
+
+#: templates/workers/manage_availability.html:27
+msgid "Reason"
+msgstr ""
+
+#: templates/workers/manage_availability.html:32
+msgid "Remove"
+msgstr "हटाएं"
+
+#: templates/workers/manage_availability.html:34
+msgid "No blocked dates."
+msgstr "कोई ब्लॉक की गई तारीख़ नहीं।"
+
+#: templates/workers/manage_availability.html:39
+msgid "Already booked (occupied automatically)"
+msgstr "पहले से बुक (स्वतः व्यस्त)"
+
+#: templates/workers/manage_availability.html:46
+msgid "No upcoming bookings."
+msgstr "कोई आगामी बुकिंग नहीं।"
+
+#: templates/workers/my_dashboard.html:8
+msgid "My work"
+msgstr "मेरा काम"
+
+#: templates/workers/my_dashboard.html:16
+msgid "Payout share"
+msgstr "भुगतान हिस्सा"
+
+#: templates/workers/my_dashboard.html:26
+msgid "Income"
+msgstr "आय"
+
+#: templates/workers/my_dashboard.html:26
+msgid "Review"
+msgstr "समीक्षा"
+
+#: templates/workers/my_dashboard.html:60
+#: templates/workers/request_category_change.html:13
+msgid "None set"
+msgstr "कोई सेट नहीं"
+
+#: templates/workers/my_dashboard.html:64
+msgid "Languages"
+msgstr "भाषाएं"
+
+#: templates/workers/my_dashboard.html:65
+msgid "Service radius"
+msgstr "सेवा दायरा"
+
+#: templates/workers/my_dashboard.html:76
+msgid "Change request pending admin approval"
+msgstr "परिवर्तन अनुरोध एडमिन स्वीकृति हेतु लंबित"
+
+#: templates/workers/my_dashboard.html:82
+msgid ""
+"Category changes require federation-admin approval before they take effect."
+msgstr ""
+
+#: templates/workers/my_dashboard.html:83
+#: templates/workers/request_category_change.html:3
+msgid "Request category change"
+msgstr "श्रेणी परिवर्तन का अनुरोध करें"
+
+#: templates/workers/my_dashboard.html:88
+msgid "Availability"
+msgstr "उपलब्धता"
+
+#: templates/workers/my_dashboard.html:89
+msgid "Upcoming blocked dates:"
+msgstr ""
+
+#: templates/workers/my_dashboard.html:94
+msgid "Documents & verification"
+msgstr "दस्तावेज़ और सत्यापन"
+
+#: templates/workers/my_dashboard.html:95
+msgid "Manage documents"
+msgstr "दस्तावेज़ प्रबंधित करें"
+
+#: templates/workers/onboarding.html:3
+msgid "Worker onboarding"
+msgstr ""
+
+#: templates/workers/onboarding.html:8
+msgid "Set up your worker profile"
+msgstr ""
+
+#: templates/workers/onboarding.html:9
+msgid ""
+"This information helps customers find and trust you. Pricing is always fixed "
+"by the federation — you never set your own rates."
+msgstr ""
+
+#: templates/workers/onboarding.html:13
+msgid "Service categories you can perform"
+msgstr ""
+
+#: templates/workers/onboarding.html:27
+msgid "Your base location"
+msgstr ""
+
+#: templates/workers/onboarding.html:30 templates/workers/onboarding.html:69
+#: templates/workers/onboarding.html:72 templates/workers/onboarding.html:76
+msgid "Use my current location"
+msgstr ""
+
+#: templates/workers/onboarding.html:33 templates/workers/onboarding.html:70
+msgid "Saved"
+msgstr ""
+
+#: templates/workers/onboarding.html:33
+msgid "Not set yet"
+msgstr ""
+
+#: templates/workers/onboarding.html:36
+msgid ""
+"This lets customers see accurate distance and arrival time to your location. "
+"Your browser will ask for permission."
+msgstr ""
+
+#: templates/workers/onboarding.html:39
+msgid "Save and continue to documents"
+msgstr ""
+
+#: templates/workers/onboarding.html:56 templates/workers/worker_list.html:96
+msgid "Location is not supported by this browser."
+msgstr ""
+
+#: templates/workers/onboarding.html:59 templates/workers/worker_list.html:99
+msgid "Locating…"
+msgstr ""
+
+#: templates/workers/onboarding.html:70 templates/workers/onboarding.html:73
+msgid "Could not save location"
+msgstr ""
+
+#: templates/workers/onboarding.html:77
+msgid "Location permission was denied."
+msgstr ""
+
+#: templates/workers/request_category_change.html:10
+msgid ""
+"Your current categories stay active until a federation administrator reviews "
+"and approves this request."
+msgstr ""
+
+#: templates/workers/request_category_change.html:12
+msgid "Current categories"
+msgstr "वर्तमान श्रेणियां"
+
+#: templates/workers/request_category_change.html:18
+msgid "Select the categories you want to work in"
+msgstr "वे श्रेणियां चुनें जिनमें आप काम करना चाहते हैं"
+
+#: templates/workers/request_category_change.html:22
+msgid "Submit for approval"
+msgstr "स्वीकृति हेतु सबमिट करें"
+
+#: templates/workers/worker_list.html:3
+msgid "Choose a worker"
+msgstr ""
+
+#: templates/workers/worker_list.html:10
+msgid "Compare verified workers"
+msgstr "सत्यापित कर्मचारियों की तुलना करें"
+
+#: templates/workers/worker_list.html:11
+msgid "Every worker below charges the exact same fixed price for this service."
+msgstr ""
+
+#: templates/workers/worker_list.html:15 templates/workers/worker_list.html:122
+msgid "Find nearest to me"
+msgstr "मेरे सबसे नज़दीक खोजें"
+
+#: templates/workers/worker_list.html:18
+msgid "Recommended"
+msgstr "अनुशंसित"
+
+#: templates/workers/worker_list.html:19
+msgid "Nearest"
+msgstr "सबसे नज़दीक"
+
+#: templates/workers/worker_list.html:20
+msgid "Highest rating"
+msgstr "उच्चतम रेटिंग"
+
+#: templates/workers/worker_list.html:21
+msgid "Most experienced"
+msgstr "सबसे अनुभवी"
+
+#: templates/workers/worker_list.html:22 templates/workers/worker_list.html:70
+msgid "Available now"
+msgstr "अभी उपलब्ध"
+
+#: templates/workers/worker_list.html:29
+msgid ""
+"Live distance and travel time will appear here once the platform's Google "
+"Maps API key is configured. Sorting by rating, experience and availability "
+"still works normally."
+msgstr ""
+
+#: templates/workers/worker_list.html:33
+msgid ""
+"Couldn't calculate distances right now — showing the recommended order "
+"instead."
+msgstr ""
+
+#: templates/workers/worker_list.html:44
+msgid "Same for every worker"
+msgstr "हर कर्मचारी के लिए समान"
+
+#: templates/workers/worker_list.html:59
+msgid "jobs completed"
+msgstr "पूरे किए गए काम"
+
+#: templates/workers/worker_list.html:62
+msgid "yrs experience"
+msgstr "वर्ष अनुभव"
+
+#: templates/workers/worker_list.html:64
+msgid "away"
+msgstr ""
+
+#: templates/workers/worker_list.html:66
+msgid "within"
+msgstr "के भीतर"
+
+#: templates/workers/worker_list.html:70
+msgid "Busy"
+msgstr "व्यस्त"
+
+#: templates/workers/worker_list.html:72
+msgid "View profile"
+msgstr "प्रोफ़ाइल देखें"
+
+#: templates/workers/worker_list.html:73
+msgid "Book"
+msgstr "बुक करें"
+
+#: templates/workers/worker_list.html:79
+msgid ""
+"No verified workers are available for this service yet. Please check back "
+"shortly."
+msgstr ""
+
+#: templates/workers/worker_list.html:123
+msgid ""
+"Location permission was denied. You can still sort by rating or experience."
+msgstr ""
+
+#: templates/workers/worker_profile.html:18
+msgid "yrs"
+msgstr ""
+
+#: templates/workers/worker_profile.html:24
+msgid "Services offered"
+msgstr ""
+
+#: templates/workers/worker_profile.html:30
+msgid "No services listed yet."
+msgstr ""
+
+#: templates/workers/worker_profile.html:33
+msgid "Recent reviews"
+msgstr ""
+
+#: templates/workers/worker_profile.html:36
+msgid "Verified booking"
+msgstr ""

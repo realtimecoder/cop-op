@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Raise a complaint" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card">
+      <div class="category-icon" style="margin-bottom:14px;"><svg><use href="#icon-alert"/></svg></div>
+      <h1 style="font-size:1.4rem;">{% trans "Raise a complaint" %}</h1>
+      <p class="muted">{% trans "Booking" %} #{{ booking.id }} — {{ booking.service.name }}</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group"><label>{% trans "Subject" %}</label>{{ form.subject }}</div>
+        <div class="form-group"><label>{% trans "Description" %}</label>{{ form.description }}</div>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Submit complaint" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

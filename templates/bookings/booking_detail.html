@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Booking" %} #{{ booking.id }} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="grid" style="grid-template-columns:1.6fr 1fr;gap:32px;align-items:start;">
+      <div>
+        <div class="section-head">
+          <div><span class="eyebrow">{% trans "Booking" %} #{{ booking.id }}</span><h1 style="margin-bottom:0;">{{ booking.service.name }}</h1></div>
+          <div class="text-center">
+            <span class="status-pill" id="status-pill">{{ booking.get_status_display }}</span>
+            {% if booking.status != 'cancelled' and booking.status != 'rejected' %}
+            <div class="live-indicator mt-1"><span class="live-dot"></span>{% trans "Live status" %}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if booking.status == 'cancelled' or booking.status == 'rejected' %}
+          <div class="alert alert-error" style="position:static;">{% trans "This booking was" %} {{ booking.get_status_display|lower }}.</div>
+        {% else %}
+        <div class="status-stepper" id="status-stepper">
+          {% for step in status_steps %}
+          <div class="status-step {% if step.done %}is-done{% elif step.current %}is-current{% endif %}" data-step="{{ step.key }}">
+            <div class="status-dot"><svg><use href="#icon-check"/></svg></div>
+            <div class="status-step-label">{{ step.label }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="table-wrap mt-3">
+          <table class="data-table">
+            <tbody>
+              <tr><th>{% trans "Worker" %}</th><td>{{ booking.worker.user.get_full_name|default:"Unassigned" }}</td></tr>
+              <tr><th>{% trans "Scheduled" %}</th><td>{{ booking.scheduled_date }} {{ booking.scheduled_time }}</td></tr>
+              <tr><th>{% trans "Address" %}</th><td>{{ booking.address }}, {{ booking.city }} {{ booking.pincode }}</td></tr>
+              {% if booking.instructions %}<tr><th>{% trans "Instructions" %}</th><td>{{ booking.instructions }}</td></tr>{% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex gap-1 mt-3" style="flex-wrap:wrap;">
+          {% if is_worker %}
+            {% if booking.status == 'assigned' %}
+              <form method="post" action="{% url 'bookings:worker_action' booking.id 'accept' %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Accept booking" %}</button></form>
+              <form method="post" action="{% url 'bookings:worker_action' booking.id 'reject' %}">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Reject" %}</button></form>
+            {% elif booking.status == 'accepted' %}
+              <form method="post" action="{% url 'bookings:worker_action' booking.id 'start_arriving' %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "I'm heading there" %}</button></form>
+            {% elif booking.status == 'worker_arriving' %}
+              <form method="post" action="{% url 'bookings:worker_action' booking.id 'mark_arrived' %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "I have arrived" %}</button></form>
+            {% elif booking.status == 'arrived' %}
+              <form method="post" action="{% url 'bookings:worker_action' booking.id 'start_work' %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Start work" %}</button></form>
+            {% elif booking.status == 'work_started' %}
+              <form method="post" action="{% url 'bookings:worker_action' booking.id 'complete_work' %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Mark work completed" %}</button></form>
+            {% endif %}
+          {% endif %}
+
+          {% if is_customer %}
+            {% if booking.status == 'requested' or booking.status == 'assigned' %}
+            <form method="post" action="{% url 'bookings:cancel_booking' booking.id %}">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Cancel booking" %}</button></form>
+            {% endif %}
+            {% if booking.status == 'work_completed' %}
+            <form method="post" action="{% url 'bookings:confirm_completion' booking.id %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Confirm work is done" %}</button></form>
+            {% endif %}
+            {% if booking.status == 'customer_confirmed' and not payment %}
+            <a href="{% url 'bookings:make_payment' booking.id %}" class="btn btn-accent btn-sm">{% trans "Pay now" %}</a>
+            {% endif %}
+            {% if payment and not review %}
+            <a href="{% url 'bookings:submit_review' booking.id %}" class="btn btn-primary btn-sm">{% trans "Rate this service" %}</a>
+            {% endif %}
+            {% if booking.status == 'rated' or booking.status == 'payment_settled' %}
+            <a href="{% url 'bookings:create_booking' booking.service.id booking.worker.id %}" class="btn btn-outline btn-sm">
+              <svg><use href="#icon-arrow-right"/></svg>{% trans "Book again with this worker" %}
+            </a>
+            {% endif %}
+            <a href="{% url 'bookings:file_complaint' booking.id %}" class="btn btn-ghost btn-sm">{% trans "Raise a complaint" %}</a>
+          {% endif %}
+        </div>
+
+        {% if booking.complaints.all %}
+        <h3 class="mt-4">{% trans "Complaints" %}</h3>
+        {% for c in booking.complaints.all %}
+        <div class="card mt-2"><b>{{ c.subject }}</b> <span class="status-pill">{{ c.get_status_display }}</span><p class="mb-0 mt-1">{{ c.description }}</p></div>
+        {% endfor %}
+        {% endif %}
+      </div>
+
+      <div>
+        <div class="price-ticket">
+          <div class="price-ticket-row"><span>{% trans "Visit charge" %}</span><span>₹{{ booking.visit_charge }}</span></div>
+          {% if booking.service.is_hourly %}
+          <div class="price-ticket-row"><span>{% trans "Rate per hour" %}</span><span>₹{{ booking.labour_charge }} × {{ booking.hours_booked }}h</span></div>
+          {% else %}
+          <div class="price-ticket-row"><span>{% trans "Labour charge" %}</span><span>₹{{ booking.labour_charge }}</span></div>
+          {% endif %}
+          <div class="price-ticket-row total"><span>{% trans "Total payable" %}</span><span>₹{{ booking.total_amount }}</span></div>
+          <p class="price-ticket-note">{% trans "Material cost is not included and is paid directly to the shop." %}</p>
+        </div>
+        {% if payment %}
+        <div class="card mt-2">
+          <h3 style="font-size:1rem;"><svg style="width:16px;height:16px;vertical-align:-3px;"><use href="#icon-receipt"/></svg> {% trans "Invoice" %}</h3>
+          <p class="mb-0">{{ payment.invoice.invoice_number }}</p>
+          <p class="muted" style="font-size:.8rem;">
+            {% trans "Paid via" %} {{ payment.get_method_display }} · {{ payment.settled_at|date:"d M Y, H:i" }}
+            {% if payment.is_simulated %}<br><span class="badge badge-warning mt-1">{% trans "Simulated (Razorpay test keys not set)" %}</span>{% else %}<br><span class="badge badge-verified mt-1">{% trans "Verified via Razorpay (test mode)" %}</span>{% endif %}
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var stepper = document.getElementById('status-stepper');
+  var pill = document.getElementById('status-pill');
+  if (!stepper) return;
+
+  function poll() {
+    fetch("{% url 'bookings:booking_status_json' booking.id %}")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (pill.textContent.trim() !== data.status_display) {
+          pill.textContent = data.status_display;
+          // status changed under us — reload to get correct action buttons and stepper.
+          window.location.reload();
+        }
+      })
+      .catch(function () {});
+  }
+  setInterval(poll, 8000);
+});
+</script>
+{% endblock %}

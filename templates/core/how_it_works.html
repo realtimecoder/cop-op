@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "How it works" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:900px;">
+    <span class="eyebrow">{% trans "How it works" %}</span>
+    <h1>{% trans "Simple, transparent, fixed-price service booking" %}</h1>
+    <div class="steps mt-4" style="grid-template-columns:1fr;gap:28px;">
+      <div class="step"><span class="step-num">01</span><h3>{% trans "Search for a service" %}</h3><p>{% trans "Browse categories like electrician, plumber, carpenter, painter, domestic help, and more — no account needed to browse." %}</p></div>
+      <div class="step"><span class="step-num">02</span><h3>{% trans "See the fixed price immediately" %}</h3><p>{% trans "Every service shows its fixed visit charge and fixed labour charge upfront. All verified workers charge the exact same price for the same service." %}</p></div>
+      <div class="step"><span class="step-num">03</span><h3>{% trans "Compare and choose a worker" %}</h3><p>{% trans "Compare workers by rating, experience, distance and arrival time — never by price." %}</p></div>
+      <div class="step"><span class="step-num">04</span><h3>{% trans "Log in to confirm your booking" %}</h3><p>{% trans "A quick mobile OTP sign-in secures your booking, schedule and address." %}</p></div>
+      <div class="step"><span class="step-num">05</span><h3>{% trans "Worker arrives and completes the job" %}</h3><p>{% trans "Track status from acceptance to arrival to work completion, with optional before/after photos." %}</p></div>
+      <div class="step"><span class="step-num">06</span><h3>{% trans "Pay digitally and download your invoice" %}</h3><p>{% trans "Pay only the visit charge and labour charge. Material, if any, is purchased directly by you from the shop." %}</p></div>
+      <div class="step"><span class="step-num">07</span><h3>{% trans "Rate the service" %}</h3><p>{% trans "Your verified rating helps the cooperative maintain quality across the platform." %}</p></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

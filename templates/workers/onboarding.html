@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Worker onboarding" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card wide">
+      <h1 style="font-size:1.5rem;">{% trans "Set up your worker profile" %}</h1>
+      <p class="muted">{% trans "This information helps customers find and trust you. Pricing is always fixed by the federation — you never set your own rates." %}</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label>{% trans "Service categories you can perform" %}</label>
+          {{ form.categories }}
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "Skill grade" %}</label>{{ form.skill_grade }}</div>
+          <div class="form-group"><label>{% trans "Years of experience" %}</label>{{ form.years_experience }}</div>
+        </div>
+        <div class="form-group"><label>{% trans "Bio" %}</label>{{ form.bio }}</div>
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "Languages spoken" %}</label>{{ form.languages_spoken }}</div>
+          <div class="form-group"><label>{% trans "Service radius (km)" %}</label>{{ form.service_radius_km }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>{% trans "Your base location" %}</label>
+          <div class="flex gap-1 items-center">
+            <button type="button" id="worker-locate-btn" class="btn btn-outline btn-sm">
+              <svg><use href="#icon-map-pin"/></svg><span id="worker-locate-label">{% trans "Use my current location" %}</span>
+            </button>
+            <span id="worker-locate-status" class="muted" style="font-size:.82rem;">
+              {% if request.user.latitude %}{% trans "Saved" %} ✓{% else %}{% trans "Not set yet" %}{% endif %}
+            </span>
+          </div>
+          <p class="help-text">{% trans "This lets customers see accurate distance and arrival time to your location. Your browser will ask for permission." %}</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Save and continue to documents" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var btn = document.getElementById('worker-locate-btn');
+  var label = document.getElementById('worker-locate-label');
+  var status = document.getElementById('worker-locate-status');
+  if (!btn) return;
+
+  btn.addEventListener('click', function () {
+    if (!navigator.geolocation) {
+      alert("{% trans 'Location is not supported by this browser.' %}");
+      return;
+    }
+    label.textContent = "{% trans 'Locating…' %}";
+    navigator.geolocation.getCurrentPosition(function (position) {
+      var form = new FormData();
+      form.append('lat', position.coords.latitude);
+      form.append('lng', position.coords.longitude);
+      fetch("{% url 'accounts:update_location' %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        body: form,
+      }).then(function (r) { return r.json(); }).then(function (data) {
+        label.textContent = "{% trans 'Use my current location' %}";
+        status.textContent = data.ok ? "{% trans 'Saved' %} ✓" : "{% trans 'Could not save location' %}";
+      }).catch(function () {
+        label.textContent = "{% trans 'Use my current location' %}";
+        status.textContent = "{% trans 'Could not save location' %}";
+      });
+    }, function () {
+      label.textContent = "{% trans 'Use my current location' %}";
+      alert("{% trans 'Location permission was denied.' %}");
+    });
+  });
+});
+</script>
+{% endblock %}

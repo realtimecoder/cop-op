@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Rate service" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card">
+      <h1 style="font-size:1.4rem;">{% trans "Rate this service" %}</h1>
+      <p class="muted">{{ booking.service.name }} {% trans "by" %} {{ booking.worker.user.get_full_name }}</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>{% trans "Rating" %}</label>
+          <select name="rating" class="input-field">
+            <option value="5">★★★★★ {% trans "Excellent" %}</option>
+            <option value="4">★★★★ {% trans "Good" %}</option>
+            <option value="3">★★★ {% trans "Average" %}</option>
+            <option value="2">★★ {% trans "Below average" %}</option>
+            <option value="1">★ {% trans "Poor" %}</option>
+          </select>
+        </div>
+        <div class="form-group"><label>{% trans "Comment (optional)" %}</label><textarea name="comment" class="input-field" rows="4"></textarea></div>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Submit rating" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

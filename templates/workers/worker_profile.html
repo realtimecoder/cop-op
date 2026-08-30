@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ worker.user.get_full_name }} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="grid" style="grid-template-columns:1fr 2fr;gap:32px;align-items:start;">
+      <div class="card text-center">
+        <div class="worker-avatar" style="width:90px;height:90px;font-size:2rem;margin:0 auto 14px;">
+          {% if worker.user.profile_photo %}<img src="{{ worker.user.profile_photo.url }}" alt="">{% else %}{{ worker.user.first_name|first|upper|default:"W" }}{% endif %}
+        </div>
+        <h2>{{ worker.user.get_full_name }}</h2>
+        <span class="badge badge-verified"><svg><use href="#icon-check"/></svg>{% trans "Verified" %}</span>
+        <div class="rating-row" style="justify-content:center;margin-top:10px;"><svg><use href="#icon-star"/></svg>{{ worker.average_rating }} · {{ worker.completed_jobs }} {% trans "jobs" %}</div>
+        <p class="muted mt-2">{{ worker.bio }}</p>
+        <ul class="worker-meta-list" style="justify-content:center;">
+          <li><svg><use href="#icon-sparkle"/></svg>{{ worker.get_skill_grade_display }}</li>
+          <li><svg><use href="#icon-clock"/></svg>{{ worker.years_experience }} {% trans "yrs" %}</li>
+          <li><svg><use href="#icon-language"/></svg>{{ worker.languages_spoken }}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h3>{% trans "Services offered" %}</h3>
+        <div class="grid grid-2 mb-0">
+          {% for service in services %}
+          <a href="{% url 'workers:worker_list_for_service' service.id %}" class="card-link">
+            <div class="card"><h3 style="font-size:1rem;">{{ service.name }}</h3><p class="muted" style="font-size:.82rem;">₹{{ service.total_charge }}</p></div>
+          </a>
+          {% empty %}<p class="muted">{% trans "No services listed yet." %}</p>{% endfor %}
+        </div>
+
+        <h3 class="mt-4">{% trans "Recent reviews" %}</h3>
+        {% for review in reviews %}
+        <div class="card mt-2">
+          <div class="rating-row"><svg><use href="#icon-star"/></svg>{{ review.rating }}/5 · <span class="badge badge-verified">{% trans "Verified booking" %}</span></div>
+          <p class="mb-0 mt-1">{{ review.comment }}</p>
+        </div>
+        {% empty %}<p class="muted">{% trans "No reviews yet." %}</p>{% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

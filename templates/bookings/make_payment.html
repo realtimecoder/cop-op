@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Pay" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card">
+      <h1 style="font-size:1.4rem;">{% trans "Complete payment" %}</h1>
+      {% if razorpay_ready %}
+        <span class="badge badge-verified">{% trans "Secured by Razorpay — Test mode" %}</span>
+      {% else %}
+        <span class="badge badge-warning">{% trans "Simulated payment (Razorpay test keys not configured)" %}</span>
+      {% endif %}
+      <div class="price-ticket mb-3">
+        <div class="price-ticket-row"><span>{% trans "Visit charge" %}</span><span>₹{{ booking.visit_charge }}</span></div>
+        {% if booking.service.is_hourly %}
+        <div class="price-ticket-row"><span>{% trans "Rate per hour" %}</span><span>₹{{ booking.labour_charge }} × {{ booking.hours_booked }}h</span></div>
+        {% else %}
+        <div class="price-ticket-row"><span>{% trans "Labour charge" %}</span><span>₹{{ booking.labour_charge }}</span></div>
+        {% endif %}
+        <div class="price-ticket-row total"><span>{% trans "Amount to pay" %}</span><span>₹{{ booking.total_amount }}</span></div>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>{% trans "Payment method" %}</label>
+          <select name="method" class="input-field">
+            <option value="upi">{% trans "UPI" %}</option>
+            <option value="card">{% trans "Debit / credit card" %}</option>
+            <option value="netbanking">{% trans "Net banking" %}</option>
+            <option value="wallet">{% trans "Wallet" %}</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">{% if razorpay_ready %}{% trans "Continue to Razorpay" %}{% else %}{% trans "Pay now" %}{% endif %}</button>
+      </form>
+      {% if not razorpay_ready %}
+      <p class="help-text text-center mt-3">{% trans "This is a simulated secure payment for demonstration purposes. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to enable real Razorpay test-mode checkout." %}</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

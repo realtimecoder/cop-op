@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ category.name }} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">{% trans "Category" %}</span>
+        <h1 style="margin-bottom:6px;">{{ category.name }}</h1>
+        <p class="muted mb-0">{{ category.description|default:"" }}</p>
+      </div>
+      <div class="price-ticket" style="min-width:220px;">
+        <div class="price-ticket-row"><span>{% trans "Visit charge (all workers)" %}</span><span>₹{{ category.fixed_visit_charge }}</span></div>
+        <p class="price-ticket-note">{% trans "Same for every verified worker in this category." %}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-3">
+      {% for service in services %}
+      <a href="{{ service.get_absolute_url }}" class="card-link">
+        <div class="card">
+          <h3>{{ service.name }}</h3>
+          <p class="muted" style="font-size:.86rem;">{{ service.description|truncatewords:16 }}</p>
+          <div class="price-ticket">
+            <div class="price-ticket-row"><span>{% trans "Visit" %}</span><span>₹{{ service.visit_charge }}</span></div>
+            {% if service.is_hourly %}
+            <div class="price-ticket-row"><span>{% trans "Rate" %}</span><span>₹{{ service.hourly_rate }}/{% trans "hr" %}</span></div>
+            <div class="price-ticket-row total"><span>{% trans "Est. total" %} ({{ service.min_hours }}{% trans "h min" %})</span><span>₹{{ service.total_charge }}</span></div>
+            {% else %}
+            <div class="price-ticket-row"><span>{% trans "Labour" %}</span><span>₹{{ service.fixed_labour_charge }}</span></div>
+            <div class="price-ticket-row total"><span>{% trans "Total" %}</span><span>₹{{ service.total_charge }}</span></div>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+      {% empty %}
+      <p class="muted">{% trans "No services configured in this category yet." %}</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
