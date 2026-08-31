@@ -4,8 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}{% trans "Co-opSeva" %} — {% trans "Verified Cooperative Labour Services" %}{% endblock %}</title>
-<meta name="description" content="{% trans 'Co-opSeva connects verified cooperative workers with households, builders and institutions through fixed, transparent pricing.' %}">
+<title>{% block title %}{% trans "logo.seva" %} — {% trans "Verified Cooperative Labour Services" %}{% endblock %}</title>
+<meta name="description" content="{% trans 'logo.seva connects verified cooperative workers with households, builders and institutions through fixed, transparent pricing.' %}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -34,7 +34,7 @@
   <div class="container">
     <a href="{% url 'core:home' %}" class="brand">
       <svg class="brand-mark" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#0E4B49"/><path d="M13 27l6-6M20 21l7-7 4 4-7 7M13 27l3 3 4-4" stroke="#E2A33D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>Co-opSeva<span class="brand-sub">{% trans "Fair work, fixed price" %}</span></span>
+      <span>logo.seva<span class="brand-sub">{% trans "Fair work, fixed price" %}</span></span>
     </a>
 
     <button class="nav-toggle" aria-label="{% trans 'Toggle menu' %}" aria-expanded="false">
@@ -91,7 +91,7 @@
   <div class="container">
     <div class="footer-grid">
       <div>
-        <h4>Co-opSeva</h4>
+        <h4>logo.seva</h4>
         <p style="color:rgba(251,249,244,.75);font-size:.9rem;max-width:32ch;">
           {% trans "A cooperative-owned digital marketplace connecting verified labour-cooperative workers with households, builders and institutions." %}
         </p>
@@ -103,7 +103,7 @@
       </div>
       <div>
         <h4>{% trans "Company" %}</h4>
-        <a href="{% url 'core:about' %}">{% trans "About Co-opSeva" %}</a>
+        <a href="{% url 'core:about' %}">{% trans "About logo.seva" %}</a>
         <a href="{% url 'core:contact' %}">{% trans "Contact support" %}</a>
       </div>
       <div>
@@ -112,7 +112,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>&copy; {% now "Y" %} Co-opSeva Cooperative Federation. {% trans "All rights reserved." %}</span>
+      <span>&copy; {% now "Y" %} logo.seva Cooperative Federation. {% trans "All rights reserved." %}</span>
       <span>{% trans "Session-based secure sign-in" %} · {% trans "No bidding · No quotation · Fixed price" %}</span>
     </div>
   </div>
