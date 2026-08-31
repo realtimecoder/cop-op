@@ -1,14 +1,65 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from catalog.models import Service
 from workers.models import WorkerProfile
 
 
+class Project(models.Model):
+    """A container for a bulk booking request or a large-scale job
+    that requires multiple workers across one or more services.
+    """
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='projects')
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('requested', 'Requested'),
+            ('in_progress', 'In Progress'),
+            ('completed', 'Completed'),
+            ('cancelled', 'Cancelled'),
+        ],
+        default='requested'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Project #{self.id} - {self.title}"
+
+    def update_status(self):
+        """Synchronize Project status with its atomic bookings."""
+        bookings = self.bookings.all()
+        if not bookings.exists():
+            return
+
+        statuses = [b.status for b in bookings]
+
+        # All completed (PAYMENT_SETTLED or RATED)
+        if all(s in (Booking.Status.PAYMENT_SETTLED, Booking.Status.RATED) for s in statuses):
+            self.status = 'completed'
+        # All cancelled or rejected
+        elif all(s in (Booking.Status.CANCELLED, Booking.Status.REJECTED) for s in statuses):
+            self.status = 'cancelled'
+        # All requested
+        elif all(s == Booking.Status.REQUESTED for s in statuses):
+            self.status = 'requested'
+        # If at least one has started progressing (beyond requested)
+        elif any(s != Booking.Status.REQUESTED for s in statuses):
+            self.status = 'in_progress'
+
+        self.save(update_fields=['status'])
+
+
 class Booking(models.Model):
     """A customer's booking of a fixed-price service with a chosen worker
     (Section 5.6, FR-028 to FR-045, UC-001)."""
+    # Link to parent project for bulk bookings. Existing single bookings have this as NULL.
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
 
     class Status(models.TextChoices):
         REQUESTED = 'requested', 'Requested'
@@ -25,9 +76,6 @@ class Booking(models.Model):
         REJECTED = 'rejected', 'Rejected by worker'
 
     # Maps each status to the exact next status a WORKER action can trigger.
-    # Used to validate worker action buttons server-side — nothing here is
-    # a manual "simulate" step; every transition is caused by a real
-    # accept/arrive/start/complete action taken by the assigned worker.
     WORKER_ACTION_MAP = {
         Status.ASSIGNED: Status.ACCEPTED,
         Status.ACCEPTED: Status.WORKER_ARRIVING,
@@ -145,3 +193,9 @@ class Complaint(models.Model):
 
     def __str__(self):
         return f"Complaint #{self.id}: {self.subject}"
+
+
+@receiver(post_save, sender=Booking)
+def update_project_status(sender, instance, **kwargs):
+    if instance.project:
+        instance.project.update_status()

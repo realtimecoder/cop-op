@@ -4,6 +4,8 @@ from . import views
 app_name = 'bookings'
 
 urlpatterns = [
+    path('wizard/', views.guided_booking, name='guided_booking'),
+    path('project/<int:project_id>/', views.project_detail, name='project_detail'),
     path('new/<int:service_id>/<int:worker_id>/', views.create_booking, name='create_booking'),
     path('availability/<int:worker_id>/', views.worker_availability_json, name='worker_availability'),
     path('mine/', views.my_bookings, name='my_bookings'),

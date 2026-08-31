@@ -6,6 +6,24 @@
   <div class="container">
     <span class="eyebrow">{% trans "Account" %}</span>
     <h1>{% trans "My bookings" %}</h1>
+
+    {% if projects %}
+    <h3 class="mt-4">{% trans "Bulk Projects" %}</h3>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:20px; margin-bottom:40px; margin-top:16px;">
+      {% for p in projects %}
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px;">
+          <b style="font-size:1.1rem;">{{ p.title }}</b>
+          <span class="status-pill">{{ p.get_status_display }}</span>
+        </div>
+        <p class="muted" style="font-size:0.85rem; margin-bottom:16px;">{{ p.description|truncatechars:100|default:"No description provided." }}</p>
+        <a href="{% url 'bookings:project_detail' p.id %}" class="btn btn-outline btn-sm" style="width:100%; text-align:center;">{% trans "View Dashboard" %}</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <h3 class="mt-4">{% trans "Single Bookings" %}</h3>
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr><th>{% trans "Service" %}</th><th>{% trans "Worker" %}</th><th>{% trans "Date" %}</th><th>{% trans "Amount" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
@@ -21,7 +39,7 @@
           </tr>
           {% empty %}
           <tr><td colspan="6">
-            <div class="empty-state"><svg><use href="#icon-empty"/></svg><p>{% trans "You have no bookings yet." %}</p>
+            <div class="empty-state"><svg><use href="#icon-empty"/></svg><p>{% trans "You have no single bookings yet." %}</p>
             <a href="{% url 'catalog:category_list' %}" class="btn btn-accent">{% trans "Browse services" %}</a></div>
           </td></tr>
           {% endfor %}

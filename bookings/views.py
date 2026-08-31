@@ -5,13 +5,14 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.db import transaction
 
-from catalog.models import Service
+from catalog.models import Service, ServiceCategory
 from workers.models import WorkerProfile, WorkerBlockedDate
 from payments.models import Payment, Invoice
 from payments import razorpay_client
 from reviews.models import Review
-from .models import Booking, Complaint
+from .models import Booking, Complaint, Project
 from .forms import BookingForm, ComplaintForm
 
 
@@ -27,6 +28,148 @@ def _worker_occupied_dates(worker):
     return blocked | booked
 
 
+@login_required
+def project_detail(request, project_id):
+    """Project Dashboard (SIH Phase 1B).
+    Displays all atomic bookings associated with a bulk project.
+    """
+    project = get_object_or_404(Project, id=project_id)
+    if project.customer != request.user and not request.user.is_staff:
+        messages.error(request, "You do not have access to this project.")
+        return redirect('core:home')
+
+    bookings = project.bookings.select_related('service', 'worker__user').order_by('service__name', 'id')
+
+    # Aggregate project stats
+    total_bookings = bookings.count()
+    completed_bookings = bookings.filter(status__in=[Booking.Status.PAYMENT_SETTLED, Booking.Status.RATED]).count()
+    progress = round((completed_bookings / total_bookings * 100), 1) if total_bookings > 0 else 0
+
+    return render(request, 'bookings/project_detail.html', {
+        'project': project,
+        'bookings': bookings,
+        'progress': progress,
+        'total_bookings': total_bookings,
+    })
+
+
+def guided_booking(request):
+    """Guided booking wizard (SIH Phase 1A/1B).
+    Collects booking details and creates either a single Booking or a Project with atomic Bookings.
+    """
+    category_slug = request.GET.get('category')
+
+    if category_slug:
+        category = get_object_or_404(ServiceCategory, slug=category_slug)
+        request.session['booking_wizard'] = {
+            'category_slug': category_slug,
+            'category_name': category.name,
+            'step': 1
+        }
+        services = category.services.filter(is_active=True)
+        return render(request, 'bookings/wizard_step_1.html', {
+            'category': category,
+            'services': services,
+            'step': 1,
+            'data': request.session['booking_wizard']
+        })
+
+    wizard_data = request.session.get('booking_wizard')
+    if not wizard_data:
+        return redirect('core:home')
+
+    step = int(wizard_data.get('step', 1))
+    data = wizard_data.copy()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'prev' and step > 1:
+            step -= 1
+            data['step'] = step
+            request.session['booking_wizard'] = data
+            return redirect('bookings:guided_booking')
+
+        if action == 'next':
+            current_form_data = request.POST.copy()
+            for key, value in current_form_data.items():
+                if key != 'action':
+                    data[key] = value
+
+            step += 1
+
+            if step > 6:
+                service_id = data.get('service_id')
+                service = get_object_or_404(Service, id=service_id)
+                workers_qty = int(data.get('workers_required', 1))
+
+                try:
+                    with transaction.atomic():
+                        project = None
+                        # Create Project if bulk
+                        if workers_qty > 1:
+                            project = Project.objects.create(
+                                customer=request.user,
+                                title=f"Bulk {service.name} Booking",
+                                description=data.get('instructions', ''),
+                                status='requested'
+                            )
+
+                        # Create atomic bookings (1 per worker)
+                        last_created_booking = None
+                        for _ in range(workers_qty):
+                            last_created_booking = Booking.objects.create(
+                                project=project,
+                                customer=request.user,
+                                service=service,
+                                address=data.get('address', request.user.address),
+                                scheduled_date=data.get('scheduled_date'),
+                                scheduled_time=data.get('scheduled_time'),
+                                instructions=data.get('instructions', ''),
+                                is_emergency=data.get('is_emergency') == 'true',
+                                visit_charge=service.visit_charge,
+                                labour_charge=service.fixed_labour_charge if not service.is_hourly else service.hourly_rate,
+                                workers_required=1, # Atomic: each booking is for 1 worker
+                                duration_days=int(data.get('duration_days', 1)),
+                                status=Booking.Status.REQUESTED,
+                            )
+
+                        del request.session['booking_wizard']
+
+                        if project:
+                            messages.success(request, f"Bulk request for {workers_qty} workers submitted successfully.")
+                            return redirect('bookings:project_detail', project_id=project.id)
+                        else:
+                            messages.success(request, "Booking request submitted successfully.")
+                            return redirect('bookings:booking_detail', booking_id=last_created_booking.id)
+
+                except Exception as e:
+                    messages.error(request, f"An error occurred while creating your booking: {e}")
+                    return redirect('bookings:guided_booking')
+
+            data['step'] = step
+            request.session['booking_wizard'] = data
+            return redirect('bookings:guided_booking')
+
+    step_templates = {
+        1: 'bookings/wizard_step_1.html',
+        2: 'bookings/wizard_step_2.html',
+        3: 'bookings/wizard_step_3.html',
+        4: 'bookings/wizard_step_4.html',
+        5: 'bookings/wizard_step_5.html',
+        6: 'bookings/wizard_step_6.html',
+    }
+
+    context = {'step': step, 'data': data}
+    if step == 1:
+        cat_slug = data.get('category_slug')
+        category = get_object_or_404(ServiceCategory, slug=cat_slug)
+        context['category'] = category
+        context['services'] = category.services.filter(is_active=True)
+
+    return render(request, step_templates.get(step, 'bookings/wizard_step_2.html'), context)
+
+
 def worker_availability_json(request, worker_id):
     """JSON endpoint the booking-date picker calls to grey out dates the
     worker is already committed on (FR — worker availability check)."""
@@ -37,9 +180,7 @@ def worker_availability_json(request, worker_id):
 
 @login_required
 def create_booking(request, service_id, worker_id):
-    """UC-001 Book Fixed Service. Requires login (session-based).
-    Also used by the "Book again" feature on a completed booking — that
-    just links here with the same service_id/worker_id, no special path."""
+    """UC-001 Book Fixed Service. Requires login (session-based)."""
     service = get_object_or_404(Service, id=service_id, is_active=True)
     worker = get_object_or_404(WorkerProfile, id=worker_id, verification_status=WorkerProfile.VerificationStatus.VERIFIED)
     occupied_dates = _worker_occupied_dates(worker)
@@ -49,8 +190,7 @@ def create_booking(request, service_id, worker_id):
         if form.is_valid():
             chosen_date = form.cleaned_data['scheduled_date']
             if chosen_date in occupied_dates:
-                messages.error(request, "This worker is already booked on the selected date. "
-                                         "Please choose a different date or another worker.")
+                messages.error(request, "This worker is already booked on the selected date.")
             elif chosen_date < timezone.localdate():
                 messages.error(request, "Please choose a current or future date.")
             else:
@@ -120,9 +260,6 @@ def booking_detail(request, booking_id):
 
 
 def booking_status_json(request, booking_id):
-    """Polled by the booking-detail page every few seconds so the status
-    dots and pill update live as the worker/customer take real actions —
-    no page refresh, no simulated timer, just the actual current state."""
     booking = get_object_or_404(Booking, id=booking_id)
     if not request.user.is_authenticated or not (
         booking.customer_id == request.user.id
@@ -140,10 +277,6 @@ def booking_status_json(request, booking_id):
 @login_required
 @require_POST
 def worker_action(request, booking_id, action):
-    """The real replacement for the old "simulate advance" button. Only
-    the assigned worker can call this, and only the exact next action for
-    the booking's current status is accepted — so a worker can't skip
-    steps or a customer can't spoof worker progress."""
     booking = get_object_or_404(Booking, id=booking_id)
     if not booking.worker or booking.worker.user != request.user:
         return HttpResponseForbidden("Only the assigned worker can update this booking.")
@@ -179,9 +312,6 @@ def worker_action(request, booking_id, action):
 @login_required
 @require_POST
 def confirm_completion(request, booking_id):
-    """The customer's real confirmation that the work is done — this is
-    what actually moves WORK_COMPLETED -> CUSTOMER_CONFIRMED, not a timer
-    or a generic advance button."""
     booking = get_object_or_404(Booking, id=booking_id, customer=request.user)
     if booking.status != Booking.Status.WORK_COMPLETED:
         messages.error(request, "This booking isn't awaiting confirmation.")
@@ -194,8 +324,15 @@ def confirm_completion(request, booking_id):
 
 @login_required
 def my_bookings(request):
-    bookings = Booking.objects.filter(customer=request.user).select_related('service', 'worker')
-    return render(request, 'bookings/my_bookings.html', {'bookings': bookings})
+    # Single bookings (no project)
+    single_bookings = Booking.objects.filter(customer=request.user, project__isnull=True).select_related('service', 'worker')
+    # Bulk projects
+    projects = Project.objects.filter(customer=request.user).order_by('-created_at')
+
+    return render(request, 'bookings/my_bookings.html', {
+        'bookings': single_bookings,
+        'projects': projects,
+    })
 
 
 @login_required
@@ -210,9 +347,6 @@ def cancel_booking(request, booking_id):
 
 @login_required
 def make_payment(request, booking_id):
-    """FR-051 to FR-056 — Razorpay TEST MODE payment + invoice generation.
-    Falls back to a clearly-labelled simulated payment if Razorpay test
-    keys aren't configured, so the flow always completes end to end."""
     booking = get_object_or_404(Booking, id=booking_id, customer=request.user)
     if hasattr(booking, 'payment'):
         return redirect('bookings:booking_detail', booking_id=booking.id)
@@ -224,9 +358,6 @@ def make_payment(request, booking_id):
         amount = booking.total_amount
 
         if razorpay_ready:
-            # Real Razorpay test-mode order — the actual charge/verification
-            # happens client-side via Razorpay Checkout and is confirmed in
-            # razorpay_callback() below.
             order = razorpay_client.create_order(amount, receipt=f"booking-{booking.id}")
             if order:
                 payment, _created = Payment.objects.get_or_create(
@@ -240,7 +371,6 @@ def make_payment(request, booking_id):
                 })
             messages.warning(request, "Could not reach Razorpay right now — falling back to a simulated payment.")
 
-        # Simulated fallback (no Razorpay configured, or order creation failed).
         payment = Payment(booking=booking, method=method, amount=amount, status=Payment.Status.SUCCESS,
                            is_simulated=True)
         payment.compute_settlement()
@@ -258,8 +388,6 @@ def make_payment(request, booking_id):
 @login_required
 @require_POST
 def razorpay_callback(request, booking_id):
-    """Verifies the Razorpay test-mode payment signature after Checkout
-    completes client-side, then settles the booking for real."""
     booking = get_object_or_404(Booking, id=booking_id, customer=request.user)
     payment = get_object_or_404(Payment, booking=booking)
 
@@ -269,7 +397,6 @@ def razorpay_callback(request, booking_id):
 
     if razorpay_client.verify_payment_signature(order_id, payment_id, signature):
         payment.razorpay_payment_id = payment_id
-        payment.razorpay_signature = signature
         payment.status = Payment.Status.SUCCESS
         payment.compute_settlement()
         payment.settled_at = timezone.now()
@@ -278,7 +405,7 @@ def razorpay_callback(request, booking_id):
             'invoice_number': Invoice.generate_number(booking.id)})
         booking.status = Booking.Status.PAYMENT_SETTLED
         booking.save(update_fields=['status'])
-        messages.success(request, "Payment verified successfully via Razorpay (test mode). Invoice generated.")
+        messages.success(request, "Payment verified successfully via Razorpay (test mode).")
     else:
         payment.status = Payment.Status.FAILED
         payment.save(update_fields=['status'])
@@ -318,7 +445,6 @@ def file_complaint(request, booking_id):
         form = ComplaintForm(request.POST)
         if form.is_valid():
             complaint = form.save(commit=False)
-            complaint.booking = booking
             complaint.raised_by = request.user
             complaint.save()
             messages.success(request, "Complaint registered. Our support team will review it shortly.")
