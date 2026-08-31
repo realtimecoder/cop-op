@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 60px auto;">
+  <div class="form-card">
+    <div class="section-head">
+      <div style="text-align: center; width: 100%;">
+        <span class="eyebrow">Step 1 of 6</span>
+        <h2>{% trans "Select a Service" %}</h2>
+        <p>{% trans "What specifically do you need help with in" %} <strong>{{ category.name }}</strong>?</p>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="grid" style="grid-template-columns: 1fr; gap: 12px; margin: 24px 0;">
+        {% for service in services %}
+        <label class="card" style="cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); transition: all .2s ease;">
+          <input type="radio" name="service_id" value="{{ service.id }}" {% if forloop.first %}checked{% endif %} style="width: 18px; height: 18px;">
+          <div style="flex: 1;">
+            <h3 style="margin: 0; font-size: 1rem;">{{ service.name }}</h3>
+            <p style="margin: 0; font-size: .85rem; opacity: .8;">{{ service.description|truncatewords:10 }}</p>
+          </div>
+          <div class="badge badge-verified" style="font-size: .7rem;">₹{{ service.total_charge }}</div>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="flex justify-between" style="margin-top: 32px;">
+        <div style="width: 100px;"></div> <!-- spacer -->
+        <button type="submit" name="action" value="next" class="btn btn-primary">{% trans "Next" %} <svg><use href="#icon-arrow-right"/></svg></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

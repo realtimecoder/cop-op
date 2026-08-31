@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 60px auto;">
+  <div class="form-card">
+    <div class="section-head">
+      <div style="text-align: center; width: 100%;">
+        <span class="eyebrow">Step 6 of 6</span>
+        <h2>{% trans "Review Your Booking" %}</h2>
+        <p>{% trans "Please check the details before confirming." %}</p>
+      </div>
+    </div>
+
+    <div class="price-ticket" style="margin: 24px 0; border-style: solid;">
+      <div class="price-ticket-row"><strong>{% trans "Service" %}:</strong> <span>{{ data.service_name }}</span></div>
+      <div class="price-ticket-row"><strong>{% trans "Workers" %}:</strong> <span>{{ data.workers_required|default:"1" }}</span></div>
+      <div class="price-ticket-row"><strong>{% trans "Date" %}:</strong> <span>{{ data.scheduled_date }}</span></div>
+      <div class="price-ticket-row"><strong>{% trans "Time" %}:</strong> <span>{{ data.scheduled_time }}</span></div>
+      <div class="price-ticket-row"><strong>{% trans "Location" %}:</strong> <span>{{ data.address }}</span></div>
+      <div class="price-ticket-row"><strong>{% trans "Priority" %}:</strong>
+        <span class="badge {% if data.is_emergency == 'true' %}badge-danger{% else %}badge-verified{% endif %}">
+          {% if data.is_emergency == 'true' %}{% trans "Emergency" %}{% else %}{% trans "Normal" %}{% endif %}
+        </span>
+      </div>
+      {% if data.instructions %}
+      <div class="price-ticket-row" style="flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 8px;">
+        <strong>{% trans "Details" %}:</strong>
+        <span style="font-size: .8rem;">{{ data.instructions }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="flex justify-between" style="margin-top: 32px; gap: 16px;">
+        <button type="submit" name="action" value="prev" class="btn btn-ghost">{% trans "Back" %}</button>
+        <button type="submit" name="action" value="next" class="btn btn-primary" style="background: var(--marigold); color: var(--teal-deep);">{% trans "Confirm Booking" %} <svg><use href="#icon-check"/></svg></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

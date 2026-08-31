@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 60px auto;">
+  <div class="form-card">
+    <div class="section-head">
+      <div style="text-align: center; width: 100%;">
+        <span class="eyebrow">Step 3 of 6</span>
+        <h2>{% trans "Service Location" %}</h2>
+        <p>{% trans "Where should the worker arrive?" %}</p>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>{% trans "Full Address" %}</label>
+        <textarea name="address" class="input-field" rows="3">{{ data.address }}</textarea>
+        <p class="help-text">{% trans "Include house number, street, and landmark if possible." %}</p>
+      </div>
+
+      <div class="flex justify-between" style="margin-top: 32px; gap: 16px;">
+        <button type="submit" name="action" value="prev" class="btn btn-ghost">{% trans "Back" %}</button>
+        <button type="submit" name="action" value="next" class="btn btn-primary">{% trans "Next" %} <svg><use href="#icon-arrow-right"/></svg></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

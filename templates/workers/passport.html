@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block content %}
+<div class="container" style="margin: 60px auto; max-width: 900px;">
+  <div class="section-head" style="margin-bottom: 32px; text-align: center;">
+    <div style="width: 100%;">
+      <span class="eyebrow">{% trans "Verified Digital Credential" %}</span>
+      <h2 style="font-size: 2.5rem;">{% trans "Worker Skill Passport" %}</h2>
+      <p class="muted">{% trans "A verified record of skills, experience and cooperative standing." %}</p>
+    </div>
+  </div>
+
+  <div class="grid grid-3" style="gap: 24px;">
+    <!-- Left Column: Identity -->
+    <div class="grid" style="grid-column: span 1; gap: 24px;">
+      <div class="card" style="text-align: center; padding: 32px 24px;">
+        <div class="worker-avatar" style="width: 120px; height: 120px; margin: 0 auto 20px; font-size: 3rem;">
+          {% if worker.user.profile_photo %}
+            <img src="{{ worker.user.profile_photo.url }}" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+          {% else %}
+            {{ worker.user.first_name|first|upper|default:"W" }}
+          {% endif %}
+        </div>
+        <h3 style="margin-bottom: 4px;">{{ worker.user.get_full_name|default:worker.user.phone_number }}</h3>
+        <div class="badge badge-verified" style="margin-bottom: 16px;">{% trans "Verified Worker" %}</div>
+
+        <div style="text-align: left; font-size: .9rem; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 16px;">
+          <div class="flex justify-between" style="margin-bottom: 8px;">
+            <span>{% trans "Society" %}:</span> <strong>{{ worker.society.name|default:"Independent" }}</strong>
+          </div>
+          <div class="flex justify-between" style="margin-bottom: 8px;">
+            <span>{% trans "Grade" %}:</span> <strong>{{ worker.get_skill_grade_display }}</strong>
+          </div>
+          <div class="flex justify-between" style="margin-bottom: 8px;">
+            <span>{% trans "Experience" %}:</span> <strong>{{ worker.years_experience }} {% trans "Years" %}</strong>
+          </div>
+          <div class="flex justify-between">
+            <span>{% trans "Joined" %}:</span> <strong>{{ worker.created_at|date:"M Y" }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 style="margin-bottom: 16px; font-size: 1rem;">{% trans "Verified Documents" %}</h4>
+        <div class="grid" style="grid-template-columns: 1fr; gap: 8px;">
+          {% for doc in docs %}
+          <div class="flex items-center gap-8" style="padding: 8px; background: var(--stone); border-radius: var(--radius-sm); font-size: .85rem;">
+            <svg style="width:14px;height:14px; color: var(--teal);"><use href="#icon-check"/></svg>
+            <span>{{ doc.get_doc_type_display }}</span>
+            <span class="muted" style="margin-left: auto;">{% trans "Verified" %}</span>
+          </div>
+          {% empty %}
+          <p class="muted" style="font-size: .85rem;">{% trans "No verified documents yet." %}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Professional History -->
+    <div class="grid" style="grid-column: span 2; gap: 24px;">
+      <div class="card">
+        <h4 style="margin-bottom: 16px; font-size: 1.1rem;">{% trans "Core Skills & Services" %}</h4>
+        <div class="grid grid-3" style="gap: 12px;">
+          {% for offering in offerings %}
+          <div class="badge badge-verified" style="text-align: center; padding: 8px; border: 1px solid var(--teal);">
+            {{ offering.service.name }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex justify-between" style="align-items: center; margin-bottom: 16px;">
+          <h4 style="margin: 0; font-size: 1.1rem;">{% trans "Professional Record" %}</h4>
+          <div class="rating-row" style="font-weight: 700; font-size: 1.1rem;">
+            <svg><use href="#icon-star"/></svg> {{ worker.average_rating }} / 5
+          </div>
+        </div>
+        <div class="grid grid-2" style="gap: 16px; margin-bottom: 20px;">
+          <div style="background: var(--teal-tint); padding: 16px; border-radius: var(--radius-md); text-align: center;">
+            <b style="display: block; font-size: 1.5rem; color: var(--teal-deep);">{{ worker.completed_jobs }}</b>
+            <span class="muted" style="font-size: .8rem;">{% trans "Jobs Completed" %}</span>
+          </div>
+          <div style="background: var(--teal-tint); padding: 16px; border-radius: var(--radius-md); text-align: center;">
+            <b style="display: block; font-size: 1.5rem; color: var(--teal-deep);">{{ worker.reliability_score }}%</b>
+            <span class="muted" style="font-size: .8rem;">{% trans "Reliability Score" %}</span>
+          </div>
+        </div>
+
+        <h5 style="font-size: .9rem; margin-bottom: 12px; opacity: .7;">{% trans "Recent Feedback" %}</h5>
+        <div class="grid" style="grid-template-columns: 1fr; gap: 12px;">
+          {% for r in reviews %}
+          <div style="padding: 12px; border-bottom: 1px solid var(--line); font-size: .9rem;">
+            <div class="flex justify-between" style="margin-bottom: 4px;">
+              <strong>{{ r.customer.get_full_name|default:"Customer" }}</strong>
+              <span class="rating-row" style="font-size: .75rem;"><svg><use href="#icon-star"/></svg> {{ r.rating }}</span>
+            </div>
+            <p style="margin: 0; font-style: italic; opacity: .8;">"{{ r.comment }}"</p>
+          </div>
+          {% empty %}
+          <p class="muted">{% trans "No reviews yet." %}</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

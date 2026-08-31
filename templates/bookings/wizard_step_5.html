@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 60px auto;">
+  <div class="form-card">
+    <div class="section-head">
+      <div style="text-align: center; width: 100%;">
+        <span class="eyebrow">Step 5 of 6</span>
+        <h2>{% trans "Service Priority" %}</h2>
+        <p>{% trans "Is this a critical emergency or a scheduled service?" %}</p>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="grid" style="grid-template-columns: 1fr; gap: 16px; margin: 24px 0;">
+        <label class="card" style="cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); transition: all .2s ease;">
+          <input type="radio" name="is_emergency" value="false" {% if data.is_emergency != 'true' %}checked{% endif %} style="width: 18px; height: 18px;">
+          <div style="flex: 1;">
+            <h3 style="margin: 0; font-size: 1rem;">{% trans "Normal Service" %}</h3>
+            <p style="margin: 0; font-size: .85rem; opacity: .8;">{% trans "Standard scheduling for non-critical work." %}</p>
+          </div>
+        </label>
+
+        <label class="card" style="cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); transition: all .2s ease; border-left: 4px solid var(--thread-red);">
+          <input type="radio" name="is_emergency" value="true" {% if data.is_emergency == 'true' %}checked{% endif %} style="width: 18px; height: 18px;">
+          <div style="flex: 1;">
+            <h3 style="margin: 0; font-size: 1rem; color: var(--thread-red);">{% trans "Emergency Request" %}</h3>
+            <p style="margin: 0; font-size: .85rem; opacity: .8;">{% trans "Immediate attention required (e.g. major leak, power failure)." %}</p>
+          </div>
+        </label>
+      </div>
+
+      <div class="flex justify-between" style="margin-top: 32px; gap: 16px;">
+        <button type="submit" name="action" value="prev" class="btn btn-ghost">{% trans "Back" %}</button>
+        <button type="submit" name="action" value="next" class="btn btn-primary">{% trans "Next" %} <svg><use href="#icon-arrow-right"/></svg></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

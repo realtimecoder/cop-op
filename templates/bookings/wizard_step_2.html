@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 60px auto;">
+  <div class="form-card">
+    <div class="section-head">
+      <div style="text-align: center; width: 100%;">
+        <span class="eyebrow">Step 2 of 6</span>
+        <h2>{% trans "Work Details" %}</h2>
+        <p>{% trans "Tell us a bit more about the requirement." %}</p>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>{% trans "Number of Workers" %}</label>
+        <select name="workers_required" class="input-field">
+          <option value="1" {% if data.workers_required == '1' %}selected{% endif %}>1 Worker</option>
+          <option value="2" {% if data.workers_required == '2' %}selected{% endif %}>2 Workers</option>
+          <option value="3" {% if data.workers_required == '3' %}selected{% endif %}>3 Workers</option>
+          <option value="4" {% if data.workers_required == '4' %}selected{% endif %}>4+ Workers</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>{% trans "Additional Description" %}</label>
+        <textarea name="instructions" class="input-field" rows="4" placeholder="e.g. The leak is in the master bathroom...">{{ data.instructions }}</textarea>
+      </div>
+
+      <div class="flex justify-between" style="margin-top: 32px; gap: 16px;">
+        <button type="submit" name="action" value="prev" class="btn btn-ghost">{% trans "Back" %}</button>
+        <button type="submit" name="action" value="next" class="btn btn-primary">{% trans "Next" %} <svg><use href="#icon-arrow-right"/></svg></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -239,3 +239,24 @@ def unblock_date(request, block_id):
         block.delete()
         messages.info(request, "Date unblocked.")
     return redirect('workers:manage_availability')
+
+
+def worker_passport(request, worker_id):
+    """The Digital Skill Passport (SIH Phase 1A).
+    Aggregates a worker's verified identity, certifications, skills,
+    and professional history into a public-facing digital credential.
+    """
+    worker = get_object_or_404(WorkerProfile, id=worker_id, verification_status=WorkerProfile.VerificationStatus.VERIFIED)
+    # Aggregate data
+    docs = worker.documents.filter(is_approved=True)
+    offerings = worker.offerings.select_related('service')
+    bookings = worker.bookings.all().order_by('-created_at')
+    reviews = worker.reviews.select_related('customer').order_by('-created_at')
+
+    return render(request, 'workers/passport.html', {
+        'worker': worker,
+        'docs': docs,
+        'offerings': offerings,
+        'bookings': bookings,
+        'reviews': reviews,
+    })
