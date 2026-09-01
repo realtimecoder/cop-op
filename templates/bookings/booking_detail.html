@@ -33,6 +33,9 @@
           <table class="data-table">
             <tbody>
               <tr><th>{% trans "Worker" %}</th><td>{{ booking.worker.user.get_full_name|default:"Unassigned" }}</td></tr>
+              {% if booking.worker and booking.status in 'accepted,worker_arriving,arrived,work_started,work_completed,customer_confirmed,payment_settled,rated' %}
+              <tr><th>{% trans "Contact" %}</th><td>{{ booking.worker.user.phone_number }}</td></tr>
+              {% endif %}
               <tr><th>{% trans "Scheduled" %}</th><td>{{ booking.scheduled_date }} {{ booking.scheduled_time }}</td></tr>
               <tr><th>{% trans "Address" %}</th><td>{{ booking.address }}, {{ booking.city }} {{ booking.pincode }}</td></tr>
               {% if booking.instructions %}<tr><th>{% trans "Instructions" %}</th><td>{{ booking.instructions }}</td></tr>{% endif %}

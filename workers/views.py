@@ -6,16 +6,19 @@ from django.utils import timezone
 
 from catalog.models import Service
 from payments.models import Payment
-from .models import WorkerProfile, WorkerServiceOffering, WorkerBlockedDate, WorkerCategoryChangeRequest
+from .models import WorkerProfile, WorkerServiceOffering, WorkerBlockedDate, WorkerCategoryChangeRequest, SocietyInvite
 from .forms import (WorkerOnboardingForm, WorkerDocumentForm, WorkerProfileEditForm,
                      WorkerCategoryChangeRequestForm, WorkerBlockedDateForm)
 from .geo import annotate_workers_with_distance, is_configured as maps_configured
 
 
-def worker_list_for_service(request, service_id):
+def worker_list_for_service(request, service_id, request_id=None):
     """FR-022/023/024 — public comparison of eligible verified workers.
     Anyone can browse this without logging in; login is only required
     to actually create a booking.
+
+    If request_id is provided, the user has already filled out the booking form
+    and is now manually selecting a worker from the verified list.
 
     FR-034 to FR-038 — if the browser supplies the customer's GPS
     coordinates (lat/lng query params, set client-side via the
@@ -75,6 +78,7 @@ def worker_list_for_service(request, service_id):
         'maps_configured': maps_configured(),
         'used_saved_address': used_saved_address,
         'customer_lat': customer_lat, 'customer_lng': customer_lng,
+        'request_id': request_id,
     })
 
 
@@ -153,10 +157,16 @@ def my_dashboard(request):
     pending_category_request = profile.category_change_requests.filter(
         status=WorkerCategoryChangeRequest.Status.PENDING).first()
 
+    # Fetch pending society invites for this worker's phone number
+    pending_invites = SocietyInvite.objects.filter(
+        phone_number=request.user.phone_number, status=SocietyInvite.Status.PENDING
+    ).select_related('society')
+
     return render(request, 'workers/my_dashboard.html', {
         'profile': profile, 'bookings': bookings, 'total_income': total_income,
         'pending_category_request': pending_category_request,
         'blocked_dates': profile.blocked_dates.filter(date__gte=timezone.localdate()).order_by('date'),
+        'pending_invites': pending_invites,
     })
 
 
@@ -239,3 +249,26 @@ def unblock_date(request, block_id):
         block.delete()
         messages.info(request, "Date unblocked.")
     return redirect('workers:manage_availability')
+
+
+@login_required
+def accept_society_invite(request, invite_id):
+    """Worker accepts an invitation to join a specific society."""
+    invite = get_object_or_404(SocietyInvite, id=invite_id, status=SocietyInvite.Status.PENDING)
+    profile = get_object_or_404(WorkerProfile, user=request.user)
+
+    if invite.phone_number != request.user.phone_number:
+        messages.error(request, "You are not invited to join this society.")
+        return redirect('workers:my_dashboard')
+
+    # Update the profile's society
+    profile.society = invite.society
+    profile.save(update_fields=['society'])
+
+    # Mark invite as accepted
+    invite.status = SocietyInvite.Status.ACCEPTED
+    invite.responded_at = timezone.now()
+    invite.save()
+
+    messages.success(request, f"Welcome to {invite.society.name}! You are now a member of the cooperative.")
+    return redirect('workers:my_dashboard')

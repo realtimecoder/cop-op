@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Federation Dashboard" %} — {{ federation.name }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">{% trans "Federation Administration" %}</span>
+        <h1 style="margin-bottom:0;">{{ federation.name }}</h1>
+        <p class="muted">{% trans "Real-time deployment and income monitoring across all associated societies." %}</p>
+      </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+      <!-- Graph 1: Deployment -->
+      <div class="card">
+        <h3 style="font-size: 1rem; margin-bottom: 16px;">{% trans "Workers Deployed (Past 30 Days)" %}</h3>
+        <canvas id="deploymentChart" height="200"></canvas>
+      </div>
+      <!-- Graph 2: Income -->
+      <div class="card">
+        <h3 style="font-size: 1rem; margin-bottom: 16px;">{% trans "Total Income (Past 30 Days)" %}</h3>
+        <canvas id="incomeChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0;">{% trans "Live Booked Workers" %}</h3>
+        <form method="get" class="flex gap-1">
+          <select name="society_id" class="input-field btn-sm" style="max-width:200px;">
+            <option value="">{% trans "All Societies" %}</option>
+            {% for s in societies %}
+              <option value="{{ s.id }}" {% if request.GET.society_id == s.id|stringformat:"i" %}selected{% endif %}>{{ s.name }}</option>
+            {% endfor %}
+          </select>
+          <select name="status" class="input-field btn-sm" style="max-width:200px;">
+            <option value="">{% trans "All Statuses" %}</option>
+            {% for status, label in booking_statuses %}
+              <option value="{{ status }}" {% if request.GET.status == status %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn btn-outline btn-sm">{% trans "Filter" %}</button>
+        </form>
+      </div>
+
+      <div class="table-wrap mt-2">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{% trans "Worker" %}</th>
+              <th>{% trans "Society" %}</th>
+              <th>{% trans "Booking Status" %}</th>
+              <th>{% trans "Scheduled" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for w in booked_workers %}
+            <tr>
+              <td>{{ w.user.get_full_name }}</td>
+              <td>{{ w.society.name }}</td>
+              <td><span class="status-pill">{{ w.bookings.first.get_status_display }}</span></td>
+              <td>{{ w.bookings.first.scheduled_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center muted">{% trans "No workers currently booked for today." %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Data from Django
+  const deploymentData = {{ deployment_data|safe }}; // Expected: [{'day': '...', 'count': ...}, ...]
+  const incomeData = {{ income_data|safe }};
+
+  // Helper to format dates
+  const formatLabels = (data) => data.map(d => {
+    const date = new Date(d.day);
+    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  });
+
+  // Deployment Chart
+  new Chart(document.getElementById('deploymentChart'), {
+    type: 'line',
+    data: {
+      labels: formatLabels(deploymentData),
+      datasets: [{
+        label: 'Workers',
+        data: deploymentData.map(d => d.count),
+        borderColor: '#eab308',
+        backgroundColor: 'rgba(234, 179, 8, 0.1)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // Income Chart
+  new Chart(document.getElementById('incomeChart'), {
+    type: 'bar',
+    data: {
+      labels: formatLabels(incomeData),
+      datasets: [{
+        label: 'Income (₹)',
+        data: incomeData.map(d => d.total),
+        backgroundColor: '#3b82f6'
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+});
+</script>
+{% endblock %}

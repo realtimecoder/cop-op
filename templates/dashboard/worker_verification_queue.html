@@ -4,24 +4,27 @@
 {% block content %}
 <section class="section">
   <div class="container">
-    <span class="eyebrow">{% trans "Society operator" %}</span>
-    <h1>{% trans "Worker verification queue" %}</h1>
+    <span class="eyebrow">{% trans "Admin" %}</span>
+    <h1>{% trans "Skill & certificate verification" %}</h1>
+    <p class="muted">{% trans "This checks identity, skill and certificate documents only. It does not assign a society — society heads claim already-verified workers separately." %}</p>
+
     <div class="table-wrap">
       <table class="data-table">
-        <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Phone" %}</th><th>{% trans "Skill grade" %}</th><th>{% trans "Status" %}</th><th>{% trans "Action" %}</th></tr></thead>
+        <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Phone" %}</th><th>{% trans "Skill grade" %}</th><th>{% trans "Society" %}</th><th>{% trans "Status" %}</th><th>{% trans "Action" %}</th></tr></thead>
         <tbody>
           {% for worker in workers %}
           <tr>
             <td>{{ worker.user.get_full_name|default:"—" }}</td>
             <td>{{ worker.user.phone_number }}</td>
             <td>{{ worker.get_skill_grade_display }}</td>
+            <td>{% if worker.society %}{{ worker.society.name }}{% else %}<span class="muted">{% trans "Unclaimed" %}</span>{% endif %}</td>
             <td><span class="status-pill">{{ worker.get_verification_status_display }}</span></td>
             <td class="flex gap-1">
               <form method="post" action="{% url 'dashboard:verify_worker' worker.id %}">{% csrf_token %}<input type="hidden" name="decision" value="approve"><button class="btn btn-primary btn-sm" type="submit">{% trans "Approve" %}</button></form>
               <form method="post" action="{% url 'dashboard:verify_worker' worker.id %}">{% csrf_token %}<input type="hidden" name="decision" value="reject"><button class="btn btn-danger btn-sm" type="submit">{% trans "Reject" %}</button></form>
             </td>
           </tr>
-          {% empty %}<tr><td colspan="5" class="muted">{% trans "No pending verifications." %}</td></tr>{% endfor %}
+          {% empty %}<tr><td colspan="6" class="muted">{% trans "No pending verifications." %}</td></tr>{% endfor %}
         </tbody>
       </table>
     </div>

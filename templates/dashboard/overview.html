@@ -14,12 +14,24 @@
     </div>
 
     <div class="grid grid-3 mt-4">
+      {% if is_platform_admin %}
+      <a href="{% url 'dashboard:federation_list' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-shield"/></svg></div><h3>{% trans "Federations" %}</h3><p class="mb-0 muted">{% trans "Create federations and appoint their admins (Admin only)." %}</p></div></a>
+      <a href="{% url 'dashboard:worker_verification_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-shield"/></svg></div><h3>{% trans "Skill & certificate verification" %}</h3><p class="mb-0 muted">{{ pending_verifications }} {% trans "pending review" %}</p></div></a>
+      {% endif %}
       {% if is_federation_admin %}
       <a href="{% url 'dashboard:pricing_config' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-receipt"/></svg></div><h3>{% trans "Fixed & hourly pricing" %}</h3><p class="mb-0 muted">{% trans "Set visit charges, fixed labour charges and hourly rates (federation admin only)." %}</p></div></a>
+      <a href="{% url 'dashboard:society_list' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-workers"/></svg></div><h3>{% trans "Cooperative societies" %}</h3><p class="mb-0 muted">{% trans "Create societies and appoint their heads." %}</p></div></a>
       <a href="{% url 'dashboard:category_change_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-workers"/></svg></div><h3>{% trans "Category change requests" %}</h3><p class="mb-0 muted">{{ pending_category_requests }} {% trans "pending approval" %}</p></div></a>
       {% endif %}
+      {% if is_federation_owner %}
+      <a href="{% url 'dashboard:independent_societies_list' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-workers"/></svg></div><h3>{% trans "Invite independent societies" %}</h3><p class="mb-0 muted">{% trans "Grow your federation by inviting societies to join." %}</p></div></a>
+      {% endif %}
       {% if is_society_operator %}
-      <a href="{% url 'dashboard:worker_verification_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-shield"/></svg></div><h3>{% trans "Worker verification queue" %}</h3><p class="mb-0 muted">{{ pending_verifications }} {% trans "pending review" %}</p></div></a>
+      <a href="{% url 'dashboard:claim_workers_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-shield"/></svg></div><h3>{% trans "Claim verified workers" %}</h3><p class="mb-0 muted">{% trans "Add admin-verified workers to your society." %}</p></div></a>
+      <a href="{% url 'dashboard:federation_directory' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-workers"/></svg></div><h3>{% trans "Join a federation" %}</h3><p class="mb-0 muted">{% trans "Request to join a federation, or stay independent." %}</p></div></a>
+      {% endif %}
+      {% if is_federation_owner or is_society_operator %}
+      <a href="{% url 'dashboard:join_requests_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-alert"/></svg></div><h3>{% trans "Join requests" %}</h3><p class="mb-0 muted">{% trans "Accept or reject pending federation membership requests." %}</p></div></a>
       {% endif %}
       <a href="{% url 'dashboard:complaints_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-alert"/></svg></div><h3>{% trans "Complaints" %}</h3><p class="mb-0 muted">{% trans "Track and resolve customer complaints." %}</p></div></a>
       <a href="{% url 'dashboard:customer_list' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-user"/></svg></div><h3>{% trans "Customer history" %}</h3><p class="mb-0 muted">{% trans "Full booking and spend history for every customer." %}</p></div></a>

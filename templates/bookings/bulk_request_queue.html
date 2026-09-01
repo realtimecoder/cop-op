@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Bulk request queue" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Society operator" %}</span>
+    <h1>{% trans "Bulk service requests" %}</h1>
+
+    {% if not managed_society %}
+    <div class="alert alert-warning" style="position:static;max-width:640px;">{% trans "You need a cooperative society assigned to you before you can claim bulk requests." %}</div>
+    {% else %}
+    <div class="alert alert-info" style="position:static;margin-bottom:20px;max-width:640px;">{% trans "Claiming for" %}: <b>{{ managed_society.name }}</b></div>
+    {% endif %}
+
+    <h3>{% trans "Unclaimed requests (available to any society)" %}</h3>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>{% trans "Service" %}</th><th>{% trans "Institution" %}</th><th>{% trans "Workers" %}</th><th>{% trans "Start" %}</th><th></th></tr></thead>
+        <tbody>
+          {% for r in unclaimed %}
+          <tr>
+            <td>{{ r.service.name }}</td><td>{{ r.institution.get_full_name|default:r.institution.phone_number }}</td>
+            <td>{{ r.workers_required }}</td><td>{{ r.start_date }}</td>
+            <td>
+              {% if managed_society %}
+              <form method="post" action="{% url 'bookings:claim_bulk_request' r.id %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Claim for my society" %}</button></form>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}<tr><td colspan="5" class="muted">{% trans "No unclaimed requests right now." %}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if managed_society %}
+    <h3 class="mt-4">{% trans "My society's requests" %}</h3>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>{% trans "Service" %}</th><th>{% trans "Institution" %}</th><th>{% trans "Assigned" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
+        <tbody>
+          {% for r in mine %}
+          <tr>
+            <td>{{ r.service.name }}</td><td>{{ r.institution.get_full_name|default:r.institution.phone_number }}</td>
+            <td>{{ r.workers_assigned_count }}/{{ r.workers_required }}</td>
+            <td><span class="status-pill">{{ r.get_status_display }}</span></td>
+            <td><a href="{% url 'bookings:bulk_request_detail' r.id %}" class="btn btn-outline btn-sm">{% trans "View" %}</a></td>
+          </tr>
+          {% empty %}<tr><td colspan="5" class="muted">{% trans "Your society hasn't claimed any requests yet." %}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

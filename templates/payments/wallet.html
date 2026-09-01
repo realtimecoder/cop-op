@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "My Wallet" %} — Co-opSeva{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">{% trans "Financial Management" %}</span>
+        <h1 style="margin-bottom:0;">{% trans "My Wallet" %}</h1>
+        <p class="muted">{% trans "Manage your earnings and withdraw funds to your bank account." %}</p>
+      </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1fr 2fr; gap: 32px;">
+      <div class="card">
+        <h3 style="font-size: 1rem; margin-bottom: 16px;">{% trans "Available Balance" %}</h3>
+        <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-color); margin-bottom: 24px;">
+          ₹{{ wallet.balance }}
+        </div>
+
+        <form method="post" action="{% url 'payments:withdraw_funds' %}">
+          {% csrf_token %}
+          <div class="field-group">
+            <label>{% trans "Withdraw Amount" %}</label>
+            <input type="number" step="0.01" name="amount" class="input-field" placeholder="₹ 0.00" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:16px;">
+            {% trans "Withdraw Funds" %}
+          </button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1rem; margin-bottom: 16px;">{% trans "Transaction History" %}</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Category" %}</th>
+                <th>{% trans "Type" %}</th>
+                <th style="text-align:right;">{% trans "Amount" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tx in transactions %}
+              <tr>
+                <td>{{ tx.created_at|date:"d M Y, H:i" }}</td>
+                <td>{{ tx.category }}</td>
+                <td>
+                  {% if tx.transaction_type == 'credit' %}
+                    <span class="badge badge-verified">{% trans "Credit" %}</span>
+                  {% else %}
+                    <span class="badge badge-warning">{% trans "Debit" %}</span>
+                  {% endif %}
+                </td>
+                <td style="text-align:right; font-weight:bold; color: {% if tx.transaction_type == 'credit' %}var(--accent-color){% else %}var(--error-color){% endif %};">
+                  {% if tx.transaction_type == 'credit' %}+{% else %}-{% endif %}₹{{ tx.amount }}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center muted">{% trans "No transactions found." %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Confirm booking details" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="grid" style="grid-template-columns:1.6fr 1fr;gap:32px;align-items:start;">
+      <div class="form-card wide" style="margin:0;">
+        <h1 style="font-size:1.4rem;">{% trans "Confirm your booking details" %}</h1>
+        <p class="muted">{{ service.name }} — {% trans "Please provide the details below to proceed to worker selection." %}</p>
+
+        {% if form.non_field_errors %}
+          {% for error in form.non_field_errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+        {% endif %}
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label>{% trans "Date" %}</label>{{ form.scheduled_date }}
+              {% for error in form.scheduled_date.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+            </div>
+            <div class="form-group"><label>{% trans "Time" %}</label>{{ form.scheduled_time }}
+              {% for error in form.scheduled_time.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+            </div>
+          </div>
+          <div class="form-group"><label>{% trans "Service address" %}</label>{{ form.address }}
+            {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="grid grid-2">
+            <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
+            <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
+          </div>
+          <div class="form-group"><label>{% trans "Instructions (optional)" %}</label>{{ form.instructions }}</div>
+
+          {% if service.is_hourly %}
+          <div class="form-group">
+            <label>{% trans "Number of hours" %}</label>{{ form.hours_booked }}
+            <p class="help-text">{% trans "Minimum" %} {{ service.min_hours }} {% trans "hour(s)" %} · ₹{{ service.hourly_rate }}/{% trans "hour" %}</p>
+          </div>
+          {% endif %}
+
+          {% if service.category.name == "Construction Labourer" or service.variant == "builder" %}
+          <div class="grid grid-2">
+            <div class="form-group"><label>{% trans "Number of workers" %}</label>{{ form.workers_required }}</div>
+            <div class="form-group"><label>{% trans "Duration (days)" %}</label>{{ form.duration_days }}</div>
+          </div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-primary btn-block mt-3">{% trans "Continue to worker selection" %}</button>
+        </form>
+      </div>
+
+      <div>
+        <div class="price-ticket">
+          <div class="price-ticket-row"><span>{% trans "Visit charge" %}</span><span>₹{{ service.visit_charge }}</span></div>
+          {% if service.is_hourly %}
+          <div class="price-ticket-row"><span>{% trans "Rate per hour" %}</span><span>₹{{ service.hourly_rate }}</span></div>
+          <div class="price-ticket-row total"><span>{% trans "Estimated total" %}</span><span>₹{{ service.total_charge }}</span></div>
+          <p class="price-ticket-note">{% trans "Final amount depends on the number of hours you book." %}</p>
+          {% else %}
+          <div class="price-ticket-row"><span>{% trans "Labour charge" %}</span><span>₹{{ service.fixed_labour_charge }}</span></div>
+          <div class="price-ticket-row total"><span>{% trans "Total payable" %}</span><span>₹{{ service.total_charge }}</span></div>
+          <p class="price-ticket-note">{% trans "Material cost, if any, is paid directly by you to the shop." %}</p>
+          {% endif %}
+        </div>
+        <div class="card mt-3" style="background: var(--bg-muted); border: 1px dashed var(--thread);">
+          <p style="font-size: 0.9rem; margin: 0; line-height: 1.4;">
+            <svg style="width:16px;height:16px;vertical-align:middle;" fill="currentColor"><use href="#icon-info"/></svg>
+            {% trans "Next, you can either let our system pick the best available worker for you (Rapid Book) or browse and select a verified worker yourself." %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Join requests" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Federation membership" %}</span>
+    <h1>{% trans "Requests awaiting your decision" %}</h1>
+    {% for r in incoming %}
+    <div class="card mt-2">
+      <div class="flex justify-between items-center">
+        <h3 class="mb-0">
+          {% if r.initiated_by == 'society' %}{{ r.society.name }} {% trans "wants to join" %} {{ r.federation.name }}
+          {% else %}{{ r.federation.name }} {% trans "invited" %} {{ r.society.name }}{% endif %}
+        </h3>
+        <span class="status-pill">{{ r.get_status_display }}</span>
+      </div>
+      <form method="post" action="{% url 'dashboard:decide_join_request' r.id %}" class="flex gap-1 mt-2">
+        {% csrf_token %}
+        <button class="btn btn-primary btn-sm" type="submit" name="decision" value="accept">{% trans "Accept" %}</button>
+        <button class="btn btn-danger btn-sm" type="submit" name="decision" value="reject">{% trans "Reject" %}</button>
+      </form>
+    </div>
+    {% empty %}<p class="muted">{% trans "No pending requests." %}</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

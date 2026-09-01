@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Select booking method" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width: 600px;">
+    <div class="text-center mb-4">
+      <h1>{% trans "How would you like to book?" %}</h1>
+      <p class="muted">{% trans "We have your details for" %} <strong>{{ service.name }}</strong>. {% trans "Choose your preferred way to find a worker." %}</p>
+    </div>
+
+    <form method="post" class="grid grid-2 gap-4">
+      {% csrf_token %}
+
+      <div class="card choice-card" style="cursor:pointer; transition: transform 0.2s;" onclick="this.querySelector('input').checked = true;">
+        <input type="radio" name="choice" value="rapid" id="choice-rapid" {% if request.POST.choice == 'rapid' %}checked{% endif %} style="display:none;">
+        <div class="text-center" style="padding: 24px;">
+          <div class="icon-circle" style="margin: 0 auto 16px; background: var(--primary-light); color: var(--primary);">
+            <svg style="width:32px;height:32px;"><use href="#icon-bolt"/></svg>
+          </div>
+          <h3>{% trans "Rapid Book" %}</h3>
+          <p class="muted" style="font-size: 0.9rem;">{% trans "Our system will instantly match you with the best available verified worker based on distance, rating, and fairness." %}</p>
+        </div>
+      </div>
+
+      <div class="card choice-card" style="cursor:pointer; transition: transform 0.2s;" onclick="this.querySelector('input').checked = true;">
+        <input type="radio" name="choice" value="manual" id="choice-manual" {% if request.POST.choice == 'manual' %}checked{% endif %} style="display:none;">
+        <div class="text-center" style="padding: 24px;">
+          <div class="icon-circle" style="margin: 0 auto 16px; background: var(--bg-muted); color: var(--thread);">
+            <svg style="width:32px;height:32px;"><use href="#icon-search"/></svg>
+          </div>
+          <h3>{% trans "See Verified Workers" %}</h3>
+          <p class="muted" style="font-size: 0.9rem;">{% trans "Browse the list of verified workers in your area and choose the one you prefer." %}</p>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" style="grid-column: span 2; margin-top: 24px;">
+        {% trans "Continue" %} <svg><use href="#icon-arrow-right"/></svg>
+      </button>
+    </form>
+
+    <a href="{% url 'catalog:service_detail' service.category.slug service.slug %}" class="btn btn-link btn-block mt-3 text-center">
+      {% trans "Go back to service details" %}
+    </a>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .choice-card { border: 2px solid transparent; transition: all 0.2s; }
+  .choice-card:hover { transform: translateY(-4px); border-color: var(--thread-light); }
+  .choice-card input:checked + div,
+  .choice-card:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--primary-ultra-light);
+  }
+  .icon-circle {
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+</style>
+{% endblock %}
