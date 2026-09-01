@@ -47,9 +47,13 @@
       <a href="{% url 'core:about' %}">{% trans "About" %}</a>
       {% if user.is_authenticated %}
         <a href="{% url 'bookings:my_bookings' %}">{% trans "My bookings" %}</a>
+        <a href="{% url 'payments:wallet_dashboard' %}">{% trans "My Wallet" %}</a>
         {% if user.role == 'worker' %}<a href="{% url 'workers:my_dashboard' %}">{% trans "Worker dashboard" %}</a>{% endif %}
+        {% if user.role == 'builder' %}<a href="{% url 'bookings:my_bulk_requests' %}">{% trans "Bulk requests" %}</a>{% endif %}
+        {% if user.role == 'society' or user.is_superuser %}<a href="{% url 'bookings:bulk_request_queue' %}">{% trans "Bulk request queue" %}</a>{% endif %}
         {% if user.role == 'federation' or user.is_superuser %}
           <a href="{% url 'core:pricing_policy' %}">{% trans "Pricing policy" %}</a>
+          <a href="{% url 'dashboard:society_list' %}">{% trans "Societies" %}</a>
         {% endif %}
         {% if user.role in 'federation,society,support,finance,welfare,platform_admin' or user.is_superuser %}
           <a href="{% url 'dashboard:overview' %}">{% trans "Admin dashboard" %}</a>

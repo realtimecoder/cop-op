@@ -38,8 +38,9 @@ Visit **http://127.0.0.1:8000/**
 |---|---|
 | Any customer | Go to **Log in**, enter any 10-digit number starting 6-9 (e.g. `9123456789`). The OTP is shown on-screen as a flash message (no real SMS gateway is wired up — plug in MSG91/Twilio in `accounts/views.py::login_request`). |
 | Demo verified workers | Phones `9810000001`–`9810000010` — ten workers, one per major category (Ramesh/Electrician, Suresh/Plumber, Anita/Domestic Helper, Vikram/Carpenter, Geeta/Painting, Pooja/Salon, Imran/AC Repair, Manoj/Cleaning, Rekha/Caregiver, Sanjay/Driver) — already verified by the seed script. |
-| Demo society operator (approves/rejects new workers) | Phone `9800000001` — log in via normal OTP flow, then visit `/dashboard/workers/verification/`. |
-| Federation administrator (full pricing + admin access) | Django admin: username `admin`, password `Admin@12345`. This account has `role=federation` **and** `is_superuser=True`, so it can also log in through the normal OTP flow once you set its phone number, or via `/admin/`. |
+| Demo society operator (approves/rejects new workers into their society) | Phone `9800000001` — operates "Delhi-NCR Workers Cooperative Society" (the 10 demo workers above already belong to it). Log in via normal OTP flow, then visit `/dashboard/workers/verification/` or `/bookings/bulk/queue/`. |
+| Demo institution (for testing bulk/multi-worker requests) | Phone `9700000099` ("Skyline Builders Pvt Ltd", role=builder). Log in via OTP, then visit `/bookings/bulk/new/`. |
+| Federation administrator (full pricing + admin access, including creating societies) | Django admin: username `admin`, password `Admin@12345`. This account has `role=federation` **and** `is_superuser=True`, so it can also log in through the normal OTP flow once you set its phone number, or via `/admin/`. Manage societies at `/dashboard/societies/`. |
 
 Change the admin password immediately in any non-demo environment.
 
@@ -140,6 +141,147 @@ Quotation and bidding modules are, as required, absent.
   `.po` files translated (`locale/<code>/LC_MESSAGES/django.po`) — the
   switcher, cookie persistence, and RTL handling for Urdu are already wired
   up and tested.
+
+## Recent updates (this revision — v6, Phase 1 of the governance overhaul)
+
+This is Phase 1 of a much larger requested redesign (full CRUD/RBAC
+matrix, cross-federation worker matching, financial/wallet system,
+graphs, real Razorpay live mode). Phase 1 builds the **foundation**
+everything else depends on — a real Admin → Federation → Society →
+Worker governance hierarchy with proper role-based CRUD permissions.
+Later phases (matching engine, dashboards/graphs, wallets, commission
+engine, live payments) are documented but not yet built — see the
+roadmap at the bottom of this section.
+
+### CRUD authority matrix (industry-standard RBAC)
+
+| Entity | Create | Read | Update | Delete |
+|---|---|---|---|---|
+| Federation | **Admin only** | Admin: all. Federation-admin: own. Public: name only | Admin: rename/ban/commission. Federation-admin: own settings | Admin only |
+| Society | Federation (under itself) **or** Admin (independent) | Admin: all. Federation: its own. Society-head: own | Federation: its societies (fieldwork toggle). Society-head: own profile. Admin: rename/ban/delete/promote | Admin only |
+| Worker skill/certificate verification | Worker (self-signup) | Admin: all + documents. Society-head: claimed workers | **Admin only** | Admin only |
+| Worker → Society membership | Society-head (from admin-verified pool only) | Admin, Federation (its societies), Society-head (own) | Society-head (own society) | — |
+| Customer | Self (signup) | Admin: all + KYC docs. Self: own | Self: own | Admin (ban) |
+| Pricing | Federation (own) / Independent Society (own) — **Phase 4** | Everyone, scoped | Federation-admin / independent-society-head | — |
+
+### What Phase 1 actually changed
+
+1. **`Federation` is now a real model**, not just a role label. Only
+   Admin (`is_platform_admin` — superuser or `role=platform_admin`) can
+   create one, at `/dashboard/federations/`, and appoint who administers
+   it (by phone number — the account is created/promoted automatically).
+2. **`Society.federation` is now a real, nullable foreign key.** A
+   society is either governed by a federation, or **independent**
+   (`federation=None`) — an independent society is meant to run its own
+   pricing/queries/work (pricing part lands in Phase 4).
+3. **Federation creates its own societies; Admin creates independent
+   ones.** `/dashboard/societies/` now branches on who's asking:
+   a federation's own admin can only create/manage societies under
+   itself; Admin can create an independent society or attach one to any
+   federation.
+4. **Join/invite flow, both directions, receiver must accept**
+   (`FederationJoinRequest`). A federation can invite an independent
+   society (`/dashboard/independent-societies/`); an independent
+   society's head can request to join a federation
+   (`/dashboard/federation-directory/`). Either way, only the
+   **receiving** side can accept/reject
+   (`/dashboard/join-requests/`) — verified with a test that a society
+   cannot self-accept its own outgoing request, and vice versa. Once
+   accepted, `society.federation` is set — the society is now expected
+   to follow that federation's pricing and policies (enforcement lands
+   in Phase 4 once federation-scoped pricing exists).
+5. **Skill/certificate verification is now Admin-only, structurally
+   separate from society membership.** Previously a society operator
+   verified AND claimed a worker in one action. Now:
+   - `/dashboard/workers/verification/` (Admin only) — identity/skill
+     check, sets `verification_status`. Confirmed with a test that a
+     society head gets redirected away from this page (403/302).
+   - `/dashboard/workers/claim-queue/` (society-head only) — lists
+     admin-verified, still-unclaimed workers; claiming one sets
+     `worker.society` to the head's own society. Confirmed a
+     newly-verified worker has `society=None` until explicitly claimed.
+6. **Society-head "does own fieldwork" toggle** (`head_performs_
+   fieldwork`) — only the society's own federation can flip it; not
+   meaningful for an independent society (its head always works,
+   handles pricing, and resolves queries by definition, per the
+   governance model).
+7. **Admin governance actions** (Section 9): rename, ban-for-a-period
+   (`ban_until`), accept resignation, hard-delete, and
+   promote-independent-society-to-federation — all Admin-only, all on
+   `/dashboard/societies/` and `/dashboard/federations/`.
+
+### What's NOT done yet (honest — deferred to later phases)
+
+- **Phase 2** — cross-federation/cross-society "best worker" matching
+  (nearest + rest-day fairness + rating + completions, with federation
+  name/rating shown), emergency-booking auto-pick-and-book, and
+  federation being invisible to the customer until acceptance (worker
+  phone number reveal on accept).
+- **Phase 3** — Federation and Society dashboards with the two
+  requested graphs each (workers deployed over time, income earned over
+  time) and the live booked/working-status filter, filterable by society.
+- **Phase 4** — society rating computed from its workers' ratings,
+  **federation/independent-society-owned pricing** (currently pricing
+  is still platform-global — this is the biggest remaining structural
+  change), commission engine + monthly admin payout tracking, and
+  promote-to-federation's pricing implications.
+- **Phase 5** — wallet + withdrawal for every party, and documentation
+  for going from Razorpay test keys to live keys (the integration code
+  itself already supports this — see the Razorpay section below — this
+  phase is really just verification + wallet-specific payout wiring).
+
+### Demo accounts for this hierarchy
+| Role | Phone | Notes |
+|---|---|---|
+| Federation admin | `9900000001` | Administers "Delhi-NCR Labour Federation" |
+| Society head (federated) | `9800000001` | Heads "Delhi-NCR Workers Cooperative Society" — under the federation above, all 10 demo workers |
+| Society head (independent) | `9800000002` | Heads "Gurgaon Independent Workers Society" — no federation, for testing the join/invite flow |
+
+## Recent updates (this revision — v5)
+
+**Fixed: "Federation" and "Society" were labels, not a real structure.**
+Previously any worker could self-register and start working immediately
+— there was no actual Federation → Society → Worker hierarchy, just role
+names on the User model. This revision makes it real:
+
+1. **Society is now a real cooperative unit with an operator.**
+   `Society.operator` is a dedicated account (role=society) appointed by
+   a federation administrator. Only that operator can claim/verify
+   workers into their own society — workers can no longer pick or be
+   auto-assigned a society themselves. Confirmed with a test: Operator A
+   cannot see or claim a worker already claimed by Operator B's society;
+   an unclaimed worker is visible to any operator until one of them
+   approves (claims) them.
+2. **Federation administration now manages societies.**
+   `/dashboard/societies/` (federation-admin only) lets you create a new
+   cooperative society and appoint its operator by phone number — the
+   operator's account is created automatically (role promoted to
+   `society`) if it doesn't already exist, since self-registering with
+   the society role is deliberately not exposed in public sign-up.
+3. **The "Institution" flow (bulk/multi-worker requests) is now real,
+   not just a price multiplier.** Previously, `workers_required` on a
+   single `Booking` only multiplied the price — it never created actual
+   separate worker assignments. Now:
+   - Institutions (`role=builder`) submit a `BulkServiceRequest`
+     (`/bookings/bulk/new/`) specifying a service, how many workers, for
+     how many days.
+   - Any society operator can **claim** it for their own cooperative
+     (`/bookings/bulk/queue/`), then hand-pick that many of their *own*
+     verified workers to fulfil it (`/bookings/bulk/<id>/assign/`) — a
+     `BulkAssignment` row is created per worker, each with its own
+     completion status and payout.
+   - The institution confirms completion once done, which splits the
+     total payment across every assigned worker individually (Section
+     12 "Track wages") rather than a single lump sum.
+   - Verified end to end with a real test: 2 workers in one cooperative
+     society assigned to a 2-worker, 3-day request — correct total
+     (₹5,550), correct per-worker payout split (₹2,164.50 each) after
+     completion.
+
+This is the real Federation → Society → Worker structure the SRS
+describes, and the real Institution → Bulk request → Cooperative
+assignment → Completion flow — not the earlier price-multiplier
+approximation.
 
 ## Recent updates (this revision)
 

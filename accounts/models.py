@@ -45,6 +45,16 @@ class User(AbstractUser):
     def is_society_operator(self):
         return self.role == self.Role.SOCIETY
 
+    @property
+    def is_platform_admin(self):
+        """The Admin persona (Section 4 of the platform governance model)
+        — the ONLY role that can create Federations, verify worker
+        skills/certificates, ban/rename/delete Federations & Societies,
+        promote an independent society to a federation, and set
+        commission. Distinct from a Federation's own admin_user, who
+        only manages their one federation."""
+        return self.is_superuser or self.role == self.Role.PLATFORM_ADMIN
+
 
 class OTPRequest(models.Model):
     """Mobile-number OTP login (FR-002). In this reference build the OTP is

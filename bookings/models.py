@@ -6,7 +6,28 @@ from catalog.models import Service
 from workers.models import WorkerProfile
 
 
+class BookingRequest(models.Model):
+    """Temporarily holds booking details before a worker is assigned.
+    This supports the flow: Service Detail -> Booking Form -> Worker Selection/Rapid Book."""
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.PROTECT)
+    scheduled_date = models.DateField()
+    scheduled_time = models.TimeField()
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100, default="Delhi")
+    pincode = models.CharField(max_length=10, blank=True)
+    instructions = models.TextField(blank=True)
+    workers_required = models.PositiveIntegerField(default=1)
+    duration_days = models.PositiveIntegerField(default=1)
+    hours_booked = models.DecimalField(max_digits=5, decimal_places=1, default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Booking Request {self.id} - {self.service.name}"
+
+
 class Booking(models.Model):
+
     """A customer's booking of a fixed-price service with a chosen worker
     (Section 5.6, FR-028 to FR-045, UC-001)."""
 
@@ -145,3 +166,84 @@ class Complaint(models.Model):
 
     def __str__(self):
         return f"Complaint #{self.id}: {self.subject}"
+
+
+class BulkServiceRequest(models.Model):
+    """Institution → bulk/multiple-worker service requests → cooperative
+    assignment → completion (the "Institution" flow from Section 5).
+    This is deliberately a SEPARATE model from Booking rather than the
+    workers_required multiplier on Booking — a bulk request needs
+    several distinct, individually-tracked WorkerProfile assignments,
+    which a single-worker Booking record structurally cannot represent."""
+
+    class Status(models.TextChoices):
+        REQUESTED = 'requested', 'Requested'
+        CLAIMED = 'claimed', 'Claimed by a society'
+        ASSIGNED = 'assigned', 'Workers assigned'
+        IN_PROGRESS = 'in_progress', 'In progress'
+        COMPLETED = 'completed', 'Completed'
+        CANCELLED = 'cancelled', 'Cancelled'
+
+    institution = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                     related_name='bulk_requests')
+    service = models.ForeignKey('catalog.Service', on_delete=models.PROTECT, related_name='bulk_requests')
+
+    workers_required = models.PositiveIntegerField(default=1)
+    duration_days = models.PositiveIntegerField(default=1)
+
+    start_date = models.DateField()
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100, default="Delhi")
+    pincode = models.CharField(max_length=10, blank=True)
+    instructions = models.TextField(blank=True)
+
+    status = models.CharField(max_length=15, choices=Status.choices, default=Status.REQUESTED)
+
+    # Snapshot pricing at request time, same convention as Booking.
+    visit_charge = models.DecimalField(max_digits=8, decimal_places=2)
+    labour_charge = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # Which cooperative society picked up this request and is fulfilling it.
+    assigned_society = models.ForeignKey('workers.Society', on_delete=models.SET_NULL,
+                                          null=True, blank=True, related_name='bulk_requests')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Bulk request #{self.id}: {self.workers_required} × {self.service.name}"
+
+    @property
+    def total_amount(self):
+        """Same fixed-pricing convention as an individual Booking:
+        visit charge (once) + labour charge × workers × days."""
+        return self.visit_charge + (self.labour_charge * self.workers_required * self.duration_days)
+
+    @property
+    def workers_assigned_count(self):
+        return self.assignments.count()
+
+    @property
+    def is_fully_staffed(self):
+        return self.workers_assigned_count >= self.workers_required
+
+
+class BulkAssignment(models.Model):
+    """One worker's individual assignment within a BulkServiceRequest —
+    each assigned worker gets their own completion status and payout,
+    exactly as the "Track wages" step in the Cooperative flow implies."""
+    bulk_request = models.ForeignKey(BulkServiceRequest, on_delete=models.CASCADE, related_name='assignments')
+    worker = models.ForeignKey('workers.WorkerProfile', on_delete=models.CASCADE, related_name='bulk_assignments')
+    is_completed = models.BooleanField(default=False)
+    payout_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('bulk_request', 'worker')
+
+    def __str__(self):
+        return f"{self.worker} on bulk request #{self.bulk_request_id}"

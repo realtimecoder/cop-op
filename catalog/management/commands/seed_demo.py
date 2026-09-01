@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from catalog.models import ServiceCategory, Service
 from accounts.models import User
-from workers.models import Society, WorkerProfile, WorkerServiceOffering
+from workers.models import Society, WorkerProfile, WorkerServiceOffering, Federation
 
 
 class Command(BaseCommand):
@@ -146,18 +146,59 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"  {ServiceCategory.objects.count()} categories, {Service.objects.count()} services ready."))
 
-        # ---- Society ----
-        society, _ = Society.objects.get_or_create(
-            name="Delhi-NCR Workers Cooperative Society",
-            defaults={'city': 'Delhi', 'registration_number': 'DL-COOP-0001'}
+        # ---- Demo Federation + its Admin (Admin creates Federation; ----
+        # Federation creates Society under itself — the real hierarchy).
+        federation_admin, _ = User.objects.get_or_create(
+            phone_number='9900000001',
+            defaults={'username': '9900000001', 'first_name': 'Delhi-NCR', 'last_name': 'Federation-Admin',
+                      'role': User.Role.FEDERATION, 'is_phone_verified': True, 'city': 'Delhi'}
         )
+        federation, _ = Federation.objects.get_or_create(
+            name="Delhi-NCR Labour Federation",
+            defaults={'city': 'Delhi', 'registration_number': 'DL-FED-0001',
+                      'admin_user': federation_admin, 'commission_percent': 10}
+        )
+        if federation.admin_user_id != federation_admin.id:
+            federation.admin_user = federation_admin
+            federation.save(update_fields=['admin_user'])
 
-        # ---- Society operator (approves workers) ----
+        # ---- Society Head (approves/claims workers into their society) ----
         operator, _ = User.objects.get_or_create(
             phone_number='9800000001',
-            defaults={'username': '9800000001', 'first_name': 'Suman', 'last_name': 'Society-Operator',
+            defaults={'username': '9800000001', 'first_name': 'Suman', 'last_name': 'Society-Head',
                       'role': User.Role.SOCIETY, 'is_phone_verified': True, 'city': 'Delhi'}
         )
+
+        # ---- Society ---- (created under the demo Federation, matching
+        # the real Federation -> Society -> Worker hierarchy the
+        # platform now enforces. A second, independent society is also
+        # seeded to demonstrate the join/invite flow.)
+        society, _ = Society.objects.get_or_create(
+            name="Delhi-NCR Workers Cooperative Society",
+            defaults={'city': 'Delhi', 'registration_number': 'DL-COOP-0001',
+                      'operator': operator, 'federation': federation}
+        )
+        if society.operator_id != operator.id:
+            society.operator = operator
+            society.save(update_fields=['operator'])
+        if society.federation_id != federation.id:
+            society.federation = federation
+            society.save(update_fields=['federation'])
+
+        # ---- A second, INDEPENDENT society (no federation) — sets its
+        # own pricing/policy and can be invited to join a federation. ----
+        indep_head, _ = User.objects.get_or_create(
+            phone_number='9800000002',
+            defaults={'username': '9800000002', 'first_name': 'Farida', 'last_name': 'Independent-Head',
+                      'role': User.Role.SOCIETY, 'is_phone_verified': True, 'city': 'Gurgaon'}
+        )
+        indep_society, _ = Society.objects.get_or_create(
+            name="Gurgaon Independent Workers Society",
+            defaults={'city': 'Gurgaon', 'registration_number': 'GGN-IND-0001', 'operator': indep_head}
+        )
+        if indep_society.operator_id != indep_head.id:
+            indep_society.operator = indep_head
+            indep_society.save(update_fields=['operator'])
 
         # ---- Demo verified workers, one per major category ----
         demo_workers = [
@@ -197,4 +238,16 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             f"  {WorkerProfile.objects.filter(verification_status='verified').count()} verified demo workers ready."))
+
+        # ---- Demo institution (for testing the bulk-request flow) ----
+        User.objects.get_or_create(
+            phone_number='9700000099',
+            defaults={'username': '9700000099', 'first_name': 'Skyline', 'last_name': 'Builders Pvt Ltd',
+                      'role': User.Role.BUILDER, 'is_phone_verified': True, 'city': 'Delhi',
+                      'address': 'Sector 62, Site Office'}
+        )
+
+        self.stdout.write(self.style.SUCCESS(
+            "  Federation admin: 9900000001 | Society head (federated): 9800000001 | "
+            "Independent society head: 9800000002"))
         self.stdout.write(self.style.SUCCESS("Seed complete. Log in with any demo phone number via OTP (shown on screen)."))

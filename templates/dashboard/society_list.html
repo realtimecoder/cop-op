@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Cooperative societies" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% if is_admin %}{% trans "Admin" %}{% else %}{% trans "Federation" %}{% endif %}</span>
+    <h1>{% trans "Cooperative societies" %}</h1>
+    {% if own_federation and not is_admin %}<p class="muted">{% trans "Showing societies under" %} <b>{{ own_federation.name }}</b></p>{% endif %}
+
+    <div class="card mt-2">
+      <h3 style="font-size:1rem;">{% trans "Create a new society" %}</h3>
+      <form method="post" action="{% url 'dashboard:society_create' %}" class="grid grid-2">
+        {% csrf_token %}
+        <div class="form-group"><label>{% trans "Society name" %}</label><input type="text" name="name" class="input-field" required></div>
+        <div class="form-group"><label>{% trans "City" %}</label><input type="text" name="city" value="Delhi" class="input-field"></div>
+        <div class="form-group"><label>{% trans "Registration number (optional)" %}</label><input type="text" name="registration_number" class="input-field"></div>
+        {% if is_admin %}
+        <div class="form-group">
+          <label>{% trans "Federation (optional — leave blank for independent)" %}</label>
+          <select name="federation_id" class="input-field">
+            <option value="">{% trans "— Independent —" %}</option>
+            {% for fed in all_federations %}
+            <option value="{{ fed.id }}">{{ fed.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        <div style="grid-column:1/-1;"><button class="btn btn-primary" type="submit">{% trans "Create society" %}</button></div>
+      </form>
+    </div>
+
+    <h3 class="mt-4">{% trans "All societies" %}</h3>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>{% trans "Name" %}</th><th>{% trans "Federation" %}</th><th>{% trans "Head" %}</th><th>{% trans "Workers" %}</th><th>{% trans "Status" %}</th><th>{% trans "Appoint head" %}</th>{% if is_admin %}<th>{% trans "Actions" %}</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for society in societies %}
+          <tr>
+            <td><a href="{% url 'dashboard:society_workers_list' society.id %}" class="font-bold hover:underline">{{ society.name }}</a></td>
+            <td>{% if society.federation %}<span class="badge badge-verified">{{ society.federation.name }}</span>{% else %}<span class="muted">{% trans "Independent" %}</span>{% endif %}</td>
+            <td>
+              {% if society.operator %}<span class="badge badge-verified">{{ society.operator.get_full_name|default:society.operator.phone_number }}</span>{% else %}<span class="badge badge-warning">{% trans "No head assigned" %}</span>{% endif %}
+            </td>
+            <td>{{ society.worker_count }}</td>
+            <td>
+              {% if society.is_currently_banned %}<span class="badge badge-danger">{% trans "Banned" %}</span>{% endif %}
+              {% if not society.is_active %}<span class="badge badge-danger">{% trans "Inactive" %}</span>{% endif %}
+              {% if society.resignation_requested and not society.resigned_at %}<span class="badge badge-warning">{% trans "Resignation pending" %}</span>{% endif %}
+              {% if society.is_active and not society.is_currently_banned and not society.resignation_requested %}<span class="badge badge-verified">{% trans "Active" %}</span>{% endif %}
+            </td>
+            <td>
+              <form method="post" action="{% url 'dashboard:society_assign_operator' society.id %}" class="flex gap-1">
+                {% csrf_token %}
+                <input type="text" name="phone_number" class="input-field" style="width:130px;" placeholder="{% trans 'Phone' %}" maxlength="10">
+                <button class="btn btn-outline btn-sm" type="submit">{% trans "Appoint" %}</button>
+              </form>
+            </td>
+            {% if is_admin %}
+            <td class="flex gap-1" style="flex-wrap:wrap;">
+              <form method="post" action="{% url 'dashboard:society_rename' society.id %}" class="flex gap-1">
+                {% csrf_token %}<input type="text" name="name" class="input-field" style="width:110px;" placeholder="{% trans 'New name' %}">
+                <button class="btn btn-ghost btn-sm" type="submit">{% trans "Rename" %}</button>
+              </form>
+              {% if society.is_currently_banned %}
+              <form method="post" action="{% url 'dashboard:society_unban' society.id %}">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% trans "Unban" %}</button></form>
+              {% else %}
+              <form method="post" action="{% url 'dashboard:society_ban' society.id %}" class="flex gap-1">
+                {% csrf_token %}<input type="number" name="days" class="input-field" style="width:70px;" placeholder="{% trans 'Days' %}">
+                <button class="btn btn-danger btn-sm" type="submit">{% trans "Ban" %}</button>
+              </form>
+              {% endif %}
+              {% if society.resignation_requested and not society.resigned_at %}
+              <form method="post" action="{% url 'dashboard:society_accept_resignation' society.id %}">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% trans "Accept resignation" %}</button></form>
+              {% endif %}
+              {% if society.is_independent %}
+              <form method="post" action="{% url 'dashboard:society_promote_to_federation' society.id %}">{% csrf_token %}<button class="btn btn-accent btn-sm" type="submit">{% trans "Promote to federation" %}</button></form>
+              {% endif %}
+              <form method="post" action="{% url 'dashboard:society_delete' society.id %}" onsubmit="return confirm('{% trans 'Delete this society permanently?' %}');">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Delete" %}</button></form>
+            </td>
+            {% endif %}
+          </tr>
+          {% empty %}<tr><td colspan="7" class="muted">{% trans "No societies created yet." %}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="help-text mt-2">{% trans "Enter the phone number of the person you want to appoint as head — if they don't have an account yet, one is created automatically with the Society role." %}</p>
+  </div>
+</section>
+{% endblock %}

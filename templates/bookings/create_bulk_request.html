@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "New bulk service request" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card wide">
+      <div class="category-icon" style="margin-bottom:14px;"><svg><use href="#icon-workers"/></svg></div>
+      <h1 style="font-size:1.4rem;">{% trans "New bulk service request" %}</h1>
+      <p class="muted">{% trans "Request multiple workers for a project. A cooperative society will claim your request and assign its own verified workers to it." %}</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-group"><label>{% trans "Service" %}</label>{{ form.service }}</div>
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "Number of workers required" %}</label>{{ form.workers_required }}</div>
+          <div class="form-group"><label>{% trans "Duration (days)" %}</label>{{ form.duration_days }}</div>
+        </div>
+        <div class="form-group"><label>{% trans "Start date" %}</label>{{ form.start_date }}
+          {% for error in form.start_date.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="form-group"><label>{% trans "Site address" %}</label>{{ form.address }}</div>
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
+          <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
+        </div>
+        <div class="form-group"><label>{% trans "Instructions (optional)" %}</label>{{ form.instructions }}</div>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Submit request" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
