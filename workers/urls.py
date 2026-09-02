@@ -5,6 +5,7 @@ app_name = 'workers'
 
 urlpatterns = [
     path('for-service/<int:service_id>/', views.worker_list_for_service, name='worker_list_for_service'),
+    path('for-service/<int:service_id>/<int:request_id>/', views.worker_list_for_service, name='worker_list_with_request'),
     path('profile/<int:worker_id>/', views.worker_public_profile, name='worker_public_profile'),
     path('onboarding/', views.onboarding, name='onboarding'),
     path('documents/', views.documents, name='documents'),
