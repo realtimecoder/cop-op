@@ -124,7 +124,7 @@ def booking_choice(request, request_id):
 
         elif choice == 'manual':
             # Redirect to worker list with the request_id
-            return redirect('workers:worker_list_for_service', service_id=service.id, request_id=request_id)
+            return redirect('workers:worker_list_with_request', service_id=service.id, request_id=request_id)
 
     return render(request, 'bookings/booking_choice.html', {
         'booking_req': booking_req, 'service': service

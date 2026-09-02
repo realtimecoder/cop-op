@@ -12,10 +12,13 @@
     <form method="post" class="grid grid-2 gap-4">
       {% csrf_token %}
 
-      <div class="card choice-card" style="cursor:pointer; transition: transform 0.2s;" onclick="this.querySelector('input').checked = true;">
+      <div class="card choice-card {% if request.POST.choice == 'rapid' %}selected{% endif %}" onclick="selectCard(this)">
         <input type="radio" name="choice" value="rapid" id="choice-rapid" {% if request.POST.choice == 'rapid' %}checked{% endif %} style="display:none;">
+        <div class="selected-indicator">
+          <svg style="width:20px;height:20px;color:var(--teal);"><use href="#icon-check"/></svg>
+        </div>
         <div class="text-center" style="padding: 24px;">
-          <div class="icon-circle" style="margin: 0 auto 16px; background: var(--primary-light); color: var(--primary);">
+          <div class="icon-circle" style="margin: 0 auto 16px; background: var(--teal-tint); color: var(--teal);">
             <svg style="width:32px;height:32px;"><use href="#icon-bolt"/></svg>
           </div>
           <h3>{% trans "Rapid Book" %}</h3>
@@ -23,8 +26,11 @@
         </div>
       </div>
 
-      <div class="card choice-card" style="cursor:pointer; transition: transform 0.2s;" onclick="this.querySelector('input').checked = true;">
+      <div class="card choice-card {% if request.POST.choice == 'manual' %}selected{% endif %}" onclick="selectCard(this)">
         <input type="radio" name="choice" value="manual" id="choice-manual" {% if request.POST.choice == 'manual' %}checked{% endif %} style="display:none;">
+        <div class="selected-indicator">
+          <svg style="width:20px;height:20px;color:var(--teal);"><use href="#icon-check"/></svg>
+        </div>
         <div class="text-center" style="padding: 24px;">
           <div class="icon-circle" style="margin: 0 auto 16px; background: var(--bg-muted); color: var(--thread);">
             <svg style="width:32px;height:32px;"><use href="#icon-search"/></svg>
@@ -48,16 +54,56 @@
 
 {% block extra_css %}
 <style>
-  .choice-card { border: 2px solid transparent; transition: all 0.2s; }
-  .choice-card:hover { transform: translateY(-4px); border-color: var(--thread-light); }
-  .choice-card input:checked + div,
-  .choice-card:has(input:checked) {
-    border-color: var(--primary);
-    background: var(--primary-ultra-light);
+  .choice-card {
+    border: 1px solid var(--line);
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: pointer;
+    background: var(--paper);
+  }
+  .choice-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--teal);
+  }
+
+  .selected-indicator {
+    position: absolute; top: 12px; right: 12px;
+    width: 24px; height: 24px; background: var(--thread-red);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    opacity: 0; transform: scale(0); transition: all 0.2s ease;
+    pointer-events: none; z-index: 2;
+  }
+  .selected-indicator svg { color: var(--white) !important; width: 14px; height: 14px; }
+
+  .choice-card.selected {
+    border-color: var(--thread-red);
+    box-shadow: 0 0 0 1px var(--thread-red), 0 4px 12px rgba(168, 65, 47, 0.2);
+    z-index: 1;
+  }
+  .choice-card.selected .selected-indicator {
+    opacity: 1; transform: scale(1);
   }
   .icon-circle {
     width: 64px; height: 64px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
   }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function selectCard(card) {
+    // 1. Check the radio input inside the card
+    const input = card.querySelector('input[type="radio"]');
+    if (input) input.checked = true;
+
+    // 2. Remove 'selected' class from all choice cards
+    document.querySelectorAll('.choice-card').forEach(c => {
+      c.classList.remove('selected');
+    });
+
+    // 3. Add 'selected' class to the clicked card
+    card.classList.add('selected');
+  }
+</script>
 {% endblock %}
