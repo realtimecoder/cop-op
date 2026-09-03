@@ -56,27 +56,44 @@
                 <button class="btn btn-outline btn-sm" type="submit">{% trans "Appoint" %}</button>
               </form>
             </td>
-            {% if is_admin %}
-            <td class="flex gap-1" style="flex-wrap:wrap;">
-              <form method="post" action="{% url 'dashboard:society_rename' society.id %}" class="flex gap-1">
-                {% csrf_token %}<input type="text" name="name" class="input-field" style="width:110px;" placeholder="{% trans 'New name' %}">
-                <button class="btn btn-ghost btn-sm" type="submit">{% trans "Rename" %}</button>
+            {% if is_admin or own_federation and society.federation == own_federation %}
+            <td class="flex flex-col gap-2" style="min-width: 200px;">
+              <!-- Rename Group -->
+              <form method="post" action="{% url 'dashboard:society_rename' society.id %}" class="flex gap-1 items-center">
+                {% csrf_token %}<input type="text" name="name" class="input-field" style="width:100px; height:28px; font-size:0.8rem;" placeholder="{% trans 'New name' %}">
+                <button class="btn btn-ghost btn-sm" type="submit" style="height:28px;">{% trans 'Rename' %}</button>
               </form>
+
+              <!-- Moderation Group -->
               {% if society.is_currently_banned %}
-              <form method="post" action="{% url 'dashboard:society_unban' society.id %}">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% trans "Unban" %}</button></form>
+              <form method="post" action="{% url 'dashboard:society_unban' society.id %}" class="flex gap-1 items-center">
+                {% csrf_token %}<button class="btn btn-outline btn-sm" type="submit" style="width:100%; height:28px;">{% trans "Unban" %}</button>
+              </form>
               {% else %}
-              <form method="post" action="{% url 'dashboard:society_ban' society.id %}" class="flex gap-1">
-                {% csrf_token %}<input type="number" name="days" class="input-field" style="width:70px;" placeholder="{% trans 'Days' %}">
-                <button class="btn btn-danger btn-sm" type="submit">{% trans "Ban" %}</button>
+              <form method="post" action="{% url 'dashboard:society_ban' society.id %}" class="flex gap-1 items-center">
+                {% csrf_token %}<input type="number" name="days" class="input-field" style="width:60px; height:28px; font-size:0.8rem;" placeholder="{% trans 'Days' %}">
+                <button class="btn btn-outline btn-sm" type="submit" style="height:28px;">{% trans "Ban" %}</button>
               </form>
               {% endif %}
-              {% if society.resignation_requested and not society.resigned_at %}
-              <form method="post" action="{% url 'dashboard:society_accept_resignation' society.id %}">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% trans "Accept resignation" %}</button></form>
-              {% endif %}
-              {% if society.is_independent %}
-              <form method="post" action="{% url 'dashboard:society_promote_to_federation' society.id %}">{% csrf_token %}<button class="btn btn-accent btn-sm" type="submit">{% trans "Promote to federation" %}</button></form>
-              {% endif %}
-              <form method="post" action="{% url 'dashboard:society_delete' society.id %}" onsubmit="return confirm('{% trans 'Delete this society permanently?' %}');">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Delete" %}</button></form>
+
+              <!-- Management Group -->
+              <div class="flex gap-1 flex-wrap">
+                {% if society.resignation_requested and not society.resigned_at %}
+                <form method="post" action="{% url 'dashboard:society_accept_resignation' society.id %}">
+                  {% csrf_token %}<button class="btn btn-outline btn-sm" type="submit" style="height:28px;">{% trans "Accept Resig." %}</button>
+                </form>
+                {% endif %}
+                {% if society.is_independent %}
+                <form method="post" action="{% url 'dashboard:society_promote_to_federation' society.id %}">
+                  {% csrf_token %}<button class="btn btn-accent btn-sm" type="submit" style="height:28px;">{% trans "Promote" %}</button>
+                </form>
+                {% endif %}
+              </div>
+
+              <!-- Danger Group -->
+              <form method="post" action="{% url 'dashboard:society_delete' society.id %}" onsubmit="return confirm('{% trans 'Delete this society permanently?' %}');">
+                {% csrf_token %}<button class="btn btn-danger btn-sm" type="submit" style="width:100%; height:28px;">{% trans "Delete" %}</button>
+              </form>
             </td>
             {% endif %}
           </tr>

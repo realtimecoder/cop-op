@@ -5,7 +5,7 @@
 <section class="section">
   <div class="container">
     <span class="eyebrow">{% trans "Administration" %}</span>
-    <h1>{% trans "Dashboard overview" %}</h1>
+    <h1>{{ dashboard_title }}</h1>
     <div class="grid grid-4">
       <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Total bookings" %}</h3><p style="font-family:var(--font-mono);font-size:1.8rem;font-weight:700;color:var(--teal-deep);margin:0;">{{ total_bookings }}</p></div>
       <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Registered workers" %}</h3><p style="font-family:var(--font-mono);font-size:1.8rem;font-weight:700;color:var(--teal-deep);margin:0;">{{ total_workers }}</p></div>

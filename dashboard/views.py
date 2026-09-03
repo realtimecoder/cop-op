@@ -179,15 +179,66 @@ def society_dashboard(request):
 @user_passes_test(is_staff_role, login_url='core:home')
 def overview(request):
     """Role-aware dashboard landing page (FR-003 Role-Based Access)."""
+    user = request.user
+
+    # Determine dynamic dashboard title
+    if is_platform_admin(user):
+        dashboard_title = "Dashboard Admin"
+    elif is_federation_owner(user):
+        fed = getattr(user, 'managed_federation', None)
+        dashboard_title = f"Dashboard {fed.name if fed else 'Federation'}"
+    elif is_society_operator(user):
+        soc = getattr(user, 'managed_society', None)
+        dashboard_title = f"Dashboard {soc.name if soc else 'Society'}"
+    else:
+        dashboard_title = "Dashboard Overview"
+
+    # Role-aware Statistics
+    # Default global counts for Platform Admin
+    total_bookings = Booking.objects.count()
+    total_workers = WorkerProfile.objects.count()
+    total_customers = User.objects.filter(role=User.Role.CUSTOMER).count()
+    open_complaints = Complaint.objects.filter(status=Complaint.Status.OPEN).count()
+
+    if not is_platform_admin(user):
+        own_federation = getattr(user, 'managed_federation', None)
+        own_society = getattr(user, 'managed_society', None)
+
+        if own_federation:
+            total_bookings = Booking.objects.filter(worker__society__federation=own_federation).count()
+            total_workers = WorkerProfile.objects.filter(society__federation=own_federation).count()
+            total_customers = User.objects.filter(
+                role=User.Role.CUSTOMER,
+                bookings__worker__society__federation=own_federation
+            ).distinct().count()
+            open_complaints = Complaint.objects.filter(
+                status=Complaint.Status.OPEN,
+                booking__worker__society__federation=own_federation
+            ).count()
+        elif own_society:
+            total_bookings = Booking.objects.filter(worker__society=own_society).count()
+            total_workers = WorkerProfile.objects.filter(society=own_society).count()
+            total_customers = User.objects.filter(
+                role=User.Role.CUSTOMER,
+                bookings__worker__society=own_society
+            ).distinct().count()
+            open_complaints = Complaint.objects.filter(
+                status=Complaint.Status.OPEN,
+                booking__worker__society=own_society
+            ).count()
+        else:
+            total_bookings = total_workers = total_customers = open_complaints = 0
+
     context = {
-        'total_bookings': Booking.objects.count(),
-        'total_workers': WorkerProfile.objects.count(),
-        'total_customers': User.objects.filter(role=User.Role.CUSTOMER).count(),
+        'dashboard_title': dashboard_title,
+        'total_bookings': total_bookings,
+        'total_workers': total_workers,
+        'total_customers': total_customers,
         'pending_verifications': WorkerProfile.objects.filter(
             verification_status=WorkerProfile.VerificationStatus.UNDER_REVIEW).count(),
         'pending_category_requests': WorkerCategoryChangeRequest.objects.filter(
             status=WorkerCategoryChangeRequest.Status.PENDING).count(),
-        'open_complaints': Complaint.objects.filter(status=Complaint.Status.OPEN).count(),
+        'open_complaints': open_complaints,
         'total_categories': ServiceCategory.objects.count(),
         'is_federation_admin': is_federation_admin(request.user),
         'is_society_operator': is_society_operator(request.user),
@@ -322,9 +373,18 @@ def category_change_queue(request):
     requested set and auto-creates service offerings for every service in
     the newly-approved categories, so the worker immediately shows up in
     customer searches for them."""
+    own_federation = getattr(request.user, 'managed_federation', None)
+
     requests_qs = WorkerCategoryChangeRequest.objects.filter(
         status=WorkerCategoryChangeRequest.Status.PENDING
     ).select_related('worker__user').prefetch_related('requested_categories')
+
+    if not is_platform_admin(request.user):
+        if own_federation:
+            requests_qs = requests_qs.filter(worker__society__federation=own_federation)
+        else:
+            requests_qs = requests_qs.none()
+
     return render(request, 'dashboard/category_change_queue.html', {'requests': requests_qs})
 
 
@@ -357,6 +417,19 @@ def decide_category_change(request, request_id):
 @user_passes_test(is_staff_role, login_url='core:home')
 def complaints_queue(request):
     complaints = Complaint.objects.select_related('booking', 'raised_by').order_by('-created_at')
+
+    user = request.user
+    if not is_platform_admin(user):
+        own_federation = getattr(user, 'managed_federation', None)
+        own_society = getattr(user, 'managed_society', None)
+
+        if own_federation:
+            complaints = complaints.filter(booking__worker__society__federation=own_federation)
+        elif own_society:
+            complaints = complaints.filter(booking__worker__society=own_society)
+        else:
+            complaints = complaints.none()
+
     return render(request, 'dashboard/complaints_queue.html', {'complaints': complaints})
 
 
@@ -381,9 +454,22 @@ def resolve_complaint(request, complaint_id):
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
 def customer_list(request):
+    user = request.user
     customers = (User.objects.filter(role=User.Role.CUSTOMER)
                  .annotate(booking_count=Count('bookings'))
                  .order_by('-date_joined'))
+
+    if not is_platform_admin(user):
+        own_federation = getattr(user, 'managed_federation', None)
+        own_society = getattr(user, 'managed_society', None)
+
+        if own_federation:
+            customers = customers.filter(bookings__worker__society__federation=own_federation).distinct()
+        elif own_society:
+            customers = customers.filter(bookings__worker__society=own_society).distinct()
+        else:
+            customers = customers.none()
+
     return render(request, 'dashboard/customer_list.html', {'customers': customers})
 
 
@@ -404,9 +490,22 @@ def customer_detail(request, user_id):
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
 def worker_list(request):
+    user = request.user
     workers = (WorkerProfile.objects.select_related('user', 'society')
                .annotate(booking_count=Count('bookings'))
                .order_by('-created_at'))
+
+    if not is_platform_admin(user):
+        own_federation = getattr(user, 'managed_federation', None)
+        own_society = getattr(user, 'managed_society', None)
+
+        if own_federation:
+            workers = workers.filter(society__federation=own_federation)
+        elif own_society:
+            workers = workers.filter(society=own_society)
+        else:
+            workers = workers.none()
+
     return render(request, 'dashboard/worker_list.html', {'workers': workers})
 
 
@@ -594,9 +693,17 @@ def society_toggle_fieldwork(request, society_id):
 # ---------------------------------------------------------------------
 
 @login_required
-@user_passes_test(is_platform_admin, login_url='core:home')
+@user_passes_test(_can_manage_societies, login_url='core:home')
 def society_rename(request, society_id):
     society = get_object_or_404(Society, id=society_id)
+
+    # Federation admins can only rename societies under their own federation.
+    # Platform admins can rename any society.
+    own_federation = getattr(request.user, 'managed_federation', None)
+    if not is_platform_admin(request.user) and (not own_federation or society.federation_id != own_federation.id):
+        messages.error(request, "You do not have permission to rename this society.")
+        return redirect('dashboard:society_list')
+
     if request.method == 'POST':
         new_name = request.POST.get('name', '').strip()
         if new_name:
