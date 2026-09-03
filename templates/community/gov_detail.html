@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ opportunity.title }} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="grid" style="grid-template-columns: 1fr 350px; gap: 32px;">
+      <div>
+        <div class="section-head">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span class="eyebrow">{% trans "Institutional Opportunity" %}</span>
+              <h1 style="margin-bottom:0;">{{ opportunity.title }}</h1>
+              <p class="muted">{{ opportunity.organization }}</p>
+            </div>
+            <span class="status-pill">{{ opportunity.get_status_display }}</span>
+          </div>
+        </div>
+
+        <div class="card mt-4" style="padding: 32px;">
+          <h3 style="margin-bottom: 16px;">{% trans "Project Overview" %}</h3>
+          <p style="line-height: 1.6; margin-bottom: 32px;">{{ opportunity.description }}</p>
+
+          <div class="grid grid-2" style="gap: 24px;">
+            <div class="card" style="padding: 20px; background: #f9fafb;">
+              <span class="eyebrow">{% trans "Requirements" %}</span>
+              <div style="margin-top: 12px; font-size: 0.95rem;">
+                <div style="margin-bottom: 8px;"><b>Category:</b> {{ opportunity.category.name }}</div>
+                {% if opportunity.service %}
+                <div style="margin-bottom: 8px;"><b>Service:</b> {{ opportunity.service.name }}</div>
+                {% endif %}
+                <div style="margin-bottom: 8px;"><b>Workers Needed:</b> {{ opportunity.workers_required }}</div>
+              </div>
+            </div>
+            <div class="card" style="padding: 20px; background: #f9fafb;">
+              <span class="eyebrow">{% trans "Logistics" %}</span>
+              <div style="margin-top: 12px; font-size: 0.95rem;">
+                <div style="margin-bottom: 8px;"><b>Location:</b> {{ opportunity.location }}</div>
+                <div style="margin-bottom: 8px;"><b>Start Date:</b> {{ opportunity.start_date }}</div>
+                <div style="margin-bottom: 8px;"><b>Deadline:</b> {{ opportunity.deadline|date:"d M Y, H:i" }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="card" style="padding: 24px; position: sticky; top: 24px;">
+          <h3 style="margin-bottom: 16px;">{% trans "Apply for this job" %}</h3>
+          <p class="muted" style="font-size: 0.85rem; margin-bottom: 24px;">
+            {% trans "Only verified cooperative workers can apply for institutional opportunities." %}
+          </p>
+
+          {% if user.is_authenticated and user.workerprofile %}
+            {% if has_applied %}
+            <button class="btn btn-outline btn-sm" style="width: 100%; padding: 14px;" disabled>
+              <svg style="width:14px;height:14px;vertical-align:-3px;"><use href="#icon-check"/></svg>
+              {% trans "Already Applied" %}
+            </button>
+            {% elif opportunity.status == 'open' %}
+            <form method="post" action="{% url 'community:gov_apply' opportunity.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">{% trans "Submit Application" %}</button>
+            </form>
+            {% else %}
+            <button class="btn btn-outline btn-sm" style="width: 100%;" disabled>{% trans "Applications Closed" %}</button>
+            {% endif %}
+          {% else %}
+            <div style="text-align: center;">
+              <a href="{% url 'accounts:login' %}" class="btn btn-primary" style="width: 100%; padding: 14px;">{% trans "Login to Apply" %}</a>
+              <p class="muted" style="font-size: 0.75rem; margin-top: 12px;">{% trans "Verified Worker profile required." %}</p>
+            </div>
+          {% endif %}
+
+          {% if budget_info %}
+          <div class="price-ticket mt-4" style="border: 1px solid var(--line);">
+            <div class="price-ticket-row">
+              <span>{% trans "Budget / Compensation" %}</span>
+              <span>{{ opportunity.budget_info }}</span>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

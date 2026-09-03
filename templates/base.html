@@ -8,10 +8,10 @@
 <meta name="description" content="{% trans 'logo.seva connects verified cooperative workers with households, builders and institutions through fixed, transparent pricing.' %}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.6">
 {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="{% if user.is_authenticated %}{% if user.role == 'worker' %}role-worker{% elif user.role == 'federation' or user.role == 'society' or user.role == 'support' or user.role == 'finance' or user.role == 'welfare' or user.role == 'platform_admin' or user.is_superuser %}role-admin{% else %}role-customer{% endif %}{% else %}role-guest{% endif %}">
 {% include 'partials/icons.html' %}
 
 <div class="topbar">
@@ -42,7 +42,7 @@
     </button>
 
     <nav class="main-nav">
-      <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
+      <a href="{% url 'core:home' %}#services" class="scroll-link">{% trans "Browse services" %}</a>
       <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
       <a href="{% url 'core:about' %}">{% trans "About" %}</a>
       {% if user.is_authenticated %}
@@ -98,7 +98,7 @@
       </div>
       <div>
         <h4>{% trans "Platform" %}</h4>
-        <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
+        <a href="{% url 'core:home' %}#services" class="scroll-link">{% trans "Browse services" %}</a>
         <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
       </div>
       <div>

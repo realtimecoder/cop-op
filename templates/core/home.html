@@ -15,6 +15,52 @@
   </div>
 </section>
 
+{% if user.is_authenticated and user.role != 'customer' %}
+<section class="section">
+  <div class="container">
+    <div class="section-head" style="text-align: center; margin-bottom: 48px;">
+      <span class="eyebrow">{% trans "Cooperative Ecosystem" %}</span>
+      <h2 style="font-size: 2.2rem;">{% trans "More than just a marketplace" %}</h2>
+      <p class="muted">{% trans "Explore our community hubs, fair pay consensus, and institutional opportunities." %}</p>
+    </div>
+    <div class="grid grid-4" style="gap: 24px;">
+      <a href="{% url 'community:dashboard' %}" class="card-link">
+        <div class="card" style="text-align: center; padding: 32px 24px;">
+          <div class="category-icon" style="margin: 0 auto 20px;"><svg style="width: 32px; height: 32px;"><use href="#icon-users"/></svg></div>
+          <h3>{% trans "Community Requests" %}</h3>
+          <p class="muted" style="font-size: 0.85rem; margin-bottom: 20px;">{% trans "Bulk bookings for community projects" %}</p>
+          <span class="btn btn-sm btn-outline" style="width: 100%; justify-content: center;">{% trans "Go to Requests" %}</span>
+        </div>
+      </a>
+      <a href="{% url 'community:global_chat' %}" class="card-link">
+        <div class="card" style="text-align: center; padding: 32px 24px;">
+          <div class="category-icon" style="margin: 0 auto 20px;"><svg style="width: 32px; height: 32px;"><use href="#icon-chat"/></svg></div>
+          <h3>{% trans "Connect Workers" %}</h3>
+          <p class="muted" style="font-size: 0.85rem; margin-bottom: 20px;">{% trans "Collaborate and connect with fellow workers" %}</p>
+          <span class="btn btn-sm btn-outline" style="width: 100%; justify-content: center;">{% trans "Go to Chat Room" %}</span>
+        </div>
+      </a>
+      <a href="{% url 'community:fair_pay' %}" class="card-link">
+        <div class="card" style="text-align: center; padding: 32px 24px;">
+          <div class="category-icon" style="margin: 0 auto 20px;"><svg style="width: 32px; height: 32px;"><use href="#icon-receipt"/></svg></div>
+          <h3>{% trans "Fair Pay Consensus" %}</h3>
+          <p class="muted" style="font-size: 0.85rem; margin-bottom: 20px;">{% trans "Anonymous wage insights and recommendations" %}</p>
+          <span class="btn btn-sm btn-outline" style="width: 100%; justify-content: center;">{% trans "View Consensus" %}</span>
+        </div>
+      </a>
+      <a href="{% url 'community:gov_hub' %}" class="card-link">
+        <div class="card" style="text-align: center; padding: 32px 24px;">
+          <div class="category-icon" style="margin: 0 auto 20px;"><svg style="width: 32px; height: 32px;"><use href="#icon-building"/></svg></div>
+          <h3>{% trans "Govt Opportunities" %}</h3>
+          <p class="muted" style="font-size: 0.85rem; margin-bottom: 20px;">{% trans "Institutional and government contracts" %}</p>
+          <span class="btn btn-sm btn-outline" style="width: 100%; justify-content: center;">{% trans "Explore Jobs" %}</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <section id="services" class="section">
   <div class="container">
     <div class="section-head">

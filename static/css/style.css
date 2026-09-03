@@ -36,6 +36,126 @@
   --container: 1180px;
 }
 
+/* ---- Role-based Theme Overrides --------------------------------------- */
+/* Customer: Vibrant & Playful Theme */
+.role-customer {
+  --teal: #5A9BBA;
+  --teal-deep: #3D7A8C;
+  --teal-tint: #C8E5ED;
+  --marigold: #E6D96E;
+  --marigold-deep: #C4B74E;
+  --stone: #E8B4B4;
+  --paper: #FFFFFF;
+  --line: #D8A8A8;
+  border-top: 5px solid var(--teal-deep);
+}
+
+/* ---- Customer Background Magic --------------------------------------- */
+.role-customer body {
+  position: relative;
+  overflow-x: hidden;
+  z-index: 0;
+}
+
+.role-customer body::before, .role-customer body::after {
+  content: "";
+  position: fixed;
+  width: 40vw;
+  height: 40vw;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: -1;
+  opacity: 0.5;
+  animation: blob-move 20s infinite alternate;
+}
+
+.role-customer body::before {
+  background: var(--teal-tint);
+  top: -10vw;
+  left: -10vw;
+}
+
+.role-customer body::after {
+  background: var(--marigold);
+  bottom: -10vw;
+  right: -10vw;
+  animation-delay: -10s;
+}
+
+@keyframes blob-move {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30vw, 20vh) scale(1.2); }
+  66% { transform: translate(10vw, 40vh) scale(0.8); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* ---- Customer Magic (Animations & Stickers) ------------------------- */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(3deg); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.customer-sticker {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));
+  animation: float 4s ease-in-out infinite;
+  font-family: var(--font-display);
+  border: 3px solid var(--white);
+}
+
+.sticker-pink { background: #F5D2D2; color: #A36B6B; border-radius: 20px 5px 20px 5px; padding: 8px 15px; font-weight: 800; transform: rotate(-8deg); }
+.sticker-yellow { background: #F8F7BA; color: #B8B06B; border-radius: 5px 20px 5px 20px; padding: 8px 15px; font-weight: 800; transform: rotate(8deg); }
+.sticker-green { background: #BDE3C3; color: #6B9B6B; border-radius: 20px 20px 5px 5px; padding: 8px 15px; font-weight: 800; transform: rotate(-5deg); }
+.sticker-blue { background: #A3CCDA; color: #6B8B9B; border-radius: 5px 5px 20px 20px; padding: 8px 15px; font-weight: 800; transform: rotate(5deg); }
+
+.modern-card {
+  border: none !important;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.1) !important;
+  border-radius: 40px !important;
+  animation: slide-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: var(--paper);
+  position: relative;
+  overflow: visible !important;
+}
+
+.modern-avatar {
+  border: 8px solid var(--white);
+  box-shadow: 0 0 0 6px var(--teal);
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+.role-worker {
+  --teal: #1A5F7A;
+  --teal-deep: #0D3B4C;
+  --teal-tint: #E1F1F7;
+  --marigold: #F2994A;
+  --marigold-deep: #C46A1A;
+  border-top: 5px solid var(--teal-deep);
+}
+
+/* Admin: Custom Professional Blue Theme */
+.role-admin {
+  --teal: #66A3BF;
+  --teal-deep: #3368A0;
+  --teal-tint: #C8DFDB;
+  --stone: #F2EFE7;
+  --marigold: #F59E0B;
+  --marigold-deep: #B45309;
+  border-top: 5px solid var(--teal-deep);
+}
+/* --------------------------------------------------------------------- */
+
 *, *::before, *::after{ box-sizing: border-box; }
 html{ scroll-behavior: smooth; }
 

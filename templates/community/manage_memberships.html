@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Manage Memberships" %} — Co-opSeva{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">{% trans "Admin Panel" %}</span>
+        <h1>{% trans "Community Join Requests" %}</h1>
+        <p class="muted">{% trans "Review and approve or reject worker requests to join cooperatives." %}</p>
+      </div>
+    </div>
+
+    <div class="table-wrap mt-4">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{% trans "Worker" %}</th>
+            <th>{% trans "Community" %}</th>
+            <th>{% trans "Requested Date" %}</th>
+            <th style="text-align: right;">{% trans "Action" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in requests %}
+          <tr>
+            <td>
+              <strong>{{ req.worker.user.get_full_name }}</strong><br>
+              <span class="muted" style="font-size: 0.8rem;">{{ req.worker.user.phone_number }}</span>
+            </td>
+            <td>{{ req.community.name }}</td>
+            <td>{{ req.joined_at|date:"d M Y" }}</td>
+            <td style="text-align: right;">
+              <div class="flex" style="gap: 8px; justify-content: flex-end;">
+                <a href="{% url 'community:update_membership' req.id 'approved' %}" class="btn btn-primary btn-sm">{% trans "Approve" %}</a>
+                <a href="{% url 'community:update_membership' req.id 'rejected' %}" class="btn btn-danger btn-sm">{% trans "Reject" %}</a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center muted" style="padding: 40px;">{% trans "No pending join requests at the moment." %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

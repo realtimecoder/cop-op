@@ -59,7 +59,8 @@ def guided_booking(request):
     """
     category_slug = request.GET.get('category')
 
-    if category_slug:
+    # 1. Handle initialization via GET
+    if request.method == 'GET' and category_slug:
         category = get_object_or_404(ServiceCategory, slug=category_slug)
         request.session['booking_wizard'] = {
             'category_slug': category_slug,
@@ -74,6 +75,7 @@ def guided_booking(request):
             'data': request.session['booking_wizard']
         })
 
+    # 2. Ensure we have wizard data
     wizard_data = request.session.get('booking_wizard')
     if not wizard_data:
         return redirect('core:home')
@@ -81,6 +83,7 @@ def guided_booking(request):
     step = int(wizard_data.get('step', 1))
     data = wizard_data.copy()
 
+    # 3. Handle Wizard Navigation (POST)
     if request.method == 'POST':
         action = request.POST.get('action')
 
@@ -151,6 +154,7 @@ def guided_booking(request):
             request.session['booking_wizard'] = data
             return redirect('bookings:guided_booking')
 
+    # 4. Render current step
     step_templates = {
         1: 'bookings/wizard_step_1.html',
         2: 'bookings/wizard_step_2.html',

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Manage Communities" %} — Co-opSeva{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">{% trans "Admin Panel" %}</span>
+        <h1>{% trans "Manage Federations & Communities" %}</h1>
+        <p class="muted">{% trans "Add new cooperative communities that workers can request to join." %}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="gap: 32px; align-items: start;">
+      <!-- Add/Edit Form -->
+      <div class="form-card">
+        <h3>{% trans "Add New Community" %}</h3>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label>{% trans "Community Name" %}</label>
+            <input type="text" name="name" class="input-field" placeholder="e.g. Delhi Electricians Federation" required>
+          </div>
+          <div class="form-group">
+            <label>{% trans "URL Slug" %}</label>
+            <input type="text" name="slug" class="input-field" placeholder="e.g. delhi-electricians" required>
+            <p class="help-text">{% trans "Used in the URL. Use lowercase and hyphens." %}</p>
+          </div>
+          <div class="form-group">
+            <label>{% trans "Location" %}</label>
+            <input type="text" name="location" class="input-field" placeholder="e.g. New Delhi, India">
+          </div>
+          <div class="form-group">
+            <label>{% trans "Description" %}</label>
+            <textarea name="description" class="input-field" rows="3" placeholder="Tell workers about this community..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">{% trans "Create Community" %}</button>
+        </form>
+      </div>
+
+      <!-- List of Communities -->
+      <div>
+        <h3>{% trans "Existing Communities" %}</h3>
+        <div class="table-wrap mt-2">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Location" %}</th>
+                <th>{% trans "Slug" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for community in communities %}
+              <tr>
+                <td><strong>{{ community.name }}</strong></td>
+                <td>{{ community.location|default:"-" }}</td>
+                <td><code>{{ community.slug }}</code></td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3" class="text-center muted">{% trans "No communities added yet." %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

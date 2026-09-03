@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Submit Wage Suggestion" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head" style="text-align: center; margin-bottom: 48px;">
+      <span class="eyebrow">{% trans "Fair Pay Consensus" %}</span>
+      <h1>{% trans "Submit Your Suggested Minimum Wage" %}</h1>
+      <p class="muted">{% trans "Your submission is anonymous. It helps the community establish a fair minimum floor for services." %}</p>
+    </div>
+
+    <div style="max-width: 500px; margin: 0 auto;">
+      <div class="card">
+        <form method="post" style="padding: 24px;">
+          {% csrf_token %}
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">{% trans "Service Category" %}</label>
+            <select name="category" class="input-field" required style="width: 100%;">
+              <option value="">{% trans "Select Category" %}</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">{% trans "Specific Service (Optional)" %}</label>
+            <input type="text" name="service" class="input-field" placeholder="e.g. Fan Installation" style="width: 100%;">
+          </div>
+
+          <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+            <div class="form-group">
+              <label style="display: block; margin-bottom: 8px; font-weight: 500;">{% trans "Suggested Wage" %}</label>
+              <input type="number" step="0.01" name="wage" class="input-field" placeholder="₹ 0.00" required style="width: 100%;">
+            </div>
+            <div class="form-group">
+              <label style="display: block; margin-bottom: 8px; font-weight: 500;">{% trans "Unit" %}</label>
+              <select name="unit" class="input-field" required style="width: 100%;">
+                <option value="hour">{% trans "Per Hour" %}</option>
+                <option value="day" selected>{% trans "Per Day" %}</option>
+                <option value="job">{% trans "Per Job" %}</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">{% trans "Submit Anonymous Suggestion" %}</button>
+        </form>
+      </div>
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="{% url 'community:fair_pay' %}" class="btn btn-ghost btn-sm">{% trans "Back to Consensus Dashboard" %}</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

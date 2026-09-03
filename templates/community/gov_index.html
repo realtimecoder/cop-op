@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Government Opportunities Hub" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div style="text-align: center; width: 100%;">
+        <span class="eyebrow">{% trans "Institutional Partnerships" %}</span>
+        <h1 style="font-size: 2.5rem;">{% trans "Government Opportunities Hub" %}</h1>
+        <p class="muted" style="max-width: 700px; margin: 0 auto 40px;">{% trans "Access large-scale institutional contracts and government-backed projects. Verified cooperative workers can apply directly." %}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-3" style="gap: 24px;">
+      {% for opp in opportunities %}
+      <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--accent-color);">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+            <h3 style="margin:0;">{{ opp.title }}</h3>
+            <span class="status-pill" style="font-size: 0.7rem;">{{ opp.get_status_display }}</span>
+          </div>
+          <div class="text-muted" style="font-size: 0.85rem; line-height: 1.6; margin-bottom: 20px;">
+            <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg style="width:14px;height:14px;"><use href="#icon-building"/></svg>
+              <b>{{ opp.organization }}</b>
+            </div>
+            <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg style="width:14px;height:14px;"><use href="#icon-tool"/></svg>
+              {{ opp.category.name }} ({{ opp.workers_required }} workers)
+            </div>
+            <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg style="width:14px;height:14px;"><use href="#icon-location"/></svg>
+              {{ opp.location }}
+            </div>
+            <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg style="width:14px;height:14px;"><use href="#icon-calendar"/></svg>
+              Deadline: {{ opp.deadline|date:"d M Y" }}
+            </div>
+          </div>
+        </div>
+        <a href="{% url 'community:gov_detail' opp.id %}" class="btn btn-outline btn-sm" style="width: 100%; text-align: center;">{% trans "View Details" %}</a>
+      </div>
+      {% empty %}
+      <div class="card" style="grid-column: span 3; text-align: center; padding: 60px 24px;">
+        <svg style="width: 48px; height: 48px; color: #d1d5db; margin-bottom: 16px;"><use href="#icon-empty"/></svg>
+        <p class="muted">{% trans "No open government opportunities at the moment." %}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

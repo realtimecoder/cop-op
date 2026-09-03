@@ -3,11 +3,23 @@
 {% block title %}{% trans "My profile" %} — Co-opSeva{% endblock %}
 {% block content %}
 <section class="section">
-  <div class="container">
-    <div class="form-card wide">
-      <h1 style="font-size:1.5rem;">{% trans "My profile" %}</h1>
-      <div class="text-center" style="margin-bottom:18px;">
-        <div class="worker-avatar" style="width:84px;height:84px;font-size:1.8rem;margin:0 auto;">
+  <div class="container" style="position: relative;">
+
+    {% if user.role == 'customer' %}
+      <!-- Playful Stickers for Customers -->
+      <div class="customer-sticker sticker-pink" style="top: -20px; left: 5%; animation-delay: 0s;">✨ VIP Member</div>
+      <div class="customer-sticker sticker-yellow" style="top: 60px; right: 2%; animation-delay: 0.5s;">🔥 Super User</div>
+      <div class="customer-sticker sticker-green" style="bottom: 120px; left: -10px; animation-delay: 1s;">🚀 Fast-Track</div>
+      <div class="customer-sticker sticker-blue" style="top: 220px; right: -20px; animation-delay: 1.5s;">💎 Elite Tier</div>
+      <div class="customer-sticker sticker-pink" style="top: 300px; left: -30px; animation-delay: 2s; transform: rotate(10deg);">🎉 Top Rated</div>
+    {% endif %}
+
+    <div class="form-card wide {% if user.role == 'customer' %}modern-card{% endif %}">
+      <h1 style="font-size:1.8rem; text-align:center; margin-bottom:20px; {% if user.role == 'customer' %}color: var(--teal-deep);{% endif %}" class="{% if user.role == 'customer' %}modern-title{% endif %}">
+        {% trans "My profile" %}
+      </h1>
+      <div class="text-center" style="margin-bottom:24px;">
+        <div class="worker-avatar {% if user.role == 'customer' %}modern-avatar{% endif %}" style="width:100px;height:100px;font-size:2.2rem;margin:0 auto;">
           {% if request.user.profile_photo %}
             <img src="{{ request.user.profile_photo.url }}" alt="">
           {% else %}
@@ -44,7 +56,7 @@
           <p class="help-text">{% trans "JPG, PNG or WEBP, up to 5 MB. iPhone HEIC photos aren't supported — switch to 'Most Compatible' in Camera settings, or share via WhatsApp first to auto-convert." %}</p>
           {% for error in form.profile_photo.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
         </div>
-        <button type="submit" class="btn btn-primary btn-block">{% trans "Save changes" %}</button>
+        <button type="submit" class="btn btn-primary btn-block" style="{% if user.role == 'customer' %}border-radius: 15px; padding: 15px; font-size: 1.1rem;{% endif %}">{% trans "Save changes" %}</button>
       </form>
     </div>
   </div>

@@ -4,6 +4,33 @@ function getCookie(name) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+  // Forceful Smooth Scroll for Browse Services
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest('.scroll-link');
+    if (!link) return;
+
+    var href = link.getAttribute('href');
+    if (href && href.includes('#services')) {
+      var target = document.getElementById('services');
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  });
+
+  // Handle hash scroll on page load
+  window.addEventListener('load', function () {
+    if (window.location.hash === '#services') {
+      var target = document.getElementById('services');
+      if (target) {
+        setTimeout(function () {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  });
+
   // Mobile nav toggle
   var toggle = document.querySelector('.nav-toggle');
   var nav = document.querySelector('.main-nav');

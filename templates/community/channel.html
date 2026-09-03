@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ channel.name }} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="grid" style="grid-template-columns: 280px 1fr; gap: 32px; height: calc(100vh - 200px); align-items: start;">
+
+      <!-- Sidebar: Channels -->
+      <div class="card" style="height: 100%; display: flex; flex-direction: column; padding: 0; overflow: hidden;">
+        <div class="section-head" style="padding: 20px; border-bottom: 1px solid var(--line);">
+          <h3 style="margin:0;">{% trans "Community" %}</h3>
+        </div>
+        <div style="flex: 1; overflow-y: auto; padding: 12px;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: #6b7280; margin: 16px 0 8px 12px; font-weight: bold;">{% trans "Channels" %}</div>
+          {% for c in channels %}
+          <a href="{% url 'community:channel' c.slug %}" class="card-link" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; text-decoration: none; color: inherit; margin-bottom: 4px; transition: background 0.2s; {% if c.slug == channel.slug %}background: var(--accent-light); font-weight: 500;{% endif %}">
+            <span style="color: #9ca3af;">#</span>
+            <span style="font-size: 0.95rem;">{{ c.name }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Main Area: Chat -->
+      <div class="card" style="height: 100%; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
+        <!-- Channel Header -->
+        <div class="section-head" style="padding: 16px 24px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="font-weight: bold; font-size: 1.2rem;"># {{ channel.name }}</span>
+            <p class="muted" style="font-size: 0.8rem; margin: 0;">{{ channel.description }}</p>
+          </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+          {% for msg in messages %}
+          <div style="display: flex; gap: 12px;">
+            <div class="worker-avatar" style="width: 36px; height: 36px; flex-shrink: 0; font-size: 0.8rem; line-height: 36px; text-align: center;">
+              {{ msg.user.username|first|upper }}
+            </div>
+            <div>
+              <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;">
+                <b style="font-size: 0.9rem;">{{ msg.user.get_full_name|default:msg.user.username }}</b>
+                <span class="muted" style="font-size: 0.7rem;">{{ msg.created_at|date:"d M, H:i" }}</span>
+              </div>
+              <p style="margin: 0; font-size: 0.95rem; line-height: 1.5;">{{ msg.content }}</p>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-center muted" style="margin-top: 40px;">
+            <p>{% trans "No messages yet. Start the conversation!" %}</p>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Message Input -->
+        {% if not channel.is_announcement %}
+        <div style="padding: 20px; border-top: 1px solid var(--line);">
+          <form method="post" style="display: flex; gap: 12px;">
+            {% csrf_token %}
+            <input type="text" name="content" placeholder="Message #{{ channel.name }}..." class="input-field" style="flex: 1;" required>
+            <button type="submit" class="btn btn-primary">{% trans "Send" %}</button>
+          </form>
+        </div>
+        {% else %}
+        <div style="padding: 16px; text-align: center; background: #f9fafb; border-top: 1px solid var(--line);">
+          <span class="muted" style="font-size: 0.85rem;">{% trans "Only admins can post in announcement channels." %}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
