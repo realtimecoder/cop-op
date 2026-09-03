@@ -13,14 +13,19 @@
     {% endif %}
     <p class="muted">{% trans "These workers have already passed Admin skill/certificate verification. Adding them here makes them a member of your cooperative society." %}</p>
 
+    <div class="mt-4 mb-4" style="max-width:300px;">
+      <label class="label-sm">{% trans "Search by phone number" %}</label>
+      <input type="text" id="workerSearch" class="input-field" placeholder="{% trans 'Enter phone number...' %}" maxlength="10">
+    </div>
+
     <div class="table-wrap">
-      <table class="data-table">
+      <table class="data-table" id="workerTable">
         <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Phone" %}</th><th>{% trans "Categories" %}</th><th>{% trans "Skill grade" %}</th><th></th></tr></thead>
-        <tbody>
+        <tbody id="workerTableBody">
           {% for worker in workers %}
-          <tr>
+          <tr class="worker-row">
             <td>{{ worker.user.get_full_name|default:"—" }}</td>
-            <td>{{ worker.user.phone_number }}</td>
+            <td class="phone-col">{{ worker.user.phone_number }}</td>
             <td>{% for c in worker.categories.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
             <td>{{ worker.get_skill_grade_display }}</td>
             <td>
@@ -29,10 +34,38 @@
               {% endif %}
             </td>
           </tr>
-          {% empty %}<tr><td colspan="5" class="muted">{% trans "No admin-verified, unclaimed workers right now." %}</td></tr>{% endfor %}
+          {% empty %}<tr id="noResultsRow"><td colspan="5" class="muted">{% trans "No admin-verified, unclaimed workers right now." %}</td></tr>{% endfor %}
         </tbody>
       </table>
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('workerSearch');
+        const rows = document.querySelectorAll('.worker-row');
+        const noResultsRow = document.getElementById('noResultsRow');
+
+        searchInput.addEventListener('input', function() {
+          const query = this.value.trim().toLowerCase();
+          let hasVisibleRows = false;
+
+          rows.forEach(row => {
+            const phone = row.querySelector('.phone-col').textContent.toLowerCase();
+            if (phone.includes(query)) {
+              row.style.display = '';
+              hasVisibleRows = true;
+            } else {
+              row.style.display = 'none';
+            }
+          });
+
+          if (noResultsRow) {
+            noResultsRow.style.display = hasVisibleRows ? 'none' : '';
+          }
+        });
+      });
+    </script>
+
   </div>
 </section>
 {% endblock %}

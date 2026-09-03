@@ -10,13 +10,19 @@
 
     <div class="table-wrap">
       <table class="data-table">
-        <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Phone" %}</th><th>{% trans "Skill grade" %}</th><th>{% trans "Society" %}</th><th>{% trans "Status" %}</th><th>{% trans "Action" %}</th></tr></thead>
+        <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Phone" %}</th><th>{% trans "Skill grade" %}</th><th>{% trans "Documents" %}</th><th>{% trans "Society" %}</th><th>{% trans "Status" %}</th><th>{% trans "Action" %}</th></tr></thead>
         <tbody>
           {% for worker in workers %}
           <tr>
-            <td>{{ worker.user.get_full_name|default:"—" }}</td>
+            <td>
+              <a href="{% url 'dashboard:worker_detail' worker.id %}" class="font-bold hover:underline">{{ worker.user.get_full_name|default:"—" }}</a>
+            </td>
             <td>{{ worker.user.phone_number }}</td>
             <td>{{ worker.get_skill_grade_display }}</td>
+            <td>
+              <span class="badge badge-outline">{{ worker.documents.count }} {% trans "uploaded" %}</span>
+              <a href="{% url 'dashboard:worker_detail' worker.id %}" class="text-sm text-primary hover:underline ml-1">{% trans "View" %}</a>
+            </td>
             <td>{% if worker.society %}{{ worker.society.name }}{% else %}<span class="muted">{% trans "Unclaimed" %}</span>{% endif %}</td>
             <td><span class="status-pill">{{ worker.get_verification_status_display }}</span></td>
             <td class="flex gap-1">

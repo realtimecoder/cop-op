@@ -1,5 +1,6 @@
 from django.conf import settings
 import uuid
+from decimal import Decimal, ROUND_HALF_UP
 from django.db import models
 from django.utils import timezone
 
@@ -17,6 +18,7 @@ class Wallet(models.Model):
         return f"Wallet: {self.user.username} - {self.balance} {self.currency}"
 
     def credit(self, amount, transaction_type='earning', reference=None):
+        amount = Decimal(str(amount)) if not isinstance(amount, Decimal) else amount
         self.balance += amount
         self.save()
         return WalletTransaction.objects.create(
@@ -25,6 +27,7 @@ class Wallet(models.Model):
         )
 
     def debit(self, amount, transaction_type='withdrawal', reference=None):
+        amount = Decimal(str(amount)) if not isinstance(amount, Decimal) else amount
         if self.balance < amount:
             raise ValueError("Insufficient wallet balance.")
         self.balance -= amount
@@ -100,19 +103,25 @@ class Payment(models.Model):
 
     def compute_settlement(self):
         worker = self.booking.worker
-        pct = float(worker.payout_percentage) if worker else 78.0
-        self.worker_payout = round(float(self.amount) * pct / 100, 2)
+        # Use Decimal for all financial calculations to avoid precision errors and TypeErrors
+        pct = Decimal(str(worker.payout_percentage)) if worker else Decimal('78.0')
 
-        gross_cooperative_fee = round(float(self.amount) - self.worker_payout, 2)
+        # Total amount as Decimal
+        amount = self.amount
+
+        # Worker Payout = amount * payout_percentage / 100
+        self.worker_payout = (amount * pct / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        gross_cooperative_fee = amount - self.worker_payout
 
         # Calculate platform commission from the cooperative fee
         from workers.models import PlatformConfig
-        comm_pct = float(PlatformConfig.get('DEFAULT_COMMISSION', '10.0'))
+        comm_pct = Decimal(str(PlatformConfig.get('DEFAULT_COMMISSION', '10.0')))
         if worker and worker.society and worker.society.federation:
-            comm_pct = float(worker.society.federation.commission_percent)
+            comm_pct = Decimal(str(worker.society.federation.commission_percent))
 
-        self.platform_commission = round(float(gross_cooperative_fee) * comm_pct / 100, 2)
-        self.cooperative_fee = round(gross_cooperative_fee - self.platform_commission, 2)
+        self.platform_commission = (gross_cooperative_fee * comm_pct / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        self.cooperative_fee = gross_cooperative_fee - self.platform_commission
 
 
 class Invoice(models.Model):
