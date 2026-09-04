@@ -32,6 +32,21 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Admin More Dropdown Toggle
+  document.querySelectorAll('.dropdown-toggle').forEach(function(toggle) {
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var dropdown = this.closest('.nav-dropdown');
+      dropdown.classList.toggle('open');
+    });
+  });
+
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.nav-dropdown.open').forEach(function(dropdown) {
+      dropdown.classList.remove('open');
+    });
+  });
+
   // OTP field: numeric-only, auto-focus
   document.querySelectorAll('.otp-field').forEach(function (el) {
     el.addEventListener('input', function () {

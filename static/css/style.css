@@ -36,6 +36,39 @@
   --container: 1180px;
 }
 
+/* Role-based Themes */
+.theme-customer {
+  --stone: #E3F2FD;
+  --teal-tint: #90CAF9;
+  --teal: #2196F3;
+  --teal-deep: #0D47A1;
+  --stone-dark: #BBDEFB;
+}
+
+.theme-worker {
+  --stone: #E6EEC9;
+  --teal-tint: #C2D099;
+  --teal: #7DA78C;
+  --teal-deep: #35858E;
+  --stone-dark: #DDEBBA;
+}
+
+.theme-society {
+  --stone: #FFE2AF;
+  --teal-tint: #24B1B1;
+  --teal: #E37434;
+  --teal-deep: #007979;
+  --stone-dark: #F2D9A0;
+}
+
+.theme-platform_admin, .theme-federation, .theme-support, .theme-finance, .theme-welfare {
+  --stone: #E6D5B8;
+  --teal-tint: #F0A500;
+  --teal: #E45826;
+  --teal-deep: #1B1A17;
+  --stone-dark: #D9C4A4;
+}
+
 *, *::before, *::after{ box-sizing: border-box; }
 html{ scroll-behavior: smooth; }
 
@@ -116,9 +149,49 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   display:flex; align-items:center; justify-content:space-between;
   padding-top:14px; padding-bottom:14px; gap: 16px;
 }
-.brand{ display:flex; align-items:center; gap:10px; font-family: var(--font-display); font-weight:700; font-size:1.35rem; color: var(--teal-deep); }
-.brand .brand-mark{ width:36px; height:36px; flex-shrink:0; }
-.brand .brand-sub{ display:block; font-family: var(--font-body); font-weight:500; font-size:.62rem; letter-spacing:.09em; text-transform:uppercase; color: var(--marigold-deep); }
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: all .3s ease;
+}
+
+.brand-text {
+  background: linear-gradient(45deg, var(--teal-deep), var(--marigold), var(--teal-deep));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  transition: all .3s ease;
+  display: inline-block;
+}
+
+.brand:hover .brand-text {
+  background-position: right center;
+  transform: scale(1.02) translateY(-1px);
+}
+
+.brand .brand-mark{ height:60px; width:auto; flex-shrink:0; object-fit:contain; transition: transform .3s ease; }
+.brand:hover .brand-mark { transform: scale(1.1); }
+
+.brand .brand-sub{
+  display:block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size:.65rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color: var(--marigold-deep);
+  transition: color .3s ease;
+}
+
+.brand:hover .brand-sub {
+  color: var(--teal-deep);
+}
+
 
 .main-nav{ display:flex; align-items:center; gap: 26px; }
 .main-nav a{
@@ -126,6 +199,69 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   padding: 6px 2px; border-bottom: 2px solid transparent;
 }
 .main-nav a:hover, .main-nav a.active{ color: var(--teal-deep); border-bottom-color: var(--marigold); }
+
+.main-nav.admin-nav{ gap: 26px; }
+.main-nav.admin-nav a, .main-nav.admin-nav .dropdown-toggle{ font-size: .95rem; }
+
+/* Dropdown for Admin More Menu */
+.nav-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding: 6px 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color .2s ease;
+}
+
+.dropdown-toggle:hover { color: var(--teal-deep); }
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  min-width: 180px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(5px);
+  transition: all .2s ease;
+  z-index: 100;
+  padding: 8px 0;
+}
+
+.nav-dropdown.open .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 8px 16px;
+  font-size: .85rem;
+  color: var(--ink-soft);
+  border-bottom: none !important;
+  transition: background .2s ease;
+}
+
+.dropdown-menu a:hover {
+  background: var(--teal-tint);
+  color: var(--teal-deep);
+}
 
 .header-actions{ display:flex; align-items:center; gap:12px; }
 .nav-toggle{
