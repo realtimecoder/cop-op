@@ -143,6 +143,27 @@
   </div>
 </footer>
 
+<div class="ai-chat-floating">
+  <span class="ai-chat-label">Chat with AI</span>
+  <button class="ai-chat-button" id="ai-chat-toggle" aria-label="Chat with AI">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2 22l5-1.338C8.47 21.513 10.179 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+  </button>
+</div>
+
+<div class="ai-chat-window" id="ai-chat-window">
+  <div class="ai-chat-header">
+    <span style="font-family: var(--font-display)">AI Assistant</span>
+    <button class="ai-chat-close" id="ai-chat-close">&times;</button>
+  </div>
+  <div class="ai-chat-messages" id="ai-chat-messages">
+    <div class="ai-msg">Hello! How can I help you with Co-opSeva today?</div>
+  </div>
+  <div class="ai-chat-input-area">
+    <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Ask me something...">
+    <button class="ai-chat-send" id="ai-chat-send">Send</button>
+  </div>
+</div>
+
 <script src="{% static 'js/app.js' %}"></script>
 {% block extra_js %}{% endblock %}
 </body>
