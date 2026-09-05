@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 from catalog.models import ServiceCategory
 from workers.models import WorkerProfile
+from .models import GovernmentOpportunity
 
 
 def home(request):
@@ -24,7 +25,8 @@ def how_it_works(request):
 
 
 def government_opportunities(request):
-    return render(request, 'core/government_opportunities.html')
+    opportunities = GovernmentOpportunity.objects.all().order_by('-created_at')
+    return render(request, 'core/government_opportunities.html', {'opportunities': opportunities})
 
 
 def apply_government_opportunity(request, project_id):

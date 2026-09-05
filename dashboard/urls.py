@@ -52,5 +52,6 @@ urlpatterns = [
     path('join-requests/', views.join_requests_queue, name='join_requests_queue'),
     path('join-requests/<int:request_id>/decide/', views.decide_join_request, name='decide_join_request'),
     path('manage-custom-pricing/', views.manage_custom_pricing, name='manage_custom_pricing'),
+    path('manage-gov-opportunities/', views.manage_government_opportunities, name='manage_gov_opportunities'),
 
 ]
