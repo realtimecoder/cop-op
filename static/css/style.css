@@ -195,13 +195,13 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
 
 .main-nav{ display:flex; align-items:center; gap: 26px; }
 .main-nav a{
-  font-weight: 500; font-size: .95rem; color: var(--ink-soft);
+  font-weight: 500; font-size: 0.9rem; color: var(--ink-soft);
   padding: 6px 2px; border-bottom: 2px solid transparent;
 }
 .main-nav a:hover, .main-nav a.active{ color: var(--teal-deep); border-bottom-color: var(--marigold); }
 
 .main-nav.admin-nav{ gap: 26px; }
-.main-nav.admin-nav a, .main-nav.admin-nav .dropdown-toggle{ font-size: .95rem; }
+.main-nav.admin-nav a, .main-nav.admin-nav .dropdown-toggle{ font-size: 0.9rem; }
 
 /* Dropdown for Admin More Menu */
 .nav-dropdown {
@@ -213,7 +213,7 @@ p{ margin: 0 0 1em; color: var(--ink-soft); }
   background: transparent;
   border: none;
   font-family: inherit;
-  font-size: .82rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--ink-soft);
   padding: 6px 2px;
@@ -788,4 +788,27 @@ table.data-table tr:last-child td{ border-bottom:none; }
 @media (max-width: 720px){
   .status-step-label{ font-size: .62rem; max-width: 64px; }
   .status-step{ min-width: 64px; }
+}
+/* Worker Role Navbar Adjustments */
+.theme-worker .main-nav { gap: 26px !important; }
+.theme-worker .main-nav a, .theme-worker .dropdown-toggle { font-size: 0.9rem !important; }
+
+.rainbow-blink {
+  background: linear-gradient(to right, #ef5350, #f48fb1, #7e57c2, #2196f3, #26c6da, #4caf50, #ffeb3b, #ff9800, #ef5350);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow-move 3s linear infinite, blink-anim 1s ease-in-out infinite;
+  white-space: nowrap;
+  font-weight: 700 !important;
+}
+
+@keyframes rainbow-move {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes blink-anim {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }

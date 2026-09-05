@@ -23,6 +23,14 @@ def how_it_works(request):
     return render(request, 'core/how_it_works.html')
 
 
+def government_opportunities(request):
+    return render(request, 'core/government_opportunities.html')
+
+
+def apply_government_opportunity(request, project_id):
+    return render(request, 'core/government_apply.html', {'project_id': project_id})
+
+
 def contact(request):
     return render(request, 'core/contact.html')
 

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Apply for Project" %} — Co-opSeva{% endblock %}
+
+{% block content %}
+<section class="page-header" style="padding: 4rem 0; background: var(--color-bg-alt); border-bottom: 1px solid var(--color-border);">
+  <div class="container">
+    <h1 style="font-family: var(--font-display); font-size: 2.5rem; margin-bottom: 1rem;">{% trans "Apply for Government Opportunity" %}</h1>
+    <p style="font-size: 1.1rem; color: var(--color-text-muted);">
+      {% trans "Please complete the application form below to register your interest in this project." %}
+    </p>
+  </div>
+</section>
+
+<section class="application-form" style="padding: 4rem 0;">
+  <div class="container">
+    <div class="form-card wide">
+      <h2 style="margin-bottom: 1.5rem; text-align: center;">{% trans "Application Form" %}</h2>
+      <p style="text-align: center; margin-bottom: 2rem; color: var(--ink-soft);">{% trans "Project ID: #" %}{{ project_id }}</p>
+
+      <form method="post" action="#">
+        {% csrf_token %}
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="form-group">
+            <label>{% trans "Full Name" %}</label>
+            <input type="text" class="input-field" placeholder="Enter your full name" required>
+          </div>
+          <div class="form-group">
+            <label>{% trans "Cooperative Name" %}</label>
+            <input type="text" class="input-field" placeholder="Enter your coop name" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>{% trans "Primary Skill / Specialization" %}</label>
+          <select class="input-field" required>
+            <option value="">Select Skill</option>
+            <option value="electrician">Electrician</option>
+            <option value="plumber">Plumber</option>
+            <option value="construction">Construction Worker</option>
+            <option value="agriculture">Agriculture Expert</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>{% trans "Relevant Experience (Years)" %}</label>
+          <input type="number" class="input-field" placeholder="e.g. 5" required>
+        </div>
+
+        <div class="form-group">
+          <label>{% trans "Why are you a good fit for this project?" %}</label>
+          <textarea class="input-field" rows="4" placeholder="Describe your experience and certifications..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>{% trans "Upload Certifications (PDF)" %}</label>
+          <input type="file" class="input-field" accept=".pdf">
+          <p class="help-text">{% trans "Maximum file size: 5MB" %}</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+          <button type="submit" class="btn btn-primary">{% trans "Submit Application" %}</button>
+          <a href="{% url 'core:government_opportunities' %}" class="btn btn-ghost btn-sm" style="margin-left: 1rem;">{% trans "Back to Projects" %}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

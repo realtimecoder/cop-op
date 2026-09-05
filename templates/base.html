@@ -59,24 +59,40 @@
           </div>
         </div>
       {% else %}
-        {# Original User/Customer nav #}
-        <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
-        {% if not user.is_authenticated or user.role not in 'federation,society,support,finance,welfare,platform_admin' and not user.is_superuser %}
+        {% if user.is_authenticated and user.role == 'worker' %}
+          {# Worker Specific Navbar #}
+          <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
           <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
-        {% endif %}
-        <a href="{% url 'core:about' %}">{% trans "About" %}</a>
-        {% if user.is_authenticated %}
-          <a href="{% url 'bookings:my_bookings' %}">{% trans "My bookings" %}</a>
-          <a href="{% url 'payments:wallet_dashboard' %}">{% trans "My Wallet" %}</a>
-          {% if user.role == 'worker' %}<a href="{% url 'workers:my_dashboard' %}">{% trans "Worker dashboard" %}</a>{% endif %}
-          {% if user.role == 'builder' %}<a href="{% url 'bookings:my_bulk_requests' %}">{% trans "Bulk requests" %}</a>{% endif %}
-          {% if user.role == 'society' or user.is_superuser %}<a href="{% url 'bookings:bulk_request_queue' %}">{% trans "Bulk request queue" %}</a>{% endif %}
-          {% if user.role == 'federation' or user.is_superuser %}
-            <a href="{% url 'core:pricing_policy' %}">{% trans "Pricing policy" %}</a>
-            <a href="{% url 'dashboard:society_list' %}">{% trans "Societies" %}</a>
+          <a href="{% url 'core:government_opportunities' %}" class="rainbow-blink">{% trans "Government opportunities" %}</a>
+
+          <div class="nav-dropdown">
+            <button class="dropdown-toggle">{% trans "More" %} <svg style="width:10px;height:10px;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+            <div class="dropdown-menu">
+              <a href="{% url 'workers:my_dashboard' %}">{% trans "Worker Dashboard" %}</a>
+              <a href="{% url 'payments:wallet_dashboard' %}">{% trans "My Wallet" %}</a>
+              <a href="{% url 'bookings:my_bookings' %}">{% trans "My booking" %}</a>
+            </div>
+          </div>
+        {% else %}
+          {# Original User/Customer nav #}
+          <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
+          {% if not user.is_authenticated or user.role not in 'federation,society,support,finance,welfare,platform_admin' and not user.is_superuser %}
+            <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
           {% endif %}
-          {% if user.role in 'federation,society,support,finance,welfare,platform_admin' or user.is_superuser %}
-            <a href="{% url 'dashboard:overview' %}">{% trans "Admin dashboard" %}</a>
+          <a href="{% url 'core:about' %}">{% trans "About" %}</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'bookings:my_bookings' %}">{% trans "My bookings" %}</a>
+            <a href="{% url 'payments:wallet_dashboard' %}">{% trans "My Wallet" %}</a>
+            {% if user.role == 'worker' %}<a href="{% url 'workers:my_dashboard' %}">{% trans "Worker dashboard" %}</a>{% endif %}
+            {% if user.role == 'builder' %}<a href="{% url 'bookings:my_bulk_requests' %}">{% trans "Bulk requests" %}</a>{% endif %}
+            {% if user.role == 'society' or user.is_superuser %}<a href="{% url 'bookings:bulk_request_queue' %}">{% trans "Bulk request queue" %}</a>{% endif %}
+            {% if user.role == 'federation' or user.is_superuser %}
+              <a href="{% url 'core:pricing_policy' %}">{% trans "Pricing policy" %}</a>
+              <a href="{% url 'dashboard:society_list' %}">{% trans "Societies" %}</a>
+            {% endif %}
+            {% if user.role in 'federation,society,support,finance,welfare,platform_admin' or user.is_superuser %}
+              <a href="{% url 'dashboard:overview' %}">{% trans "Admin dashboard" %}</a>
+            {% endif %}
           {% endif %}
         {% endif %}
       {% endif %}
