@@ -1,8 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from catalog.models import ServiceCategory
 from workers.models import WorkerProfile
-from .models import GovernmentOpportunity
+from .models import GovernmentOpportunity, GovernmentApplication
+from accounts.models import User
 
 
 def home(request):
@@ -29,8 +31,42 @@ def government_opportunities(request):
     return render(request, 'core/government_opportunities.html', {'opportunities': opportunities})
 
 
+@login_required
 def apply_government_opportunity(request, project_id):
-    return render(request, 'core/government_apply.html', {'project_id': project_id})
+    opportunity = get_object_or_404(GovernmentOpportunity, id=project_id)
+
+    # Ensure user is a worker
+    if request.user.role != User.Role.WORKER:
+        messages.error(request, "Only registered workers can apply for government opportunities.")
+        return redirect('core:home')
+
+    # Get worker profile
+    try:
+        worker_profile = request.user.worker_profile
+    except AttributeError:
+        messages.error(request, "You do not have a completed worker profile. Please set up your profile first.")
+        return redirect('accounts:profile')
+
+    if request.method == 'POST':
+        cover_letter = request.POST.get('cover_letter', '').strip()
+
+        # Check if already applied
+        if GovernmentApplication.objects.filter(opportunity=opportunity, worker=worker_profile).exists():
+            messages.warning(request, "You have already applied for this project.")
+            return redirect('core:government_opportunities')
+
+        GovernmentApplication.objects.create(
+            opportunity=opportunity,
+            worker=worker_profile,
+            cover_letter=cover_letter
+        )
+        messages.success(request, f"Your application for {opportunity.title} has been submitted successfully!")
+        return redirect('core:government_opportunities')
+
+    return render(request, 'core/government_apply.html', {
+        'opportunity': opportunity,
+        'project_id': project_id
+    })
 
 
 def contact(request):

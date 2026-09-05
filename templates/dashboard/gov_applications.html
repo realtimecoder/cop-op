@@ -1,0 +1,87 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Government Project Applications</h1>
+                <p>Review and verify workers who have applied for government contracts.</p>
+            </div>
+            <a href="{% url 'dashboard:manage_gov_opportunities' %}" class="btn btn-outline btn-sm">Back to Projects</a>
+        </div>
+    </header>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>All Applications</h2>
+            <form method="GET" style="display: flex; gap: 10px; align-items: center;">
+                <select name="project_id" class="input-field" style="width: 200px; padding: 5px;">
+                    <option value="">All Projects</option>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}" {% if selected_project_id == project.id|stringformat:"s" %}selected{% endif %}>
+                            {{ project.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Worker</th>
+                            <th>Project</th>
+                            <th>Applied Date</th>
+                            <th>Status</th>
+                            <th>Application</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applications %}
+                        <tr>
+                            <td>
+                                <strong>{{ app.worker.user.get_full_name }}</strong><br>
+                                <small>{{ app.worker.society.name }}</small>
+                            </td>
+                            <td>{{ app.opportunity.title }}</td>
+                            <td>{{ app.applied_at|date:"d M Y" }}</td>
+                            <td>
+                                <span class="badge-status {{ app.status }}">
+                                    {{ app.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline" onclick="alert('Cover Letter: {{ app.cover_letter|escapejs }}')">View Reason</a>
+                            </td>
+                            <td>
+                                <a href="{% url 'dashboard:worker_detail' app.worker.id %}" class="btn btn-sm btn-primary">View Profile & Docs</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No applications found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-status {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .badge-status.pending { background: #FFF3CD; color: #856404; }
+    .badge-status.accepted { background: #D4EDDA; color: #155724; }
+    .badge-status.rejected { background: #F8D7DA; color: #721C24; }
+</style>
+{% endblock %}

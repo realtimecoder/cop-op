@@ -6,7 +6,11 @@
   <div class="container">
     <span class="eyebrow">{% if is_admin %}{% trans "Admin" %}{% else %}{% trans "Federation" %}{% endif %}</span>
     <h1>{% trans "Cooperative societies" %}</h1>
-    {% if own_federation and not is_admin %}<p class="muted">{% trans "Showing societies under" %} <b>{{ own_federation.name }}</b></p>{% endif %}
+    {% if selected_federation %}
+      <p class="muted">{% trans "Showing societies under" %} <b>{{ selected_federation.name }}</b> <a href="{% url 'dashboard:society_list' %}" class="text-sm ml-2 underline">{% trans "Clear filter" %}</a></p>
+    {% elif own_federation and not is_admin %}
+      <p class="muted">{% trans "Showing societies under" %} <b>{{ own_federation.name }}</b></p>
+    {% endif %}
 
     <div class="card mt-2">
       <h3 style="font-size:1rem;">{% trans "Create a new society" %}</h3>
@@ -78,6 +82,16 @@
 
               <!-- Management Group -->
               <div class="flex gap-1 flex-wrap">
+                <!-- Federation Join/Change Dropdown -->
+                <form method="post" action="{% url 'dashboard:update_society_federation' society.id %}" class="flex gap-1 items-center">
+                  {% csrf_token %}
+                  <select name="federation_id" class="input-field" style="width:120px; height:28px; font-size:0.8rem;" onchange="this.form.submit()">
+                    <option value="">{% trans "— Independent —" %}</option>
+                    {% for fed in all_federations %}
+                    <option value="{{ fed.id }}" {% if society.federation == fed %}selected{% endif %}>{{ fed.name }}</option>
+                    {% endfor %}
+                  </select>
+                </form>
                 {% if society.resignation_requested and not society.resigned_at %}
                 <form method="post" action="{% url 'dashboard:society_accept_resignation' society.id %}">
                   {% csrf_token %}<button class="btn btn-outline btn-sm" type="submit" style="height:28px;">{% trans "Accept Resig." %}</button>
