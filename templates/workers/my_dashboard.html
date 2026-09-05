@@ -75,6 +75,17 @@
               <tr><th>{% trans "Society" %}</th><td>{{ profile.society|default:"—" }}</td></tr>
             </tbody>
           </table>
+          {% if not profile.society and pending_invites %}
+          <div class="alert alert-info mt-2" style="padding:12px; font-size:0.85rem;">
+            <p style="margin-bottom:8px;"><strong>{% trans "Invitations received:" %}</strong></p>
+            {% for invite in pending_invites %}
+            <div class="flex justify-between align-center" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+              <span>{{ invite.society.name }}</span>
+              <a href="{% url 'workers:accept_society_invite' invite.id %}" class="btn btn-primary btn-sm">{% trans "Join" %}</a>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
           <a href="{% url 'workers:edit_profile' %}" class="btn btn-primary btn-block mt-2">{% trans "Edit profile" %}</a>
         </div>
 

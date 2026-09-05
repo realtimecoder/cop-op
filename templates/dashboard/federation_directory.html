@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Federations" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Society head" %}</span>
+    <h1>{% trans "Request to join a federation" %}</h1>
+    {% if not own_society %}<div class="alert alert-warning" style="position:static;max-width:640px;">{% trans "You need a society assigned to you first." %}</div>
+    {% elif not own_society.is_independent %}<div class="alert alert-info" style="position:static;max-width:640px;">{% trans "Your society already belongs to" %} <b>{{ own_society.federation.name }}</b>.</div>{% endif %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>{% trans "Federation" %}</th><th>{% trans "City" %}</th><th>{% trans "Societies" %}</th><th></th></tr></thead>
+        <tbody>
+          {% for fed in federations %}
+          <tr>
+            <td>{{ fed.name }}</td><td>{{ fed.city }}</td><td>{{ fed.societies.count }}</td>
+            <td>
+              {% if fed.id in pending_requests %}<span class="badge badge-warning">{% trans "Request pending" %}</span>
+              {% elif own_society and own_society.is_independent %}<form method="post" action="{% url 'dashboard:request_join_federation' fed.id %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Request to join" %}</button></form>{% endif %}
+            </td>
+          </tr>
+          {% empty %}<tr><td colspan="4" class="muted">{% trans "No federations available." %}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

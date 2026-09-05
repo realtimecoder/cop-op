@@ -57,6 +57,13 @@
           </div>
           <div>
             <h3 style="margin-bottom:2px;">{{ worker.user.get_full_name|default:"Worker" }}</h3>
+            <div class="muted" style="font-size: 0.85rem; margin-bottom: 4px;">
+              {% if worker.society %}
+                {{ worker.society.name }}{% if worker.society.federation %} ({{ worker.society.federation.name }} · {{ worker.society.federation.average_rating }} ★){% endif %}
+              {% else %}
+                {% trans "Independent" %}
+              {% endif %}
+            </div>
             <span class="badge badge-verified"><svg><use href="#icon-check"/></svg>{% trans "Verified" %}</span>
           </div>
         </div>
@@ -74,7 +81,11 @@
         {% if worker.is_available_now %}<span class="badge badge-verified">{% trans "Available now" %}</span>{% else %}<span class="badge badge-warning">{% trans "Busy" %}</span>{% endif %}
         <div class="flex gap-1 mt-2">
           <a href="{% url 'workers:worker_public_profile' worker.id %}" class="btn btn-outline btn-sm" style="flex:1;">{% trans "View profile" %}</a>
+          {% if request_id %}
+          <a href="{% url 'bookings:finalize_booking_from_request' request_id worker.id %}" class="btn btn-accent btn-sm" style="flex:1;">{% trans "Book" %}</a>
+          {% else %}
           <a href="{% url 'bookings:create_booking' service.id worker.id %}" class="btn btn-accent btn-sm" style="flex:1;">{% trans "Book" %}</a>
+          {% endif %}
         </div>
       </div>
       {% empty %}

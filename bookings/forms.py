@@ -1,5 +1,5 @@
 from django import forms
-from .models import Booking, Complaint
+from .models import Booking, Complaint, BookingRequest
 
 
 class BookingForm(forms.ModelForm):
@@ -39,7 +39,33 @@ class BookingForm(forms.ModelForm):
         self.fields['instructions'].required = False
 
 
+class BookingRequestForm(forms.ModelForm):
+    class Meta:
+        model = BookingRequest
+        fields = ['scheduled_date', 'scheduled_time', 'address', 'city', 'pincode',
+                  'instructions', 'workers_required', 'duration_days', 'hours_booked']
+        widgets = {
+            'scheduled_date': forms.DateInput(attrs={'class': 'input-field', 'type': 'date'}),
+            'scheduled_time': forms.TimeInput(attrs={'class': 'input-field', 'type': 'time'}),
+            'address': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Full service address'}),
+            'city': forms.TextInput(attrs={'class': 'input-field'}),
+            'pincode': forms.TextInput(attrs={'class': 'input-field'}),
+            'instructions': forms.Textarea(attrs={'class': 'input-field', 'rows': 3,
+                                                    'placeholder': 'Any special instructions (optional)'}),
+            'workers_required': forms.NumberInput(attrs={'class': 'input-field', 'min': 1}),
+            'duration_days': forms.NumberInput(attrs={'class': 'input-field', 'min': 1}),
+            'hours_booked': forms.NumberInput(attrs={'class': 'input-field', 'min': 1, 'step': '0.5'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['workers_required'].required = False
+        self.fields['duration_days'].required = False
+        self.fields['hours_booked'].required = False
+        self.fields['instructions'].required = False
+
 class ComplaintForm(forms.ModelForm):
+
     class Meta:
         model = Complaint
         fields = ['subject', 'description']

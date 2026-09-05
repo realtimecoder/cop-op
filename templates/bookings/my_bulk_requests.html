@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "My bulk requests" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">{% trans "Institution" %}</span><h1 style="margin-bottom:0;">{% trans "My bulk service requests" %}</h1></div>
+      <a href="{% url 'bookings:create_bulk_request' %}" class="btn btn-accent">{% trans "New request" %}</a>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>{% trans "Service" %}</th><th>{% trans "Workers" %}</th><th>{% trans "Start date" %}</th><th>{% trans "Society" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
+        <tbody>
+          {% for r in requests %}
+          <tr>
+            <td>{{ r.service.name }}</td><td>{{ r.workers_required }}</td><td>{{ r.start_date }}</td>
+            <td>{{ r.assigned_society.name|default:"—" }}</td>
+            <td><span class="status-pill">{{ r.get_status_display }}</span></td>
+            <td><a href="{% url 'bookings:bulk_request_detail' r.id %}" class="btn btn-outline btn-sm">{% trans "View" %}</a></td>
+          </tr>
+          {% empty %}<tr><td colspan="6">
+            <div class="empty-state"><svg><use href="#icon-empty"/></svg><p>{% trans "No bulk requests yet." %}</p>
+            <a href="{% url 'bookings:create_bulk_request' %}" class="btn btn-accent">{% trans "Create your first request" %}</a></div>
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

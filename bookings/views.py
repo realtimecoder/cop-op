@@ -11,8 +11,9 @@ from workers.models import WorkerProfile, WorkerBlockedDate
 from payments.models import Payment, Invoice
 from payments import razorpay_client
 from reviews.models import Review
-from .models import Booking, Complaint
-from .forms import BookingForm, ComplaintForm
+from .models import Booking, Complaint, BookingRequest
+from .forms import BookingForm, ComplaintForm, BookingRequestForm
+from .services import find_best_worker
 
 
 def _worker_occupied_dates(worker):
@@ -34,6 +35,220 @@ def worker_availability_json(request, worker_id):
     dates = sorted(_worker_occupied_dates(worker))
     return JsonResponse({'blocked_dates': [d.isoformat() for d in dates]})
 
+
+@login_required
+def booking_request(request, service_id):
+    """Step 1: Confirm Your Booking. Collects details before worker selection."""
+    service = get_object_or_404(Service, id=service_id, is_active=True)
+
+    if request.method == 'POST':
+        form = BookingRequestForm(request.POST)
+        if form.is_valid():
+            booking_req = form.save(commit=False)
+            booking_req.customer = request.user
+            booking_req.service = service
+            booking_req.save()
+            return redirect('bookings:booking_choice', request_id=booking_req.id)
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        initial = {'city': request.user.city, 'address': request.user.address}
+        form = BookingRequestForm(initial=initial)
+
+    return render(request, 'bookings/booking_request.html', {
+        'form': form, 'service': service
+    })
+
+
+@login_required
+def booking_choice(request, request_id):
+    """Step 2: The Choice. Rapid Book (Algo) vs Manual selection."""
+    booking_req = get_object_or_404(BookingRequest, id=request_id, customer=request.user)
+    service = booking_req.service
+
+    if request.method == 'POST':
+        choice = request.POST.get('choice')
+
+        if choice == 'rapid':
+            # Rapid Book: Find best worker and finalize booking immediately
+            customer_lat = request.user.latitude
+            customer_lng = request.user.longitude
+            best_worker = find_best_worker(service, customer_lat, customer_lng)
+
+            if not best_worker:
+                messages.error(request, "No available workers found for rapid booking. Please select one manually.")
+                return redirect('bookings:booking_choice', request_id=request_id)
+
+            # Pricing logic (reuse same as create_booking)
+            visit_charge = service.category.fixed_visit_charge
+            labour_charge = service.fixed_labour_charge if not service.is_hourly else service.hourly_rate
+            if best_worker.society:
+                society = best_worker.society
+                if society.is_independent:
+                    try:
+                        pricing = society.custom_pricing
+                        custom_visit = pricing.get_visit_charge(service.category)
+                        custom_labour = pricing.get_labour_charge(service)
+                        if custom_visit: visit_charge = custom_visit
+                        if custom_labour: labour_charge = custom_labour
+                    except: pass
+                elif society.federation:
+                    try:
+                        pricing = society.federation.custom_pricing
+                        custom_visit = pricing.get_visit_charge(service.category)
+                        custom_labour = pricing.get_labour_charge(service)
+                        if custom_visit: visit_charge = custom_visit
+                        if custom_labour: labour_charge = custom_labour
+                    except: pass
+
+            booking = Booking.objects.create(
+                customer=booking_req.customer,
+                service=service,
+                worker=best_worker,
+                scheduled_date=booking_req.scheduled_date,
+                scheduled_time=booking_req.scheduled_time,
+                address=booking_req.address,
+                city=booking_req.city,
+                pincode=booking_req.pincode,
+                instructions=booking_req.instructions,
+                visit_charge=visit_charge,
+                labour_charge=labour_charge,
+                workers_required=booking_req.workers_required,
+                duration_days=booking_req.duration_days,
+                hours_booked=booking_req.hours_booked,
+                status=Booking.Status.ASSIGNED
+            )
+            booking_req.delete()
+            messages.success(request, f"Rapid Book successful! {best_worker.user.get_full_name()} has been assigned.")
+            return redirect('bookings:booking_detail', booking_id=booking.id)
+
+        elif choice == 'manual':
+            # Redirect to worker list with the request_id
+            return redirect('workers:worker_list_with_request', service_id=service.id, request_id=request_id)
+
+    return render(request, 'bookings/booking_choice.html', {
+        'booking_req': booking_req, 'service': service
+    })
+
+
+@login_required
+def finalize_booking_from_request(request, request_id, worker_id):
+    """Finalizes a booking using details from a pre-filled BookingRequest."""
+    booking_req = get_object_or_404(BookingRequest, id=request_id, customer=request.user)
+    worker = get_object_or_404(WorkerProfile, id=worker_id, verification_status=WorkerProfile.VerificationStatus.VERIFIED)
+    service = booking_req.service
+
+    # Pricing logic (same as rapid book)
+    visit_charge = service.category.fixed_visit_charge
+    labour_charge = service.fixed_labour_charge if not service.is_hourly else service.hourly_rate
+    if worker.society:
+        society = worker.society
+        if society.is_independent:
+            try:
+                pricing = society.custom_pricing
+                custom_visit = pricing.get_visit_charge(service.category)
+                custom_labour = pricing.get_labour_charge(service)
+                if custom_visit: visit_charge = custom_visit
+                if custom_labour: labour_charge = custom_labour
+            except: pass
+        elif society.federation:
+            try:
+                pricing = society.federation.custom_pricing
+                custom_visit = pricing.get_visit_charge(service.category)
+                custom_labour = pricing.get_labour_charge(service)
+                if custom_visit: visit_charge = custom_visit
+                if custom_labour: labour_charge = custom_labour
+            except: pass
+
+    booking = Booking.objects.create(
+        customer=booking_req.customer,
+        service=service,
+        worker=worker,
+        scheduled_date=booking_req.scheduled_date,
+        scheduled_time=booking_req.scheduled_time,
+        address=booking_req.address,
+        city=booking_req.city,
+        pincode=booking_req.pincode,
+        instructions=booking_req.instructions,
+        visit_charge=visit_charge,
+        labour_charge=labour_charge,
+        workers_required=booking_req.workers_required,
+        duration_days=booking_req.duration_days,
+        hours_booked=booking_req.hours_booked,
+        status=Booking.Status.ASSIGNED
+    )
+    booking_req.delete()
+    messages.success(request, f"Booking created with {worker.user.get_full_name()}.")
+    return redirect('bookings:booking_detail', booking_id=booking.id)
+
+
+@login_required
+def create_emergency_booking(request, service_id):
+    """Emergency Booking: Auto-picks the best available worker and books them immediately."""
+    service = get_object_or_404(Service, id=service_id, is_active=True)
+
+    # Get customer coordinates for distance matching
+    customer_lat = request.user.latitude
+    customer_lng = request.user.longitude
+
+    best_worker = find_best_worker(service, customer_lat, customer_lng)
+
+    if not best_worker:
+        messages.error(request, "No available workers found for this service right now. Please try a standard booking.")
+        return redirect('core:home')
+
+    if request.method == 'POST':
+        # Simple form for emergency: just confirm and maybe provide specific instructions
+        instructions = request.POST.get('instructions', '')
+
+        # Pricing logic: Federation Pricing -> Independent Society Override -> Global
+        visit_charge = service.category.fixed_visit_charge
+        labour_charge = service.fixed_labour_charge if not service.is_hourly else service.hourly_rate
+
+        if best_worker.society:
+            society = best_worker.society
+            if society.is_independent:
+                try:
+                    pricing = society.custom_pricing
+                    custom_visit = pricing.get_visit_charge(service.category)
+                    custom_labour = pricing.get_labour_charge(service)
+                    if custom_visit: visit_charge = custom_visit
+                    if custom_labour: labour_charge = custom_labour
+                except Exception:
+                    pass
+            elif society.federation:
+                try:
+                    pricing = society.federation.custom_pricing
+                    custom_visit = pricing.get_visit_charge(service.category)
+                    custom_labour = pricing.get_labour_charge(service)
+                    if custom_visit: visit_charge = custom_visit
+                    if custom_labour: labour_charge = custom_labour
+                except Exception:
+                    pass
+
+        booking = Booking.objects.create(
+            customer=request.user,
+            service=service,
+            worker=best_worker,
+            scheduled_date=timezone.localdate(),
+            scheduled_time=timezone.localtime().time(),
+            address=request.user.address,
+            city=request.user.city,
+            pincode=request.user.pincode,
+            instructions=f"[EMERGENCY] {instructions}",
+            visit_charge=visit_charge,
+            labour_charge=labour_charge,
+            status=Booking.Status.ASSIGNED,
+            is_emergency=True
+        )
+
+        messages.success(request, f"Emergency booking created! Best match {best_worker.user.get_full_name()} has been assigned.")
+        return redirect('bookings:booking_detail', booking_id=booking.id)
+
+    return render(request, 'bookings/create_emergency_booking.html', {
+        'service': service,
+        'worker': best_worker,
+    })
 
 @login_required
 def create_booking(request, service_id, worker_id):
@@ -58,14 +273,41 @@ def create_booking(request, service_id, worker_id):
                 booking.customer = request.user
                 booking.service = service
                 booking.worker = worker
-                booking.visit_charge = service.visit_charge
+
+                # Pricing logic: Federation Pricing -> Independent Society Override -> Global
+                visit_charge = service.category.fixed_visit_charge
+                labour_charge = service.fixed_labour_charge if not service.is_hourly else service.hourly_rate
+
+                if worker.society:
+                    society = worker.society
+                    if society.is_independent:
+                        try:
+                            pricing = society.custom_pricing
+                            custom_visit = pricing.get_visit_charge(service.category)
+                            custom_labour = pricing.get_labour_charge(service)
+                            if custom_visit: visit_charge = custom_visit
+                            if custom_labour: labour_charge = custom_labour
+                        except Exception:
+                            pass
+                    elif society.federation:
+                        try:
+                            pricing = society.federation.custom_pricing
+                            custom_visit = pricing.get_visit_charge(service.category)
+                            custom_labour = pricing.get_labour_charge(service)
+                            if custom_visit: visit_charge = custom_visit
+                            if custom_labour: labour_charge = custom_labour
+                        except Exception:
+                            pass
+
+                booking.visit_charge = visit_charge
                 booking.workers_required = form.cleaned_data.get('workers_required') or 1
                 booking.duration_days = form.cleaned_data.get('duration_days') or 1
                 if service.is_hourly:
-                    booking.labour_charge = service.hourly_rate
+                    # If custom labour charge was set for hourly, it's the hourly rate
+                    booking.labour_charge = labour_charge
                     booking.hours_booked = form.cleaned_data.get('hours_booked') or service.min_hours
                 else:
-                    booking.labour_charge = service.fixed_labour_charge
+                    booking.labour_charge = labour_charge
                     booking.hours_booked = 1
                 booking.status = Booking.Status.ASSIGNED
                 booking.save()
@@ -249,6 +491,21 @@ def make_payment(request, booking_id):
         Invoice.objects.create(payment=payment, invoice_number=Invoice.generate_number(booking.id))
         booking.status = Booking.Status.PAYMENT_SETTLED
         booking.save(update_fields=['status'])
+
+        # Wallet Credits
+        from payments.models import Wallet
+        # Credit Worker
+        if booking.worker:
+            worker_wallet, _ = Wallet.objects.get_or_create(user=booking.worker.user)
+            worker_wallet.credit(payment.worker_payout, transaction_type='booking_earning', reference=f"Payment {payment.reference_id}")
+
+        # Credit Society/Federation
+        if booking.worker and booking.worker.society:
+            society_op = booking.worker.society.operator
+            if society_op:
+                society_wallet, _ = Wallet.objects.get_or_create(user=society_op)
+                society_wallet.credit(payment.cooperative_fee, transaction_type='cooperative_fee', reference=f"Payment {payment.reference_id}")
+
         messages.success(request, "Payment successful (simulated — Razorpay test keys not configured). Invoice generated.")
         return redirect('bookings:booking_detail', booking_id=booking.id)
 
@@ -278,8 +535,24 @@ def razorpay_callback(request, booking_id):
             'invoice_number': Invoice.generate_number(booking.id)})
         booking.status = Booking.Status.PAYMENT_SETTLED
         booking.save(update_fields=['status'])
+
+        # Wallet Credits
+        from payments.models import Wallet
+        # Credit Worker
+        if booking.worker:
+            worker_wallet, _ = Wallet.objects.get_or_create(user=booking.worker.user)
+            worker_wallet.credit(payment.worker_payout, transaction_type='booking_earning', reference=f"Payment {payment.reference_id}")
+
+        # Credit Society/Federation
+        if booking.worker and booking.worker.society:
+            society_op = booking.worker.society.operator
+            if society_op:
+                society_wallet, _ = Wallet.objects.get_or_create(user=society_op)
+                society_wallet.credit(payment.cooperative_fee, transaction_type='cooperative_fee', reference=f"Payment {payment.reference_id}")
+
         messages.success(request, "Payment verified successfully via Razorpay (test mode). Invoice generated.")
     else:
+
         payment.status = Payment.Status.FAILED
         payment.save(update_fields=['status'])
         messages.error(request, "Payment verification failed. Please try again.")
@@ -302,7 +575,8 @@ def submit_review(request, booking_id):
         if all_ratings.exists():
             worker.average_rating = round(sum(r.rating for r in all_ratings) / all_ratings.count(), 2)
         worker.completed_jobs += 1
-        worker.save(update_fields=['average_rating', 'completed_jobs'])
+        worker.last_worked_date = timezone.localdate()
+        worker.save(update_fields=['average_rating', 'completed_jobs', 'last_worked_date'])
         booking.status = Booking.Status.RATED
         booking.save(update_fields=['status'])
         messages.success(request, "Thank you for rating this service.")

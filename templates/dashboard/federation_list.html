@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Federations" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Admin" %}</span>
+    <h1>{% trans "Federations" %}</h1>
+    <p class="muted">{% trans "Only Admin can create a federation and appoint who administers it." %}</p>
+
+    <div class="card mt-2">
+      <h3 style="font-size:1rem;">{% trans "Create a new federation" %}</h3>
+      <form method="post" action="{% url 'dashboard:federation_create' %}" class="grid grid-2">
+        {% csrf_token %}
+        <div class="form-group"><label>{% trans "Federation name" %}</label><input type="text" name="name" class="input-field" required></div>
+        <div class="form-group"><label>{% trans "City" %}</label><input type="text" name="city" value="Delhi" class="input-field"></div>
+        <div class="form-group"><label>{% trans "Registration number (optional)" %}</label><input type="text" name="registration_number" class="input-field"></div>
+        <div class="form-group"><label>{% trans "Commission %" %}</label><input type="number" step="0.01" name="commission_percent" value="10" class="input-field"></div>
+        <div style="grid-column:1/-1;"><button class="btn btn-primary" type="submit">{% trans "Create federation" %}</button></div>
+      </form>
+    </div>
+
+    <h3 class="mt-4">{% trans "All federations" %}</h3>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>{% trans "Name" %}</th><th>{% trans "Admin" %}</th><th>{% trans "Societies" %}</th><th>{% trans "Commission" %}</th><th>{% trans "Status" %}</th><th>{% trans "Appoint admin" %}</th><th>{% trans "Actions" %}</th></tr></thead>
+        <tbody>
+          {% for fed in federations %}
+          <tr>
+            <td>{{ fed.name }}</td>
+            <td>{% if fed.admin_user %}<span class="badge badge-verified">{{ fed.admin_user.get_full_name|default:fed.admin_user.phone_number }}</span>{% else %}<span class="badge badge-warning">{% trans "No admin assigned" %}</span>{% endif %}</td>
+            <td>{{ fed.society_count }}</td>
+            <td>
+              <form method="post" action="{% url 'dashboard:federation_set_commission' fed.id %}" class="flex gap-1">
+                {% csrf_token %}<input type="number" step="0.01" name="commission_percent" value="{{ fed.commission_percent }}" class="input-field" style="width:80px;">
+                <button class="btn btn-outline btn-sm" type="submit">%</button>
+              </form>
+            </td>
+            <td>{% if fed.is_currently_banned %}<span class="badge badge-danger">{% trans "Banned" %}</span>{% elif not fed.is_active %}<span class="badge badge-danger">{% trans "Inactive" %}</span>{% else %}<span class="badge badge-verified">{% trans "Active" %}</span>{% endif %}</td>
+            <td>
+              <form method="post" action="{% url 'dashboard:federation_assign_admin' fed.id %}" class="flex gap-1">
+                {% csrf_token %}<input type="text" name="phone_number" class="input-field" style="width:120px;" placeholder="{% trans 'Phone' %}" maxlength="10">
+                <button class="btn btn-outline btn-sm" type="submit">{% trans "Appoint" %}</button>
+              </form>
+            </td>
+            <td class="flex gap-1" style="flex-wrap:wrap;">
+              <form method="post" action="{% url 'dashboard:federation_rename' fed.id %}" class="flex gap-1">
+                {% csrf_token %}<input type="text" name="name" class="input-field" style="width:100px;" placeholder="{% trans 'New name' %}">
+                <button class="btn btn-ghost btn-sm" type="submit">{% trans "Rename" %}</button>
+              </form>
+              {% if fed.is_currently_banned %}
+              <form method="post" action="{% url 'dashboard:federation_unban' fed.id %}">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% trans "Unban" %}</button></form>
+              {% else %}
+              <form method="post" action="{% url 'dashboard:federation_ban' fed.id %}" class="flex gap-1">
+                {% csrf_token %}<input type="number" name="days" class="input-field" style="width:60px;" placeholder="{% trans 'Days' %}">
+                <button class="btn btn-danger btn-sm" type="submit">{% trans "Ban" %}</button>
+              </form>
+              {% endif %}
+              <form method="post" action="{% url 'dashboard:federation_delete' fed.id %}" onsubmit="return confirm('{% trans 'Delete this federation? Its societies become independent.' %}');">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Delete" %}</button></form>
+            </td>
+          </tr>
+          {% empty %}<tr><td colspan="7" class="muted">{% trans "No federations created yet." %}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

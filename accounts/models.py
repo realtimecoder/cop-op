@@ -32,6 +32,7 @@ class User(AbstractUser):
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     is_phone_verified = models.BooleanField(default=False)
+    has_completed_tour = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -44,6 +45,16 @@ class User(AbstractUser):
     @property
     def is_society_operator(self):
         return self.role == self.Role.SOCIETY
+
+    @property
+    def is_platform_admin(self):
+        """The Admin persona (Section 4 of the platform governance model)
+        — the ONLY role that can create Federations, verify worker
+        skills/certificates, ban/rename/delete Federations & Societies,
+        promote an independent society to a federation, and set
+        commission. Distinct from a Federation's own admin_user, who
+        only manages their one federation."""
+        return self.is_superuser or self.role == self.Role.PLATFORM_ADMIN
 
 
 class OTPRequest(models.Model):

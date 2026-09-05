@@ -32,6 +32,21 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Admin More Dropdown Toggle
+  document.querySelectorAll('.dropdown-toggle').forEach(function(toggle) {
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var dropdown = this.closest('.nav-dropdown');
+      dropdown.classList.toggle('open');
+    });
+  });
+
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.nav-dropdown.open').forEach(function(dropdown) {
+      dropdown.classList.remove('open');
+    });
+  });
+
   // OTP field: numeric-only, auto-focus
   document.querySelectorAll('.otp-field').forEach(function (el) {
     el.addEventListener('input', function () {
@@ -60,5 +75,62 @@ document.addEventListener('DOMContentLoaded', function () {
   if (recurringCheckbox) {
     recurringCheckbox.addEventListener('change', syncRecurrence);
     syncRecurrence();
+  }
+
+  // AI Chat Logic
+  var chatToggle = document.getElementById('ai-chat-toggle');
+  var chatWindow = document.getElementById('ai-chat-window');
+  var chatClose = document.getElementById('ai-chat-close');
+  var chatSend = document.getElementById('ai-chat-send');
+  var chatInput = document.getElementById('ai-chat-input');
+  var chatMessages = document.getElementById('ai-chat-messages');
+
+  if (chatToggle && chatWindow) {
+    chatToggle.addEventListener('click', function() {
+      chatWindow.classList.toggle('open');
+    });
+  }
+
+  if (chatClose) {
+    chatClose.addEventListener('click', function() {
+      chatWindow.classList.remove('open');
+    });
+  }
+
+  function addMessage(text, sender) {
+    var msg = document.createElement('div');
+    msg.className = sender === 'user' ? 'user-msg' : 'ai-msg';
+    msg.textContent = text;
+    chatMessages.appendChild(msg);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  if (chatSend) {
+    chatSend.addEventListener('click', function() {
+      var text = chatInput.value.trim();
+      if (!text) return;
+
+      addMessage(text, 'user');
+      chatInput.value = '';
+
+      // Mock AI Response
+      setTimeout(function() {
+        var replies = [
+          "I'm here to help! Co-opSeva ensures fair work and fixed prices.",
+          "You can browse verified services in the Catalog section.",
+          "Our cooperative model ensures workers get a fair share of the earnings.",
+          "Need help with bookings? Just let me know!",
+          "Co-opSeva is currently piloting in Delhi-NCR."
+        ];
+        var randomReply = replies[Math.floor(Math.random() * replies.length)];
+        addMessage(randomReply, 'ai');
+      }, 800);
+    });
+  }
+
+  if (chatInput) {
+    chatInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') chatSend.click();
+    });
   }
 });

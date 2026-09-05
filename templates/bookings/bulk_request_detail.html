@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Bulk request" %} #{{ bulk.id }} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="grid" style="grid-template-columns:1.6fr 1fr;gap:32px;align-items:start;">
+      <div>
+        <div class="section-head">
+          <div><span class="eyebrow">{% trans "Bulk request" %} #{{ bulk.id }}</span><h1 style="margin-bottom:0;">{{ bulk.service.name }}</h1></div>
+          <span class="status-pill">{{ bulk.get_status_display }}</span>
+        </div>
+
+        <div class="table-wrap mt-3">
+          <table class="data-table">
+            <tbody>
+              <tr><th>{% trans "Institution" %}</th><td>{{ bulk.institution.get_full_name|default:bulk.institution.phone_number }}</td></tr>
+              <tr><th>{% trans "Workers required" %}</th><td>{{ bulk.workers_required }}</td></tr>
+              <tr><th>{% trans "Duration" %}</th><td>{{ bulk.duration_days }} {% trans "days" %}</td></tr>
+              <tr><th>{% trans "Start date" %}</th><td>{{ bulk.start_date }}</td></tr>
+              <tr><th>{% trans "Address" %}</th><td>{{ bulk.address }}, {{ bulk.city }} {{ bulk.pincode }}</td></tr>
+              <tr><th>{% trans "Cooperative society" %}</th><td>{{ bulk.assigned_society.name|default:"Not yet claimed" }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="mt-4">{% trans "Assigned workers" %} ({{ assignments.count }}/{{ bulk.workers_required }})</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Status" %}</th><th>{% trans "Payout" %}</th></tr></thead>
+            <tbody>
+              {% for a in assignments %}
+              <tr>
+                <td>{{ a.worker.user.get_full_name|default:a.worker.user.phone_number }}</td>
+                <td>{% if a.is_completed %}<span class="badge badge-verified">{% trans "Completed" %}</span>{% else %}<span class="badge badge-warning">{% trans "In progress" %}</span>{% endif %}</td>
+                <td style="font-family:var(--font-mono)">{% if a.payout_amount %}₹{{ a.payout_amount }}{% else %}—{% endif %}</td>
+              </tr>
+              {% empty %}<tr><td colspan="3" class="muted">{% trans "No workers assigned yet." %}</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex gap-1 mt-3" style="flex-wrap:wrap;">
+          {% if is_institution %}
+            {% if bulk.status == 'requested' or bulk.status == 'claimed' %}
+            <form method="post" action="{% url 'bookings:cancel_bulk_request' bulk.id %}">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Cancel request" %}</button></form>
+            {% endif %}
+            {% if bulk.status == 'in_progress' %}
+            <form method="post" action="{% url 'bookings:confirm_bulk_completion' bulk.id %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Confirm work is done" %}</button></form>
+            {% endif %}
+          {% endif %}
+          {% if is_assigned_society_operator %}
+            {% if bulk.status == 'claimed' or bulk.status == 'assigned' %}
+            <a href="{% url 'bookings:assign_bulk_workers' bulk.id %}" class="btn btn-primary btn-sm">{% trans "Assign / manage workers" %}</a>
+            {% endif %}
+            {% if bulk.status == 'assigned' and bulk.is_fully_staffed %}
+            <form method="post" action="{% url 'bookings:start_bulk_work' bulk.id %}">{% csrf_token %}<button class="btn btn-accent btn-sm" type="submit">{% trans "Mark as in progress" %}</button></form>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <div class="price-ticket">
+          <div class="price-ticket-row"><span>{% trans "Visit charge" %}</span><span>₹{{ bulk.visit_charge }}</span></div>
+          <div class="price-ticket-row"><span>{% trans "Labour" %} × {{ bulk.workers_required }} × {{ bulk.duration_days }}{% trans "d" %}</span><span>₹{{ bulk.labour_charge }}</span></div>
+          <div class="price-ticket-row total"><span>{% trans "Total payable" %}</span><span>₹{{ bulk.total_amount }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Assign workers" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <span class="eyebrow">{% trans "Bulk request" %} #{{ bulk.id }}</span>
+    <h1>{% trans "Assign workers from your society" %}</h1>
+    <p class="muted">{{ bulk.service.name }} · {% trans "needs" %} {{ bulk.workers_required }} {% trans "worker(s) for" %} {{ bulk.duration_days }} {% trans "day(s), starting" %} {{ bulk.start_date }}</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th></th><th>{% trans "Worker" %}</th><th>{% trans "Skill grade" %}</th><th>{% trans "Rating" %}</th><th>{% trans "Available" %}</th></tr></thead>
+          <tbody>
+            {% for w in eligible_workers %}
+            <tr>
+              <td><input type="checkbox" name="worker_ids" value="{{ w.id }}" {% if w.id in already_assigned_ids %}checked disabled{% endif %}></td>
+              <td>{{ w.user.get_full_name|default:w.user.phone_number }}</td>
+              <td>{{ w.get_skill_grade_display }}</td>
+              <td>{{ w.average_rating }}</td>
+              <td>{% if w.is_available_now %}<span class="badge badge-verified">{% trans "Available now" %}</span>{% else %}<span class="badge badge-warning">{% trans "Busy" %}</span>{% endif %}</td>
+            </tr>
+            {% empty %}<tr><td colspan="5" class="muted">{% trans "None of your society's verified workers offer this service yet." %}</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" class="btn btn-primary mt-2">{% trans "Assign selected workers" %}</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

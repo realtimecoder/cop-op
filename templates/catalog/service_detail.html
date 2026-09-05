@@ -47,8 +47,8 @@
           <p class="price-ticket-note">{% trans "Material cost, if any, is paid directly by you to the shop." %}</p>
           {% endif %}
         </div>
-        <a href="{% url 'workers:worker_list_for_service' service.id %}" class="btn btn-primary btn-block mt-3">
-          {% trans "View verified workers" %} <svg><use href="#icon-arrow-right"/></svg>
+        <a href="{% url 'bookings:booking_request' service.id %}" class="btn btn-primary btn-block mt-3">
+          {% trans "Book this service" %} <svg><use href="#icon-arrow-right"/></svg>
         </a>
       </div>
     </div>
