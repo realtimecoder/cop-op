@@ -61,7 +61,15 @@
   --stone-dark: #F2D9A0;
 }
 
-.theme-platform_admin, .theme-federation, .theme-support, .theme-finance, .theme-welfare {
+.theme-federation {
+  --stone: #D6F4ED;
+  --teal-tint: #87BAC3;
+  --teal: #53629E;
+  --teal-deep: #473472;
+  --stone-dark: #B8E0D8;
+}
+
+.theme-platform_admin, .theme-support, .theme-finance, .theme-welfare {
   --stone: #E6D5B8;
   --teal-tint: #F0A500;
   --teal: #E45826;
