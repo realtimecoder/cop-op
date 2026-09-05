@@ -7,8 +7,8 @@
 <section class="page-header" style="padding: 4rem 0; background: var(--color-bg-alt); border-bottom: 1px solid var(--color-border);">
   <div class="container">
     <h1 style="font-family: var(--font-display); font-size: 2.5rem; margin-bottom: 1rem;">{% trans "Apply for Government Opportunity" %}</h1>
-    <p style="font-size: 1.1rem; color: var(--color-text-muted);">
-      {% trans "Please complete the application form below to register your interest in this project." %}
+    <p style="font-size: 1.1rem; color: var(--ink-soft);">
+      {% trans "You are applying for: " %} <strong>{{ opportunity.title }}</strong>
     </p>
   </div>
 </section>
@@ -17,47 +17,16 @@
   <div class="container">
     <div class="form-card wide">
       <h2 style="margin-bottom: 1.5rem; text-align: center;">{% trans "Application Form" %}</h2>
-      <p style="text-align: center; margin-bottom: 2rem; color: var(--ink-soft);">{% trans "Project ID: #" %}{{ project_id }}</p>
+      <p style="text-align: center; margin-bottom: 2rem; color: var(--ink-soft);">
+        {% trans "Your verified profile and documents will be automatically attached to this application for admin review." %}
+      </p>
 
-      <form method="post" action="#">
+      <form method="post">
         {% csrf_token %}
-        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
-          <div class="form-group">
-            <label>{% trans "Full Name" %}</label>
-            <input type="text" class="input-field" placeholder="Enter your full name" required>
-          </div>
-          <div class="form-group">
-            <label>{% trans "Cooperative Name" %}</label>
-            <input type="text" class="input-field" placeholder="Enter your coop name" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>{% trans "Primary Skill / Specialization" %}</label>
-          <select class="input-field" required>
-            <option value="">Select Skill</option>
-            <option value="electrician">Electrician</option>
-            <option value="plumber">Plumber</option>
-            <option value="construction">Construction Worker</option>
-            <option value="agriculture">Agriculture Expert</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>{% trans "Relevant Experience (Years)" %}</label>
-          <input type="number" class="input-field" placeholder="e.g. 5" required>
-        </div>
 
         <div class="form-group">
           <label>{% trans "Why are you a good fit for this project?" %}</label>
-          <textarea class="input-field" rows="4" placeholder="Describe your experience and certifications..." required></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>{% trans "Upload Certifications (PDF)" %}</label>
-          <input type="file" class="input-field" accept=".pdf">
-          <p class="help-text">{% trans "Maximum file size: 5MB" %}</p>
+          <textarea name="cover_letter" class="input-field" rows="6" placeholder="Describe your relevant experience and why your cooperative is best suited for this project..." required></textarea>
         </div>
 
         <div style="text-align: center; margin-top: 2rem;">

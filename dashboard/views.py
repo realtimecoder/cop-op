@@ -572,19 +572,51 @@ def _can_manage_societies(user):
 
 @login_required
 @user_passes_test(_can_manage_societies, login_url='core:home')
+def update_society_federation(request, society_id):
+    """Allows an Admin or Federation Admin to change which federation a society belongs to."""
+    society = get_object_or_404(Society, id=society_id)
+    if request.method == 'POST':
+        federation_id = request.POST.get('federation_id')
+        if federation_id:
+            federation = get_object_or_404(Federation, id=federation_id)
+            society.federation = federation
+        else:
+            society.federation = None
+        society.save(update_fields=['federation'])
+        messages.success(request, f"Society '{society.name}' updated to {society.federation.name if society.federation else 'Independent'}.")
+    return redirect('dashboard:society_list')
+
+@login_required
+@user_passes_test(_can_manage_societies, login_url='core:home')
 def society_list(request):
     own_federation = getattr(request.user, 'managed_federation', None)
+    federation_id = request.GET.get('federation_id')
+
     societies = (Society.objects
                  .select_related('operator', 'federation')
                  .annotate(worker_count=Count('workers'))
                  .order_by('name'))
-    if own_federation and not is_platform_admin(request.user):
-        # A federation's own admin only manages/sees ITS societies.
-        societies = societies.filter(federation=own_federation)
+
+    if federation_id:
+        # If a specific federation is requested, ensure the user has permission to see it
+        if is_platform_admin(request.user) or (own_federation and str(own_federation.id) == str(federation_id)):
+            societies = societies.filter(federation_id=federation_id)
+            selected_fed = Federation.objects.filter(id=federation_id).first()
+        else:
+            messages.error(request, "You do not have permission to view this federation's societies.")
+            return redirect('dashboard:society_list')
+    else:
+        selected_fed = None
+        if own_federation and not is_platform_admin(request.user):
+            # Default view for Federation Admin: show their own societies
+            societies = societies.filter(federation=own_federation)
+            selected_fed = own_federation
+
     return render(request, 'dashboard/society_list.html', {
         'societies': societies, 'own_federation': own_federation,
+        'selected_federation': selected_fed,
         'is_admin': is_platform_admin(request.user),
-        'all_federations': Federation.objects.filter(is_active=True) if is_platform_admin(request.user) else None,
+        'all_federations': Federation.objects.filter(is_active=True) if (is_platform_admin(request.user) or is_federation_admin(request.user)) else None,
     })
 
 
@@ -903,17 +935,28 @@ def federation_set_commission(request, federation_id):
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
+def delete_government_opportunity(request, opp_id):
+    """Admin-only deletion of a government opportunity."""
+    opportunity = get_object_or_404(GovernmentOpportunity, id=opp_id)
+    if request.method == 'POST':
+        opportunity.delete()
+        messages.success(request, "Government opportunity deleted successfully.")
+    return redirect('dashboard:manage_gov_opportunities')
+
+@login_required
+@user_passes_test(is_platform_admin, login_url='core:home')
 def manage_government_opportunities(request):
     """Admin-only management of government opportunities."""
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
         description = request.POST.get('description', '').strip()
         location = request.POST.get('location', '').strip()
+        google_form_url = request.POST.get('google_form_url', '').strip()
         required_workers = request.POST.get('required_workers')
         closing_date = request.POST.get('closing_date')
         category = request.POST.get('category', '').strip()
 
-        if not all([title, description, location, required_workers, closing_date, category]):
+        if not all([title, description, location, google_form_url, required_workers, closing_date, category]):
             messages.error(request, "All fields are required.")
             return redirect('dashboard:manage_gov_opportunities')
 
@@ -921,6 +964,7 @@ def manage_government_opportunities(request):
             title=title,
             description=description,
             location=location,
+            google_form_url=google_form_url,
             required_workers=int(required_workers),
             closing_date=closing_date,
             category=category
@@ -1110,4 +1154,23 @@ def manage_custom_pricing(request):
         'pricing_type': pricing_type,
         'categories': categories,
         'services': services,
+    })
+
+@login_required
+@user_passes_test(is_platform_admin, login_url='core:home')
+def government_applications_list(request):
+    """Admin-only view to see all worker applications for government projects."""
+    # Filter by project if provided in query params
+    project_id = request.GET.get('project_id')
+    from core.models import GovernmentApplication, GovernmentOpportunity
+    applications = GovernmentApplication.objects.select_related('opportunity', 'worker__user').order_by('-applied_at')
+    projects = GovernmentOpportunity.objects.all().order_by('title')
+
+    if project_id:
+        applications = applications.filter(opportunity_id=project_id)
+
+    return render(request, 'dashboard/gov_applications.html', {
+        'applications': applications,
+        'selected_project_id': project_id,
+        'projects': projects,
     })
