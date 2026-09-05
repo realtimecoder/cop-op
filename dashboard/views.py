@@ -5,6 +5,7 @@ from django.db.models import Sum, Count, F
 from django.db.models.functions import TruncDay
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from functools import wraps
 
 from accounts.models import User
 from core.models import GovernmentOpportunity
@@ -15,25 +16,51 @@ from catalog.models import ServiceCategory, Service
 from payments.models import Payment
 from reviews.models import Review
 
+def federation_admin_required(view_func):
+    """
+    Custom decorator that ensures the user is a Federation Admin.
+    If they have the role but aren't assigned to a federation, shows a specific error.
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('accounts:login')
+
+        # Superusers always get in
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
+
+        # Check for Federation role
+        if request.user.role == User.Role.FEDERATION:
+            # Check if they are actually assigned to a federation
+            if getattr(request.user, 'managed_federation', None) is not None:
+                return view_func(request, *args, **kwargs)
+            else:
+                messages.error(request, "You need to contact administrator to give you access of federation admin dashboard.")
+                return redirect('core:home')
+
+        # Other roles or unassigned users are not allowed
+        messages.error(request, "You need to contact administrator to give you access of federation admin dashboard.")
+        return redirect('core:home')
+    return _wrapped_view
+
 def is_federation_admin(user):
-    return user.is_authenticated and (user.role == User.Role.FEDERATION or user.is_superuser)
-
-
-def is_federation_admin(user):
-    return user.is_authenticated and (user.role == User.Role.FEDERATION or user.is_superuser)
-
+    """Checks if user is a superuser or a Federation Admin assigned to a federation."""
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    return user.role == User.Role.FEDERATION and getattr(user, 'managed_federation', None) is not None
 
 def is_platform_admin(user):
     """The true Admin persona — the ONLY one who can create Federations,
-    verify worker skills/certificates, and ban/rename/delete/promote
+    verify worker skills/certificates, and ban/rename/delete
     Federations & Societies. Distinct from `is_federation_admin`, which
     is about managing ONE already-created federation."""
     return user.is_authenticated and user.is_platform_admin
 
-
 def is_society_operator(user):
     return user.is_authenticated and (user.role == User.Role.SOCIETY or user.is_superuser)
-
 
 def is_staff_role(user):
     return user.is_authenticated and (
@@ -41,7 +68,6 @@ def is_staff_role(user):
                       User.Role.FINANCE, User.Role.WELFARE, User.Role.PLATFORM_ADMIN]
         or user.is_superuser
     )
-
 
 @login_required
 @user_passes_test(is_society_operator, login_url='core:home')
@@ -73,9 +99,8 @@ def send_society_invite(request):
 
     return redirect('dashboard:society_dashboard')
 
-
 @login_required
-@user_passes_test(is_federation_admin, login_url='core:home')
+@federation_admin_required
 def federation_dashboard(request):
     """Federation dashboard with worker deployment and income graphs.
     Also includes filter for booked workers by society."""
@@ -131,7 +156,6 @@ def federation_dashboard(request):
         'deployment_data': deployment_data,
         'income_data': income_data,
     })
-
 
 @login_required
 @user_passes_test(is_society_operator, login_url='core:home')
@@ -251,9 +275,8 @@ def overview(request):
     }
     return render(request, 'dashboard/overview.html', context)
 
-
 @login_required
-@user_passes_test(is_federation_admin, login_url='core:home')
+@federation_admin_required
 def pricing_config(request):
     """UC-002 Configure Fixed Charges — only the federation administrator
     can change visit charges, fixed labour charges, and hourly rates
@@ -275,9 +298,8 @@ def pricing_config(request):
         'categories': categories, 'pricing_types': Service.PricingType.choices,
     })
 
-
 @login_required
-@user_passes_test(is_federation_admin, login_url='core:home')
+@federation_admin_required
 def update_service_charge(request, service_id):
     """Handles both fixed-price and hourly services: the federation admin
     picks the pricing type here and sets whichever rate applies."""
@@ -294,7 +316,6 @@ def update_service_charge(request, service_id):
         messages.success(request, f"Pricing for {service.name} updated.")
     return redirect('dashboard:pricing_config')
 
-
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
 def worker_verification_queue(request):
@@ -307,7 +328,6 @@ def worker_verification_queue(request):
                                   WorkerProfile.VerificationStatus.UNDER_REVIEW]
     ).select_related('user', 'society')
     return render(request, 'dashboard/worker_verification_queue.html', {'workers': workers})
-
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
@@ -330,7 +350,6 @@ def verify_worker(request, worker_id):
         worker.save()
     return redirect('dashboard:worker_verification_queue')
 
-
 @login_required
 @user_passes_test(is_society_operator, login_url='core:home')
 def claim_workers_queue(request):
@@ -351,7 +370,6 @@ def claim_workers_queue(request):
         'workers': available_workers, 'managed_society': managed_society,
     })
 
-
 @login_required
 @user_passes_test(is_society_operator, login_url='core:home')
 def claim_worker(request, worker_id):
@@ -368,9 +386,8 @@ def claim_worker(request, worker_id):
         messages.success(request, f"{worker.user.get_full_name()} added to {managed_society.name}.")
     return redirect('dashboard:claim_workers_queue')
 
-
 @login_required
-@user_passes_test(is_federation_admin, login_url='core:home')
+@federation_admin_required
 def category_change_queue(request):
     """Federation-admin approval queue for worker category-change requests.
     Approving a request replaces the worker's categories with the
@@ -391,9 +408,8 @@ def category_change_queue(request):
 
     return render(request, 'dashboard/category_change_queue.html', {'requests': requests_qs})
 
-
 @login_required
-@user_passes_test(is_federation_admin, login_url='core:home')
+@federation_admin_required
 def decide_category_change(request, request_id):
     change_request = get_object_or_404(WorkerCategoryChangeRequest, id=request_id)
     if request.method == 'POST':
@@ -416,7 +432,6 @@ def decide_category_change(request, request_id):
         change_request.save()
     return redirect('dashboard:category_change_queue')
 
-
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
 def complaints_queue(request):
@@ -436,7 +451,6 @@ def complaints_queue(request):
 
     return render(request, 'dashboard/complaints_queue.html', {'complaints': complaints})
 
-
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
 def resolve_complaint(request, complaint_id):
@@ -448,12 +462,6 @@ def resolve_complaint(request, complaint_id):
         complaint.save()
         messages.success(request, "Complaint marked as resolved.")
     return redirect('dashboard:complaints_queue')
-
-
-# ---------------------------------------------------------------------
-# Full history views — admin can see every customer's and worker's
-# complete activity (bookings, spend/earnings, reviews, documents).
-# ---------------------------------------------------------------------
 
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
@@ -476,7 +484,6 @@ def customer_list(request):
 
     return render(request, 'dashboard/customer_list.html', {'customers': customers})
 
-
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
 def customer_detail(request, user_id):
@@ -489,7 +496,6 @@ def customer_detail(request, user_id):
     return render(request, 'dashboard/customer_detail.html', {
         'customer': customer, 'bookings': bookings, 'total_spend': total_spend, 'complaints': complaints,
     })
-
 
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
@@ -512,7 +518,6 @@ def worker_list(request):
 
     return render(request, 'dashboard/worker_list.html', {'workers': workers})
 
-
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
 def worker_detail(request, worker_id):
@@ -528,7 +533,6 @@ def worker_detail(request, worker_id):
         'worker': worker, 'bookings': bookings, 'total_income': total_income,
         'reviews': reviews, 'documents': documents, 'category_requests': category_requests,
     })
-
 
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
@@ -554,21 +558,11 @@ def society_workers_list(request, society_id):
         'workers': workers,
     })
 
-#   - Admin (is_platform_admin): creates an INDEPENDENT society
-#     (federation=None) — it runs its own pricing/queries/work.
-#   - A Federation's own admin_user (is_federation_owner): creates a
-#     society automatically UNDER their own federation.
-# Renaming, banning, deleting, and promoting a society/federation
-# remain Admin-only actions (Section 9).
-# ---------------------------------------------------------------------
-
 def is_federation_owner(user):
     return user.is_authenticated and getattr(user, 'managed_federation', None) is not None
 
-
 def _can_manage_societies(user):
     return is_platform_admin(user) or is_federation_owner(user)
-
 
 @login_required
 @user_passes_test(_can_manage_societies, login_url='core:home')
@@ -619,7 +613,6 @@ def society_list(request):
         'all_federations': Federation.objects.filter(is_active=True) if (is_platform_admin(request.user) or is_federation_admin(request.user)) else None,
     })
 
-
 @login_required
 @user_passes_test(_can_manage_societies, login_url='core:home')
 def society_create(request):
@@ -647,7 +640,6 @@ def society_create(request):
                               + " Now assign it a head.")
         return redirect('dashboard:society_list')
     return redirect('dashboard:society_list')
-
 
 @login_required
 @user_passes_test(_can_manage_societies, login_url='core:home')
@@ -689,7 +681,6 @@ def society_assign_operator(request, society_id):
             messages.success(request, f"{label} is now the head of {society.name}.")
     return redirect('dashboard:society_list')
 
-
 @login_required
 @user_passes_test(_can_manage_societies, login_url='core:home')
 def society_remove_operator(request, society_id):
@@ -703,7 +694,6 @@ def society_remove_operator(request, society_id):
         society.save(update_fields=['operator'])
         messages.info(request, f"Head removed from {society.name}.")
     return redirect('dashboard:society_list')
-
 
 @login_required
 @user_passes_test(is_federation_admin, login_url='core:home')
@@ -721,12 +711,6 @@ def society_toggle_fieldwork(request, society_id):
         society.save(update_fields=['head_performs_fieldwork'])
         messages.success(request, f"Updated for {society.name}.")
     return redirect('dashboard:society_list')
-
-
-# ---------------------------------------------------------------------
-# Admin-only governance: rename, ban (for a period), accept resignation,
-# delete — for both Societies and Federations (Section 9).
-# ---------------------------------------------------------------------
 
 @login_required
 @user_passes_test(_can_manage_societies, login_url='core:home')
@@ -748,7 +732,6 @@ def society_rename(request, society_id):
             messages.success(request, "Society renamed.")
     return redirect('dashboard:society_list')
 
-
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
 def society_ban(request, society_id):
@@ -761,7 +744,6 @@ def society_ban(request, society_id):
         messages.warning(request, f"{society.name} banned" + (f" for {days} days." if days else " indefinitely."))
     return redirect('dashboard:society_list')
 
-
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
 def society_unban(request, society_id):
@@ -772,7 +754,6 @@ def society_unban(request, society_id):
         society.save(update_fields=['is_banned', 'ban_until'])
         messages.success(request, f"{society.name} unbanned.")
     return redirect('dashboard:society_list')
-
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
@@ -785,7 +766,6 @@ def society_accept_resignation(request, society_id):
         messages.info(request, f"Resignation accepted for {society.name}.")
     return redirect('dashboard:society_list')
 
-
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
 def society_delete(request, society_id):
@@ -795,7 +775,6 @@ def society_delete(request, society_id):
         society.delete()
         messages.warning(request, f"{name} deleted permanently.")
     return redirect('dashboard:society_list')
-
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
@@ -812,15 +791,7 @@ def society_promote_to_federation(request, society_id):
         messages.success(request, f"{society.name} promoted to a federation. "
                                    f"Its former head ({society.operator}) now administers the new federation — "
                                    f"appoint a new society head separately if needed.")
-        # The society itself still exists as a society; if desired an
-        # operator can create a new society under this new federation.
     return redirect('dashboard:society_list')
-
-
-# ---------------------------------------------------------------------
-# Federation management — Admin-only creation/governance, plus a
-# federation's own admin_user can view/manage their one federation.
-# ---------------------------------------------------------------------
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
@@ -830,7 +801,6 @@ def federation_list(request):
                    .annotate(society_count=Count('societies'))
                    .order_by('name'))
     return render(request, 'dashboard/federation_list.html', {'federations': federations})
-
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
@@ -847,7 +817,6 @@ def federation_create(request):
                                        commission_percent=commission)
             messages.success(request, f"Federation '{name}' created. Now assign it an admin.")
     return redirect('dashboard:federation_list')
-
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
@@ -870,7 +839,6 @@ def federation_assign_admin(request, federation_id):
         messages.success(request, f"{admin_user.get_full_name() or admin_user.phone_number} now administers {federation.name}.")
     return redirect('dashboard:federation_list')
 
-
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
 def federation_rename(request, federation_id):
@@ -882,7 +850,6 @@ def federation_rename(request, federation_id):
             federation.save(update_fields=['name'])
             messages.success(request, "Federation renamed.")
     return redirect('dashboard:federation_list')
-
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
@@ -896,7 +863,6 @@ def federation_ban(request, federation_id):
         messages.warning(request, f"{federation.name} banned.")
     return redirect('dashboard:federation_list')
 
-
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
 def federation_unban(request, federation_id):
@@ -907,7 +873,6 @@ def federation_unban(request, federation_id):
         federation.save(update_fields=['is_banned', 'ban_until'])
         messages.success(request, f"{federation.name} unbanned.")
     return redirect('dashboard:federation_list')
-
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
@@ -921,7 +886,6 @@ def federation_delete(request, federation_id):
         messages.warning(request, f"{name} deleted. Its societies are now independent.")
     return redirect('dashboard:federation_list')
 
-
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
 def federation_set_commission(request, federation_id):
@@ -931,7 +895,6 @@ def federation_set_commission(request, federation_id):
         federation.save(update_fields=['commission_percent'])
         messages.success(request, f"Commission for {federation.name} updated.")
     return redirect('dashboard:federation_list')
-
 
 @login_required
 @user_passes_test(is_platform_admin, login_url='core:home')
@@ -978,7 +941,7 @@ def manage_government_opportunities(request):
     })
 
 @login_required
-@user_passes_test(is_federation_admin, login_url='core:home')
+@federation_admin_required
 def independent_societies_list(request):
     """A federation admin browses independent societies to invite."""
     societies = Society.objects.filter(federation__isnull=True, is_active=True)
@@ -992,9 +955,8 @@ def independent_societies_list(request):
         'societies': societies, 'own_federation': own_federation, 'pending_invites': pending_invites,
     })
 
-
 @login_required
-@user_passes_test(is_federation_admin, login_url='core:home')
+@federation_admin_required
 def invite_society(request, society_id):
     own_federation = getattr(request.user, 'managed_federation', None)
     if not own_federation:
@@ -1008,7 +970,6 @@ def invite_society(request, society_id):
         )
         messages.success(request, f"Invited {society.name} to join {own_federation.name}.")
     return redirect('dashboard:independent_societies_list')
-
 
 @login_required
 @user_passes_test(is_society_operator, login_url='core:home')
@@ -1025,7 +986,6 @@ def federation_directory(request):
         'federations': federations, 'own_society': own_society, 'pending_requests': pending_requests,
     })
 
-
 @login_required
 @user_passes_test(is_society_operator, login_url='core:home')
 def request_join_federation(request, federation_id):
@@ -1041,7 +1001,6 @@ def request_join_federation(request, federation_id):
         )
         messages.success(request, f"Requested to join {federation.name}. Awaiting their acceptance.")
     return redirect('dashboard:federation_directory')
-
 
 @login_required
 def join_requests_queue(request):
@@ -1062,7 +1021,6 @@ def join_requests_queue(request):
     else:
         messages.info(request, "You don't manage a federation or society yet.")
     return render(request, 'dashboard/join_requests_queue.html', {'incoming': incoming})
-
 
 @login_required
 def decide_join_request(request, request_id):
@@ -1096,7 +1054,6 @@ def decide_join_request(request, request_id):
             messages.info(request, "Request rejected.")
         join_request.save()
     return redirect('dashboard:join_requests_queue')
-
 
 @login_required
 def manage_custom_pricing(request):
@@ -1162,7 +1119,6 @@ def government_applications_list(request):
     """Admin-only view to see all worker applications for government projects."""
     # Filter by project if provided in query params
     project_id = request.GET.get('project_id')
-    from core.models import GovernmentApplication, GovernmentOpportunity
     applications = GovernmentApplication.objects.select_related('opportunity', 'worker__user').order_by('-applied_at')
     projects = GovernmentOpportunity.objects.all().order_by('title')
 

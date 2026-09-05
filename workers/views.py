@@ -252,6 +252,51 @@ def unblock_date(request, block_id):
 
 
 @login_required
+def worker_insurance(request):
+    """
+    Worker's insurance management page.
+    Shows current status, policy details, coverage, and available plans.
+    (Currently using mock data as per requirements).
+    """
+    profile, _created = WorkerProfile.objects.get_or_create(user=request.user)
+
+    # Mock insurance data
+    insurance_data = {
+        'status': 'Active', # Options: Active, Pending, Not Enrolled
+        'policy': {
+            'name': 'Co-op Seva Worker Protection Plan',
+            'id': 'CS-INS-2026-8842',
+            'coverage': '₹ 5,00,000',
+            'valid_from': '2026-01-01',
+            'valid_to': '2026-12-31',
+        },
+        'benefits': [
+            {'type': 'Accident', 'coverage': '₹ 2,00,000', 'description': 'Accidental death and permanent disability.'},
+            {'type': 'Medical', 'coverage': '₹ 1,50,000', 'description': 'Hospitalization and critical illness coverage.'},
+            {'type': 'Disability', 'coverage': '₹ 1,00,000', 'description': 'Monthly stipend for temporary disability.'},
+            {'type': 'Death Benefit', 'coverage': '₹ 50,000', 'description': 'Immediate funeral and family support grant.'},
+        ],
+        'claims': [
+            {'id': 'CLM-102', 'date': '2026-03-15', 'amount': '₹ 12,000', 'status': 'Paid', 'type': 'Medical'},
+        ],
+        'nominee': {
+            'name': 'Sita Devi',
+            'relation': 'Spouse',
+            'contact': '9876543210',
+        },
+        'available_plans': [
+            {'name': 'Basic Protection', 'premium': '₹ 150/mo', 'coverage': '₹ 2,00,000', 'highlight': False},
+            {'name': 'Standard Care', 'premium': '₹ 300/mo', 'coverage': '₹ 5,00,000', 'highlight': True},
+            {'name': 'Premium Security', 'premium': '₹ 600/mo', 'coverage': '₹ 10,00,000', 'highlight': False},
+        ]
+    }
+
+    return render(request, 'workers/insurance.html', {
+        'profile': profile,
+        'insurance': insurance_data,
+    })
+
+@login_required
 def accept_society_invite(request, invite_id):
     """Worker accepts an invitation to join a specific society."""
     invite = get_object_or_404(SocietyInvite, id=invite_id, status=SocietyInvite.Status.PENDING)

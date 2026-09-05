@@ -15,4 +15,5 @@ urlpatterns = [
     path('dashboard/availability/', views.manage_availability, name='manage_availability'),
     path('dashboard/availability/<int:block_id>/unblock/', views.unblock_date, name='unblock_date'),
     path('dashboard/accept-invite/<int:invite_id>/', views.accept_society_invite, name='accept_society_invite'),
+    path('dashboard/insurance/', views.worker_insurance, name='worker_insurance'),
 ]

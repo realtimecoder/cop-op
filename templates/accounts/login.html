@@ -8,10 +8,27 @@
       <div class="text-center mb-0" style="margin-bottom:20px;">
         <div class="category-icon" style="margin:0 auto 14px;"><svg><use href="#icon-user"/></svg></div>
         <h1 style="font-size:1.5rem;">{% trans "Log in or create an account" %}</h1>
-        <p class="muted">{% trans "Enter your mobile number to receive a one-time password." %}</p>
+        <p class="muted">{% trans "Select your role and enter your mobile number." %}</p>
       </div>
       <form method="post" novalidate>
         {% csrf_token %}
+        <div class="form-group">
+          <label>{% trans "I am a..." %}</label>
+          <div class="role-selector" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+            <label class="role-option">
+              <input type="radio" name="login_role" value="customer" checked> <span>{% trans "Customer" %}</span>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="login_role" value="builder"> <span>{% trans "Institutional" %}</span>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="login_role" value="worker"> <span>{% trans "Worker" %}</span>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="login_role" value="federation"> <span>{% trans "Federation Admin" %}</span>
+            </label>
+          </div>
+        </div>
         <div class="form-group">
           <label for="{{ form.phone_number.id_for_label }}">{% trans "Mobile number" %}</label>
           <div style="display:flex;align-items:center;gap:8px;">
