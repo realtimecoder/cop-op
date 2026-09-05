@@ -192,7 +192,7 @@ class SocietyPricing(models.Model):
 class FederationPricing(models.Model):
     """Custom pricing for federations (FR-012).
     If a society is associated with a federation, it MUST follow the federation's pricing."""
-    federation = models.OneToOneField(Federation, on_delete=models.CASCADE, related_name='custom_pricing')
+    federation = models.OneToOneField(Federation, on_delete=models.CASCADE, related_name='custom_pricing', null=True, blank=True)
     category_overrides = models.JSONField(
         default=dict,
         help_text='Mapping of category_id to custom visit charge.')

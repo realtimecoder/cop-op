@@ -17,6 +17,7 @@
       {% if is_platform_admin %}
       <a href="{% url 'dashboard:federation_list' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-shield"/></svg></div><h3>{% trans "Federations" %}</h3><p class="mb-0 muted">{% trans "Create federations and appoint their admins (Admin only)." %}</p></div></a>
       <a href="{% url 'dashboard:worker_verification_queue' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-shield"/></svg></div><h3>{% trans "Skill & certificate verification" %}</h3><p class="mb-0 muted">{{ pending_verifications }} {% trans "pending review" %}</p></div></a>
+      <a href="{% url 'dashboard:manage_gov_opportunities' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-shield"/></svg></div><h3>{% trans "Government Opportunities" %}</h3><p class="mb-0 muted">{% trans "Post and manage live government projects for workers." %}</p></div></a>
       {% endif %}
       {% if is_federation_admin %}
       <a href="{% url 'dashboard:pricing_config' %}" class="card-link"><div class="card"><div class="category-icon"><svg><use href="#icon-receipt"/></svg></div><h3>{% trans "Fixed & hourly pricing" %}</h3><p class="mb-0 muted">{% trans "Set visit charges, fixed labour charges and hourly rates (federation admin only)." %}</p></div></a>

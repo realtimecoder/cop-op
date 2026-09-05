@@ -7,12 +7,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
 from accounts.models import User
-from catalog.models import ServiceCategory, Service
+from core.models import GovernmentOpportunity
+from bookings.models import Booking, Complaint, BulkServiceRequest
 from workers.models import (WorkerProfile, WorkerCategoryChangeRequest, WorkerServiceOffering,
                              Society, Federation, FederationJoinRequest, SocietyInvite)
-from bookings.models import Booking, Complaint, BulkServiceRequest
+from catalog.models import ServiceCategory, Service
 from payments.models import Payment
 from reviews.models import Review
+
+def is_federation_admin(user):
+    return user.is_authenticated and (user.role == User.Role.FEDERATION or user.is_superuser)
 
 
 def is_federation_admin(user):
@@ -897,10 +901,37 @@ def federation_set_commission(request, federation_id):
     return redirect('dashboard:federation_list')
 
 
-# ---------------------------------------------------------------------
-# Federation <-> independent-society join/invite flow (Section 4.2).
-# Either side can initiate; the OTHER side must accept.
-# ---------------------------------------------------------------------
+@login_required
+@user_passes_test(is_platform_admin, login_url='core:home')
+def manage_government_opportunities(request):
+    """Admin-only management of government opportunities."""
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        location = request.POST.get('location', '').strip()
+        required_workers = request.POST.get('required_workers')
+        closing_date = request.POST.get('closing_date')
+        category = request.POST.get('category', '').strip()
+
+        if not all([title, description, location, required_workers, closing_date, category]):
+            messages.error(request, "All fields are required.")
+            return redirect('dashboard:manage_gov_opportunities')
+
+        GovernmentOpportunity.objects.create(
+            title=title,
+            description=description,
+            location=location,
+            required_workers=int(required_workers),
+            closing_date=closing_date,
+            category=category
+        )
+        messages.success(request, f"Opportunity '{title}' added successfully.")
+        return redirect('dashboard:manage_gov_opportunities')
+
+    opportunities = GovernmentOpportunity.objects.all().order_by('-created_at')
+    return render(request, 'dashboard/manage_gov_opportunities.html', {
+        'opportunities': opportunities,
+    })
 
 @login_required
 @user_passes_test(is_federation_admin, login_url='core:home')

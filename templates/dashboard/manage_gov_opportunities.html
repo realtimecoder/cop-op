@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Manage Government Opportunities</h1>
+        <p>Create and oversee live project opportunities for verified workers.</p>
+    </header>
+
+    <div class="management-grid">
+        <!-- Add Opportunity Form -->
+        <section class="form-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Add New Opportunity</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="admin-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="title">Project Title</label>
+                            <input type="text" id="title" name="title" placeholder="e.g. Rural Road Development" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <input type="text" id="category" name="category" placeholder="e.g. Infrastructure" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" name="location" placeholder="e.g. Haryana, India" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="required_workers">Workers Required</label>
+                            <input type="number" id="required_workers" name="required_workers" placeholder="e.g. 50" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="closing_date">Closing Date</label>
+                            <input type="date" id="closing_date" name="closing_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Detailed Description</label>
+                            <textarea id="description" name="description" rows="4" placeholder="Describe the project and requirements..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Post Opportunity</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- List of Opportunities -->
+        <section class="list-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Live Opportunities</h2>
+                </div>
+                <div class="card-body">
+                    {% if opportunities %}
+                        <div class="opp-list">
+                            {% for opp in opportunities %}
+                                <div class="opp-item">
+                                    <div class="opp-info">
+                                        <h3>{{ opp.title }}</h3>
+                                        <p class="opp-meta">
+                                            <span class="badge">{{ opp.category }}</span>
+                                            <span class="loc">📍 {{ opp.location }}</span>
+                                            <span class="workers">👥 {{ opp.required_workers }} Workers</span>
+                                            <span class="date">📅 Due: {{ opp.closing_date }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="opp-actions">
+                                        <a href="#" class="btn btn-sm btn-outline">Edit</a>
+                                        <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty-state">No government opportunities posted yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+    .management-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .admin-form .form-group {
+        margin-bottom: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .admin-form label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-main);
+    }
+
+    .admin-form input, .admin-form textarea {
+        padding: 0.7rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    .opp-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .opp-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-card);
+        transition: transform 0.2s;
+    }
+
+    .opp-item:hover {
+        transform: translateX(5px);
+        border-color: var(--primary-color);
+    }
+
+    .opp-info h3 {
+        margin: 0 0 0.4rem 0;
+        font-size: 1.1rem;
+        color: var(--primary-color);
+    }
+
+    .opp-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .badge {
+        background: var(--primary-light);
+        color: var(--primary-color);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 2rem;
+    }
+
+    @media (max-width: 992px) {
+        .management-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

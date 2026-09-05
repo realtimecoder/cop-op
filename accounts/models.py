@@ -32,6 +32,7 @@ class User(AbstractUser):
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     is_phone_verified = models.BooleanField(default=False)
+    has_completed_tour = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
