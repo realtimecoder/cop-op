@@ -162,8 +162,6 @@ def complete_profile(request):
                     messages.error(request, _("You must join a cooperative society to complete your profile."))
                     # Re-render form with error (do this by updating the form instance)
                     form = RegistrationForm(request.POST, instance=request.user)
-                    # Populate societies again for the re-render
-                    form.fields['society'].queryset = Society.objects.filter(is_active=True)
                     return render(request, 'accounts/complete_profile.html', {'form': form})
 
                 # Assign worker to selected society

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "SOS Requests" %} — Co-opSeva{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h1>{% trans "Emergency SOS Requests" %}</h1>
+            <p class="muted">{% trans "Real-time emergency requests in your area. Claim them quickly to help customers!" %}</p>
+        </div>
+
+        {% if requests %}
+            <div class="sos-grid">
+                {% for booking in requests %}
+                    <div class="sos-card">
+                        <div class="sos-card-header">
+                            <div class="sos-badge">🚨 EMERGENCY</div>
+                            <div class="sos-time">Requested: {{ booking.created_at|timesince }} ago</div>
+                        </div>
+                        <div class="sos-card-body">
+                            <h3>{{ booking.service.name }}</h3>
+                            <p class="location">
+                                <svg class="icon-sm"><use href="#icon-location"/></svg>
+                                {{ booking.address }}, {{ booking.city }}
+                            </p>
+                            <p class="instructions">
+                                <strong>Note:</strong> {{ booking.instructions }}
+                            </p>
+                        </div>
+                        <div class="sos-card-footer">
+                            <form action="{% url 'bookings:accept_sos' booking.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-block">{% trans "Claim Request" %}</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state text-center">
+                <div class="empty-icon">💤</div>
+                <h3>{% trans "No active SOS requests" %}</h3>
+                <p class="muted">{% trans "Everything is quiet for now. We'll notify you when a new emergency arises." %}</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.sos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.sos-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.sos-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+}
+
+.sos-card-header {
+    padding: 12px 16px;
+    background: var(--bg-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sos-badge {
+    background: #ff4d4f;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.sos-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.sos-card-body {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.sos-card-body h3 {
+    margin: 0 0 10px;
+    font-size: 1.25rem;
+}
+
+.location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.instructions {
+    font-size: 0.9rem;
+    background: var(--bg-muted);
+    padding: 10px;
+    border-radius: 8px;
+    font-style: italic;
+}
+
+.sos-card-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.empty-state {
+    margin-top: 100px;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}

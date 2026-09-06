@@ -17,7 +17,7 @@
   --teal-tint:    #E4EFEE;
   --marigold:     #E2A33D;   /* accent: price / call-to-action       */
   --marigold-deep:#B97F22;
-  --thread-red:   #A8412F;   /* alerts / emergency accents           */
+  --thread-red:   #ab2b14;   /* alerts / emergency accents           */
   --line:         #D8CFBC;
   --white:        #FFFFFF;
 
@@ -493,6 +493,15 @@ table.data-table tr:last-child td{ border-bottom:none; }
 .alert-success{ border-left-color: #2F8A5B; }
 .alert-error{ border-left-color: var(--thread-red); }
 .alert-warning{ border-left-color: var(--marigold-deep); }
+.alert-sos{
+  border: 2px solid #FF0000;
+  background: #fff1f0;
+  color: #cf1322;
+  border-left: 4px solid #FF0000;
+}
+.alert-sos b { color: #cf1322; font-size: 1.1rem; }
+.alert-sos p { color: #cf1322; margin: 8px 0; }
+.alert-sos .btn-sos { background: #FF0000; color: white; border: none; }
 .alert-info{ border-left-color: var(--teal); }
 
 /* ---------------------------------------------------------------
