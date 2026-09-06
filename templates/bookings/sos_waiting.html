@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Searching for Worker" %} — Co-opSeva{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container text-center">
+        <div class="sos-waiting-card">
+            <div class="pulse-animation">
+                <div class="sos-icon">🚨</div>
+            </div>
+            <h1 style="font-size: 2rem; margin-top: 20px;">{% trans "Broadcasting Request..." %}</h1>
+            <p class="muted">{% trans "We are notifying nearby verified workers for" %} <strong>{{ booking.service.name }}</strong>.</p>
+            <p>{% trans "Please stay on this page. We will redirect you as soon as a worker claims your request." %}</p>
+
+            <div class="loading-spinner"></div>
+
+            <div class="sos-status-pill">
+                <span class="pill-label">Status:</span>
+                <span id="status-text" class="pill-value">{{ booking.get_status_display }}</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.sos-waiting-card {
+    max-width: 600px;
+    margin: 80px auto;
+    padding: 40px;
+    background: var(--bg-card);
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    border: 1px solid var(--border-color);
+}
+
+.pulse-animation {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 0, 0, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    position: relative;
+    animation: pulse 2s infinite;
+}
+
+.sos-icon {
+    font-size: 3rem;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+    70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 0, 0, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--bg-muted);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    margin: 30px auto;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.sos-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--bg-muted);
+    border-radius: 100px;
+    font-size: 0.9rem;
+    margin-top: 20px;
+}
+
+.pill-label {
+    font-weight: bold;
+    color: var(--text-muted);
+}
+
+.pill-value {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+</style>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const bookingId = "{{ booking.id }}";
+    const statusText = document.getElementById('status-text');
+
+    async function checkStatus() {
+        try {
+            const response = await fetch(`/bookings/${bookingId}/status/`);
+            if (!response.ok) throw new Error('Network error');
+
+            const data = await response.json();
+            statusText.textContent = data.status_display;
+
+            if (data.status === 'assigned') {
+                window.location.href = `/bookings/${bookingId}/`;
+            }
+        } catch (error) {
+            console.error('Error polling status:', error);
+        }
+    }
+
+    // Poll every 3 seconds
+    setInterval(checkStatus, 3000);
+});
+</script>
+{% endblock %}
+{% endblock %}

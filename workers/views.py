@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from catalog.models import Service
 from payments.models import Payment
+from bookings.models import Booking
 from .models import WorkerProfile, WorkerServiceOffering, WorkerBlockedDate, WorkerCategoryChangeRequest, SocietyInvite
 from .forms import (WorkerOnboardingForm, WorkerDocumentForm, WorkerProfileEditForm,
                      WorkerCategoryChangeRequestForm, WorkerBlockedDateForm)
@@ -162,11 +163,18 @@ def my_dashboard(request):
         phone_number=request.user.phone_number, status=SocietyInvite.Status.PENDING
     ).select_related('society')
 
+    # SOS Requests waiting for acceptance (Broadcast-and-Claim)
+    open_sos = Booking.objects.filter(
+        status=Booking.Status.WAITING_FOR_ACCEPTANCE,
+        is_emergency=True
+    ).select_related('service', 'customer').order_by('-created_at')
+
     return render(request, 'workers/my_dashboard.html', {
         'profile': profile, 'bookings': bookings, 'total_income': total_income,
         'pending_category_request': pending_category_request,
         'blocked_dates': profile.blocked_dates.filter(date__gte=timezone.localdate()).order_by('date'),
         'pending_invites': pending_invites,
+        'open_sos': open_sos,
     })
 
 
