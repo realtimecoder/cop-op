@@ -23,6 +23,7 @@ class User(AbstractUser):
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
     phone_number = models.CharField(max_length=15, unique=True, db_index=True)
+    REQUIRED_FIELDS = ['phone_number']
     preferred_language = models.CharField(max_length=8, default='en')
     address = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
