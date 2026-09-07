@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from catalog.models import Service
 from payments.models import Payment
+from bookings.models import Booking
 from .models import WorkerProfile, WorkerServiceOffering, WorkerBlockedDate, WorkerCategoryChangeRequest, SocietyInvite
 from .forms import (WorkerOnboardingForm, WorkerDocumentForm, WorkerProfileEditForm,
                      WorkerCategoryChangeRequestForm, WorkerBlockedDateForm)
@@ -162,11 +163,18 @@ def my_dashboard(request):
         phone_number=request.user.phone_number, status=SocietyInvite.Status.PENDING
     ).select_related('society')
 
+    # SOS Requests waiting for acceptance (Broadcast-and-Claim)
+    open_sos = Booking.objects.filter(
+        status=Booking.Status.WAITING_FOR_ACCEPTANCE,
+        is_emergency=True
+    ).select_related('service', 'customer').order_by('-created_at')
+
     return render(request, 'workers/my_dashboard.html', {
         'profile': profile, 'bookings': bookings, 'total_income': total_income,
         'pending_category_request': pending_category_request,
         'blocked_dates': profile.blocked_dates.filter(date__gte=timezone.localdate()).order_by('date'),
         'pending_invites': pending_invites,
+        'open_sos': open_sos,
     })
 
 
@@ -250,6 +258,51 @@ def unblock_date(request, block_id):
         messages.info(request, "Date unblocked.")
     return redirect('workers:manage_availability')
 
+
+@login_required
+def worker_insurance(request):
+    """
+    Worker's insurance management page.
+    Shows current status, policy details, coverage, and available plans.
+    (Currently using mock data as per requirements).
+    """
+    profile, _created = WorkerProfile.objects.get_or_create(user=request.user)
+
+    # Mock insurance data
+    insurance_data = {
+        'status': 'Active', # Options: Active, Pending, Not Enrolled
+        'policy': {
+            'name': 'Co-op Seva Worker Protection Plan',
+            'id': 'CS-INS-2026-8842',
+            'coverage': '₹ 5,00,000',
+            'valid_from': '2026-01-01',
+            'valid_to': '2026-12-31',
+        },
+        'benefits': [
+            {'type': 'Accident', 'coverage': '₹ 2,00,000', 'description': 'Accidental death and permanent disability.'},
+            {'type': 'Medical', 'coverage': '₹ 1,50,000', 'description': 'Hospitalization and critical illness coverage.'},
+            {'type': 'Disability', 'coverage': '₹ 1,00,000', 'description': 'Monthly stipend for temporary disability.'},
+            {'type': 'Death Benefit', 'coverage': '₹ 50,000', 'description': 'Immediate funeral and family support grant.'},
+        ],
+        'claims': [
+            {'id': 'CLM-102', 'date': '2026-03-15', 'amount': '₹ 12,000', 'status': 'Paid', 'type': 'Medical'},
+        ],
+        'nominee': {
+            'name': 'Sita Devi',
+            'relation': 'Spouse',
+            'contact': '9876543210',
+        },
+        'available_plans': [
+            {'name': 'Basic Protection', 'premium': '₹ 150/mo', 'coverage': '₹ 2,00,000', 'highlight': False},
+            {'name': 'Standard Care', 'premium': '₹ 300/mo', 'coverage': '₹ 5,00,000', 'highlight': True},
+            {'name': 'Premium Security', 'premium': '₹ 600/mo', 'coverage': '₹ 10,00,000', 'highlight': False},
+        ]
+    }
+
+    return render(request, 'workers/insurance.html', {
+        'profile': profile,
+        'insurance': insurance_data,
+    })
 
 @login_required
 def accept_society_invite(request, invite_id):

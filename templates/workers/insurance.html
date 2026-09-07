@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "My Insurance" %} — Co-opSeva{% endblock %}
+
+{% block extra_head %}
+<style>
+  .insurance-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .status-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .status-active { background: #dcfce7; color: #166534; }
+  .status-pending { background: #fef9c3; color: #854d0e; }
+  .status-none { background: #fee2e2; color: #991b1b; }
+
+  .policy-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .detail-item {
+    padding: 1rem;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+  }
+
+  .detail-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .detail-value {
+    font-weight: 600;
+    color: var(--teal-deep);
+  }
+
+  .benefit-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    margin-bottom: 1rem;
+    transition: transform 0.2s;
+  }
+
+  .benefit-card:hover {
+    transform: translateX(5px);
+    border-color: var(--teal);
+  }
+
+  .benefit-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--teal-tint);
+    color: var(--teal-deep);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .benefit-info h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--teal-deep);
+  }
+
+  .benefit-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
+
+  .claim-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  .claim-table th, .claim-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.85rem;
+  }
+
+  .plan-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .plan-card {
+    background: var(--paper);
+    border: 2px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .plan-card.highlight {
+    border-color: var(--teal);
+    box-shadow: var(--shadow-md);
+    transform: scale(1.05);
+  }
+
+  .plan-card.highlight::before {
+    content: "MOST POPULAR";
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--teal);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .plan-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--teal-deep);
+    margin: 1rem 0;
+  }
+
+  @media (max-width: 992px) {
+    .insurance-grid { grid-template-columns: 1fr; }
+    .plan-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <header class="dashboard-header">
+      <div>
+        <h1>{% trans "Insurance & Protection" %}</h1>
+        <p class="muted">{% trans "Secure your future and your family with Co-opSeva cooperative insurance plans." %}</p>
+      </div>
+      <div class="header-actions">
+        <a href="#" class="btn btn-primary">{% trans "File a Claim" %}</a>
+      </div>
+    </header>
+
+    <div class="insurance-grid">
+      <!-- Left Column: Current Policy -->
+      <div class="column">
+        <div class="status-card">
+          <span class="status-badge status-{% if insurance.status == 'Active' %}active{% elif insurance.status == 'Pending' %}pending{% else %}none{% endif %}">
+            {% trans "Status: " %}{{ insurance.status }}
+          </span>
+
+          <h3 style="margin-bottom: 1.5rem;">{% trans "My Current Policy" %}</h3>
+
+          <div class="policy-detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">{% trans "Policy Name" %}</span>
+              <span class="detail-value">{{ insurance.policy.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{% trans "Policy ID" %}</span>
+              <span class="detail-value">{{ insurance.policy.id }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{% trans "Coverage" %}</span>
+              <span class="detail-value">{{ insurance.policy.coverage }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">{% trans "Validity" %}</span>
+              <span class="detail-value">{{ insurance.policy.valid_from }} to {{ insurance.policy.valid_to }}</span>
+            </div>
+          </div>
+
+          <div class="flex gap-2 justify-center">
+            <a href="#" class="btn btn-outline btn-sm">{% trans "View Policy" %}</a>
+            <a href="#" class="btn btn-ghost btn-sm">{% trans "Download Certificate" %}</a>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <h3 style="margin-bottom: 1rem;">{% trans "Nominee & Beneficiary" %}</h3>
+          <div class="detail-item" style="background: var(--white);">
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="detail-label">{% trans "Primary Nominee" %}</span>
+                <span class="detail-value">{{ insurance.nominee.name }} ({{ insurance.nominee.relation }})</span>
+              </div>
+              <a href="#" class="btn btn-ghost btn-sm">{% trans "Update" %}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Benefits & Claims -->
+      <div class="column">
+        <div class="card">
+          <h3 style="margin-bottom: 1.5rem;">{% trans "Coverage & Benefits" %}</h3>
+          <div class="benefits-list">
+            {% for benefit in insurance.benefits %}
+            <div class="benefit-card">
+              <div class="benefit-icon">
+                <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div class="benefit-info">
+                <h4>{{ benefit.type }} — {{ benefit.coverage }}</h4>
+                <p>{{ benefit.description }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <div class="flex justify-between items-center" style="margin-bottom: 1.5rem;">
+            <h3>{% trans "My Claims History" %}</h3>
+            <a href="#" class="btn btn-outline btn-sm">{% trans "Track Claim" %}</a>
+          </div>
+          <div class="table-wrap">
+            <table class="claim-table">
+              <thead>
+                <tr>
+                  <th>{% trans "Claim ID" %}</th>
+                  <th>{% trans "Date" %}</th>
+                  <th>{% trans "Type" %}</th>
+                  <th>{% trans "Amount" %}</th>
+                  <th>{% trans "Status" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for claim in insurance.claims %}
+                <tr>
+                  <td>{{ claim.id }}</td>
+                  <td>{{ claim.date }}</td>
+                  <td>{{ claim.type }}</td>
+                  <td>{{ claim.amount }}</td>
+                  <td><span class="badge badge-verified">{{ claim.status }}</span></td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center muted">{% trans "No claims filed yet." %}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="mt-5 mb-2 text-center" style="font-size: 1.8rem;">{% trans "Available Insurance Plans" %}</h3>
+    <p class="text-center muted mb-4">{% trans "Upgrade your protection. Choose a plan that fits your needs." %}</p>
+
+    <div class="plan-grid">
+      {% for plan in insurance.available_plans %}
+      <div class="plan-card {% if plan.highlight %}highlight{% endif %}">
+        <h4>{{ plan.name }}</h4>
+        <div class="plan-price">{{ plan.premium }} <small style="font-size: 0.8rem; color: var(--ink-soft);">/ month</small></div>
+        <p class="muted" style="margin-bottom: 1.5rem;">{% trans "Total Coverage:" %} <br><strong>{{ plan.coverage }}</strong></p>
+        <button class="btn btn-primary btn-sm" style="width: 100%;">{% if plan.highlight %}{% trans "Current Plan" %}{% else %}{% trans "Enroll Now" %}{% endif %}</button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

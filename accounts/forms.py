@@ -1,5 +1,6 @@
 from django import forms
 from django.core.validators import RegexValidator
+from django.apps import apps
 
 from .models import User
 
@@ -33,6 +34,13 @@ class OTPVerifyForm(forms.Form):
 
 class RegistrationForm(forms.ModelForm):
     """Used right after first-time OTP verification to complete the profile."""
+    society = forms.ModelChoiceField(
+        queryset=apps.get_model('workers', 'Society').objects.none(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'input-field'}),
+        label="Join a Cooperative Society"
+    )
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'role', 'address', 'city', 'pincode', 'preferred_language']
@@ -48,6 +56,9 @@ class RegistrationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Populate society queryset for workers
+        self.fields['society'].queryset = apps.get_model('workers', 'Society').objects.filter(is_active=True)
+
         # Public self-registration is limited to customer / builder / worker.
         self.fields['role'].choices = [
             (User.Role.CUSTOMER, 'Customer'),

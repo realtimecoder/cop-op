@@ -16,6 +16,34 @@ from .forms import BookingForm, ComplaintForm, BookingRequestForm
 from .services import find_best_worker
 
 
+def _calculate_booking_pricing(service, worker=None):
+    """Calculates pricing based on the fixed-price ledger system.
+    Order: Federation Pricing -> Independent Society Override -> Global."""
+    visit_charge = service.category.fixed_visit_charge
+    labour_charge = service.fixed_labour_charge if not service.is_hourly else service.hourly_rate
+
+    if worker and worker.society:
+        society = worker.society
+        if society.is_independent:
+            try:
+                pricing = society.custom_pricing
+                custom_visit = pricing.get_visit_charge(service.category)
+                custom_labour = pricing.get_labour_charge(service)
+                if custom_visit: visit_charge = custom_visit
+                if custom_labour: labour_charge = custom_labour
+            except: pass
+        elif society.federation:
+            try:
+                pricing = society.federation.custom_pricing
+                custom_visit = pricing.get_visit_charge(service.category)
+                custom_labour = pricing.get_labour_charge(service)
+                if custom_visit: visit_charge = custom_visit
+                if custom_labour: labour_charge = custom_labour
+            except: pass
+
+    return visit_charge, labour_charge
+
+
 def _worker_occupied_dates(worker):
     """Dates the worker cannot be booked on: manually blocked days, plus
     any day already carrying an active (non-cancelled/rejected) booking.
@@ -250,6 +278,7 @@ def create_emergency_booking(request, service_id):
         'worker': best_worker,
     })
 
+
 @login_required
 def create_booking(request, service_id, worker_id):
     """UC-001 Book Fixed Service. Requires login (session-based).
@@ -424,7 +453,7 @@ def confirm_completion(request, booking_id):
     """The customer's real confirmation that the work is done — this is
     what actually moves WORK_COMPLETED -> CUSTOMER_CONFIRMED, not a timer
     or a generic advance button."""
-    booking = get_object_or_404(Booking, id=booking_id, customer=request.user)
+    booking = get_object_of_404(Booking, id=booking_id, customer=request.user)
     if booking.status != Booking.Status.WORK_COMPLETED:
         messages.error(request, "This booking isn't awaiting confirmation.")
         return redirect('bookings:booking_detail', booking_id=booking.id)
@@ -438,6 +467,84 @@ def confirm_completion(request, booking_id):
 def my_bookings(request):
     bookings = Booking.objects.filter(customer=request.user).select_related('service', 'worker')
     return render(request, 'bookings/my_bookings.html', {'bookings': bookings})
+
+
+@login_required
+def request_sos(request, service_id):
+    """SOS Broadcast: Creates a booking in WAITING_FOR_ACCEPTANCE state.
+    Any eligible worker can claim it (Broadcast-and-Claim model)."""
+    service = get_object_or_404(Service, id=service_id, is_active=True)
+
+    # Pricing for SOS (broadcast): use global/category rates as no worker is assigned yet
+    visit_charge, labour_charge = _calculate_booking_pricing(service)
+
+    booking = Booking.objects.create(
+        customer=request.user,
+        service=service,
+        scheduled_date=timezone.localdate(),
+        scheduled_time=timezone.localtime().time(),
+        address=request.user.address,
+        city=request.user.city,
+        pincode=request.user.pincode,
+        instructions=f"[SOS EMERGENCY] Requested via Broadcast",
+        visit_charge=visit_charge,
+        labour_charge=labour_charge,
+        status=Booking.Status.WAITING_FOR_ACCEPTANCE,
+        is_emergency=True
+    )
+
+    messages.success(request, "Emergency request broadcasted! Searching for available workers...")
+    return redirect('bookings:sos_waiting', booking_id=booking.id)
+
+
+@login_required
+@require_POST
+def accept_sos(request, booking_id):
+    """Worker claims an SOS broadcast.
+    Validates worker verification and availability before assignment."""
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    # Check if already claimed
+    if booking.status != Booking.Status.WAITING_FOR_ACCEPTANCE:
+        messages.error(request, "This emergency request has already been claimed by another worker.")
+        return redirect('workers:my_dashboard')
+
+    # Identify worker
+    try:
+        worker = WorkerProfile.objects.get(user=request.user)
+    except WorkerProfile.DoesNotExist:
+        messages.error(request, "You must have a worker profile to claim SOS requests.")
+        return redirect('workers:my_dashboard')
+
+    # Verify worker is suited for this service (verified and has skill/category match)
+    if worker.verification_status != WorkerProfile.VerificationStatus.VERIFIED:
+        messages.error(request, "Only verified workers can claim SOS requests.")
+        return redirect('workers:my_dashboard')
+
+    # Check worker availability for today
+    if timezone.localdate() in _worker_occupied_dates(worker):
+        messages.error(request, "You are already booked for today and cannot claim this SOS request.")
+        return redirect('workers:my_dashboard')
+
+    # Recalculate pricing now that we have a worker (Society/Federation overrides)
+    visit_charge, labour_charge = _calculate_booking_pricing(booking.service, worker)
+    booking.visit_charge = visit_charge
+    booking.labour_charge = labour_charge
+
+    # Assign worker and move status to ASSIGNED
+    booking.worker = worker
+    booking.status = Booking.Status.ASSIGNED
+    booking.save()
+
+    messages.success(request, "SOS request claimed! You have been assigned to this emergency job.")
+    return redirect('bookings:booking_detail', booking_id=booking.id)
+
+
+@login_required
+def sos_waiting(request, booking_id):
+    """Customer-side waiting screen while broadcast is active."""
+    booking = get_object_or_404(Booking, id=booking_id, customer=request.user)
+    return render(request, 'bookings/sos_waiting.html', {'booking': booking})
 
 
 @login_required
@@ -474,7 +581,7 @@ def make_payment(request, booking_id):
                 payment, _created = Payment.objects.get_or_create(
                     booking=booking,
                     defaults={'method': method, 'amount': amount, 'status': Payment.Status.PENDING,
-                              'razorpay_order_id': order['id']}
+                                  'razorpay_order_id': order['id']}
                 )
                 return render(request, 'bookings/razorpay_checkout.html', {
                     'booking': booking, 'payment': payment, 'order': order,
@@ -600,3 +707,21 @@ def file_complaint(request, booking_id):
     else:
         form = ComplaintForm()
     return render(request, 'bookings/file_complaint.html', {'form': form, 'booking': booking})
+
+
+@login_required
+def available_sos_requests(request):
+    """Lists all SOS bookings currently waiting for acceptance.
+    Filters for matching services for the logged-in worker."""
+    try:
+        worker = WorkerProfile.objects.get(user=request.user)
+    except WorkerProfile.DoesNotExist:
+        return render(request, 'bookings/sos_alert.html', {'requests': []})
+
+    # SOS requests that are still waiting
+    open_sos = Booking.objects.filter(
+        status=Booking.Status.WAITING_FOR_ACCEPTANCE,
+        is_emergency=True
+    ).select_related('service', 'customer')
+
+    return render(request, 'bookings/sos_alert.html', {'requests': open_sos})

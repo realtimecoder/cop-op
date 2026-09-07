@@ -50,6 +50,9 @@
         <a href="{% url 'bookings:booking_request' service.id %}" class="btn btn-primary btn-block mt-3">
           {% trans "Book this service" %} <svg><use href="#icon-arrow-right"/></svg>
         </a>
+        <a href="{% url 'bookings:request_sos' service.id %}" class="btn btn-danger btn-block mt-2" style="background-color: #d32f2f; color: white; font-weight: bold;">
+          🚨 {% trans "Request Now (SOS)" %}
+        </a>
       </div>
     </div>
   </div>

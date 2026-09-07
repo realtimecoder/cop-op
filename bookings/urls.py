@@ -21,6 +21,12 @@ urlpatterns = [
     path('<int:booking_id>/review/', views.submit_review, name='submit_review'),
     path('<int:booking_id>/complaint/', views.file_complaint, name='file_complaint'),
 
+    # SOS (Broadcast-and-Claim) flow
+    path('sos/request/<int:service_id>/', views.request_sos, name='request_sos'),
+    path('sos/accept/<int:booking_id>/', views.accept_sos, name='accept_sos'),
+    path('sos/waiting/<int:booking_id>/', views.sos_waiting, name='sos_waiting'),
+    path('sos/available/', views.available_sos_requests, name='available_sos_requests'),
+
     # Institution flow: bulk/multiple-worker requests -> cooperative assignment -> completion
     path('bulk/new/', bulk_views.create_bulk_request, name='create_bulk_request'),
     path('bulk/mine/', bulk_views.my_bulk_requests, name='my_bulk_requests'),

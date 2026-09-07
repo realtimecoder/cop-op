@@ -71,6 +71,7 @@
               <a href="{% url 'workers:my_dashboard' %}">{% trans "Worker Dashboard" %}</a>
               <a href="{% url 'payments:wallet_dashboard' %}">{% trans "My Wallet" %}</a>
               <a href="{% url 'bookings:my_bookings' %}">{% trans "My booking" %}</a>
+              <a href="{% url 'workers:worker_insurance' %}">{% trans "Insurance" %}</a>
             </div>
           </div>
         {% else %}
@@ -121,6 +122,16 @@
   {% for message in messages %}
     <div class="alert alert-{{ message.tags }}">{{ message }}</div>
   {% endfor %}
+</div>
+{% endif %}
+
+{% if user.role == 'worker' and global_open_sos %}
+<div class="container" style="margin-top: 20px;">
+  <div class="alert alert-sos" style="position:static; margin-bottom:20px;">
+    <b>🚨 {% trans "Emergency SOS Requests Available!" %}</b>
+    <p>{% trans "There are active emergency requests in your area that need immediate attention." %}</p>
+    <a href="{% url 'bookings:available_sos_requests' %}" class="btn btn-danger btn-sm btn-sos">{% trans "View & Claim Now" %}</a>
+  </div>
 </div>
 {% endif %}
 

@@ -286,7 +286,7 @@
         </div>
         <div class="apply-section">
           <div class="posted-time">{% trans "Posted" %} {{ opp.created_at|timesince }} ago</div>
-          <a href="{% url 'core:apply_government_opportunity' opp.id %}" class="btn btn-primary btn-sm">{% trans "Apply Now" %}</a>
+          <a href="{{ opp.google_form_url|default:'#' }}" target="_blank" class="btn btn-primary btn-sm">{% trans "Apply Now" %}</a>
         </div>
       </div>
       {% empty %}

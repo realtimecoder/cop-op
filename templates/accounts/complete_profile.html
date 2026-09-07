@@ -7,14 +7,15 @@
     <div class="form-card wide">
       <h1 style="font-size:1.5rem;">{% trans "Complete your profile" %}</h1>
       <p class="muted">{% trans "Tell us a little about you to personalise your Co-opSeva experience." %}</p>
-      <form method="post" novalidate>
+      <form method="post" novalidate id="profile-form" data-role="{{ request.user.role }}">
         {% csrf_token %}
         <div class="grid grid-2">
           <div class="form-group"><label>{% trans "First name" %}</label>{{ form.first_name }}</div>
           <div class="form-group"><label>{% trans "Last name" %}</label>{{ form.last_name }}</div>
         </div>
-        <div class="form-group">
-          <label>{% trans "I am a…" %}</label>{{ form.role }}
+        <div style="display:none;">{{ form.role }}</div>
+        <div class="form-group" id="society-group" style="display:none;">
+          <label>{% trans "Join a Cooperative Society" %}</label>{{ form.society }}
         </div>
         <div class="form-group"><label>{% trans "Address" %}</label>{{ form.address }}</div>
         <div class="grid grid-2">
@@ -29,4 +30,29 @@
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var roleField = document.querySelector('select[name="role"]');
+  var societyGroup = document.getElementById('society-group');
+  if (!societyGroup) return;
+
+  // Since roleField is now hidden, we get the role from the session or a hidden input if available
+  // But for now, let's assume the role is handled by the backend and we just need a way
+  // to know if it's a worker to show the society group.
+  // To make this work without the visible role field, we'll use a small trick:
+  // We can check the URL or a data attribute, but since it's a POST form,
+  // we should probably rely on the backend to render the hidden field or handle the display.
+
+  // However, a better way is to have the backend include the role in a data attribute on the form.
+  var form = document.getElementById('profile-form');
+  var userRole = form.dataset.role;
+
+  if (userRole === 'worker') {
+    societyGroup.style.display = 'block';
+  }
+});
+</script>
 {% endblock %}

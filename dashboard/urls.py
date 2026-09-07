@@ -24,6 +24,7 @@ urlpatterns = [
     path('workers/<int:worker_id>/', views.worker_detail, name='worker_detail'),
 
     path('societies/', views.society_list, name='society_list'),
+    path('societies/update-federation/<int:society_id>/', views.update_society_federation, name='update_society_federation'),
     path('societies/<int:society_id>/workers/', views.society_workers_list, name='society_workers_list'),
     path('societies/create/', views.society_create, name='society_create'),
     path('societies/<int:society_id>/assign-operator/', views.society_assign_operator, name='society_assign_operator'),
@@ -53,5 +54,7 @@ urlpatterns = [
     path('join-requests/<int:request_id>/decide/', views.decide_join_request, name='decide_join_request'),
     path('manage-custom-pricing/', views.manage_custom_pricing, name='manage_custom_pricing'),
     path('manage-gov-opportunities/', views.manage_government_opportunities, name='manage_gov_opportunities'),
+    path('manage-gov-opportunities/<int:opp_id>/delete/', views.delete_government_opportunity, name='delete_gov_opportunity'),
+    path('gov-applications/', views.government_applications_list, name='gov_applications'),
 
 ]

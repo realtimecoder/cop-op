@@ -27,7 +27,7 @@
         <tbody>
           {% for fed in federations %}
           <tr>
-            <td>{{ fed.name }}</td>
+            <td><a href="{% url 'dashboard:society_list' %}?federation_id={{ fed.id }}" class="font-bold hover:underline">{{ fed.name }}</a></td>
             <td>{% if fed.admin_user %}<span class="badge badge-verified">{{ fed.admin_user.get_full_name|default:fed.admin_user.phone_number }}</span>{% else %}<span class="badge badge-warning">{% trans "No admin assigned" %}</span>{% endif %}</td>
             <td>{{ fed.society_count }}</td>
             <td>

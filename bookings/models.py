@@ -33,6 +33,7 @@ class Booking(models.Model):
 
     class Status(models.TextChoices):
         REQUESTED = 'requested', 'Requested'
+        WAITING_FOR_ACCEPTANCE = 'waiting', 'Waiting for Acceptance'
         ASSIGNED = 'assigned', 'Assigned'
         ACCEPTED = 'accepted', 'Accepted'
         WORKER_ARRIVING = 'worker_arriving', 'Worker arriving'
@@ -94,8 +95,8 @@ class Booking(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     STATUS_FLOW = [
-        Status.REQUESTED, Status.ASSIGNED, Status.ACCEPTED, Status.WORKER_ARRIVING,
-        Status.ARRIVED, Status.WORK_STARTED, Status.WORK_COMPLETED,
+        Status.REQUESTED, Status.WAITING_FOR_ACCEPTANCE, Status.ASSIGNED, Status.ACCEPTED,
+        Status.WORKER_ARRIVING, Status.ARRIVED, Status.WORK_STARTED, Status.WORK_COMPLETED,
         Status.CUSTOMER_CONFIRMED, Status.PAYMENT_SETTLED, Status.RATED,
     ]
 
