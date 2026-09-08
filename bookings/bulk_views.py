@@ -31,7 +31,11 @@ def _is_institution(user):
 
 
 def _is_society_operator(user):
-    return user.is_authenticated and (user.role == User.Role.SOCIETY or user.is_superuser)
+    return user.is_authenticated and (
+        user.role == User.Role.SOCIETY or
+        user.role == User.Role.FEDERATION or
+        user.is_superuser
+    )
 
 
 @login_required
