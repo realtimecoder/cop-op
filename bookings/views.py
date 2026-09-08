@@ -63,7 +63,11 @@ def booking_request(request, service_id):
 @login_required
 def booking_choice(request, request_id):
     """Step 2: The Choice. Rapid Book (Algo) vs Manual selection."""
-    booking_req = get_object_or_404(BookingRequest, id=request_id, customer=request.user)
+    try:
+        booking_req = BookingRequest.objects.get(id=request_id, customer=request.user)
+    except BookingRequest.DoesNotExist:
+        messages.info(request, "This booking request has already been processed or no longer exists.")
+        return redirect('bookings:my_bookings')
     service = booking_req.service
 
     if request.method == 'POST':
@@ -134,7 +138,11 @@ def booking_choice(request, request_id):
 @login_required
 def finalize_booking_from_request(request, request_id, worker_id):
     """Finalizes a booking using details from a pre-filled BookingRequest."""
-    booking_req = get_object_or_404(BookingRequest, id=request_id, customer=request.user)
+    try:
+        booking_req = BookingRequest.objects.get(id=request_id, customer=request.user)
+    except BookingRequest.DoesNotExist:
+        messages.info(request, "This booking request has already been processed or no longer exists.")
+        return redirect('bookings:my_bookings')
     worker = get_object_or_404(WorkerProfile, id=worker_id, verification_status=WorkerProfile.VerificationStatus.VERIFIED)
     service = booking_req.service
 
