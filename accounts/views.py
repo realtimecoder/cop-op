@@ -44,19 +44,17 @@ def _geocode_and_save_location(user):
 
 
 def login_request(request):
-    """Step 1: select role and enter phone number, receive OTP (FR-002)."""
+    """Step 1: Enter phone number, receive OTP (FR-002)."""
     if request.user.is_authenticated:
         return redirect('core:home')
 
     if request.method == 'POST':
         form = PhoneForm(request.POST)
-        login_role = request.POST.get('login_role', 'customer')
         if form.is_valid():
             phone = form.cleaned_data['phone_number']
             otp = OTPRequest.generate(phone, purpose='login')
             request.session['otp_phone'] = phone
             request.session['otp_id'] = otp.id
-            request.session['login_role'] = login_role
             # Demo-mode: show OTP directly since no SMS gateway is configured.
             messages.info(request, _("Demo OTP for %(phone)s is %(code)s (valid 10 minutes).")
                           % {'phone': phone, 'code': otp.code})
@@ -67,11 +65,9 @@ def login_request(request):
 
 
 def verify_otp(request):
-    """Step 2: verify OTP and log in, or route to registration if new user.
-    Enforces strict checks for Federation Admin login."""
+    """Step 2: verify OTP and log in, or route to registration if new user."""
     phone = request.session.get('otp_phone')
     otp_id = request.session.get('otp_id')
-    login_role = request.session.get('login_role', 'customer')
     if not phone or not otp_id:
         return redirect('accounts:login')
 
@@ -93,46 +89,17 @@ def verify_otp(request):
                 try:
                     user = User.objects.get(phone_number=phone)
                 except User.DoesNotExist:
-                    user = None
-
-                # SPECIAL CHECK: Federation Admin
-                if login_role == 'federation':
-                    # Only allow if user exists AND is appointed as a federation head
-                    if user and user.role == User.Role.FEDERATION and getattr(user, 'managed_federation', None) is not None:
-                        pass # Authorized
-                    else:
-                        messages.error(request, _("You are not authorized as a Federation Admin. Please contact the Platform Administrator to be appointed as a Federation Head."))
-                        return redirect('accounts:login')
-
-                # Handle normal login/registration for other roles
-                if not user:
-                    # New user
+                    # New user: Default to CUSTOMER. They can change it/join society in profile.
                     user = User.objects.create(
                         phone_number=phone,
                         username=phone,
                         is_phone_verified=True,
-                        role=User.Role[login_role.upper()] if login_role.upper() in User.Role.__members__ else User.Role.CUSTOMER
+                        role=User.Role.CUSTOMER
                     )
-                else:
-                    # Existing user - verify they aren't trying to log in as a role they don't have
-                    # (except for superusers who can be anything)
-                    if not user.is_superuser:
-                        # Map login_role to User.Role
-                        role_map = {
-                            'customer': User.Role.CUSTOMER,
-                            'builder': User.Role.BUILDER,
-                            'worker': User.Role.WORKER,
-                            'federation': User.Role.FEDERATION,
-                        }
-                        expected_role = role_map.get(login_role, User.Role.CUSTOMER)
-                        if user.role != expected_role:
-                            messages.error(request, _("Your account is registered as a %s, not a %s.") % (user.get_role_display(), login_role))
-                            return redirect('accounts:login')
 
                 login(request, user)
                 del request.session['otp_phone']
                 del request.session['otp_id']
-                del request.session['login_role']
 
                 if not user.first_name:
                     response = redirect('accounts:complete_profile')
