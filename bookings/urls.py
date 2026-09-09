@@ -17,10 +17,12 @@ urlpatterns = [
     path('<int:booking_id>/confirm/', views.confirm_completion, name='confirm_completion'),
     path('<int:booking_id>/cancel/', views.cancel_booking, name='cancel_booking'),
     path('<int:booking_id>/pay/', views.make_payment, name='make_payment'),
+    path('<int:booking_id>/pay/manual/', views.manual_payment, name='manual_payment'),
     path('<int:booking_id>/pay/callback/', views.razorpay_callback, name='razorpay_callback'),
     path('<int:booking_id>/review/', views.submit_review, name='submit_review'),
     path('<int:booking_id>/complaint/', views.file_complaint, name='file_complaint'),
-
+    path('bulk/<int:bulk_request_id>/complaint/', views.file_complaint, name='file_complaint_bulk'),
+    path('nearest/<int:service_id>/', views.find_nearest_workers, name='find_nearest_workers'),
     # Institution flow: bulk/multiple-worker requests -> cooperative assignment -> completion
     path('bulk/new/', bulk_views.create_bulk_request, name='create_bulk_request'),
     path('bulk/mine/', bulk_views.my_bulk_requests, name='my_bulk_requests'),
@@ -31,4 +33,11 @@ urlpatterns = [
     path('bulk/<int:request_id>/claim/', bulk_views.claim_bulk_request, name='claim_bulk_request'),
     path('bulk/<int:request_id>/assign/', bulk_views.assign_bulk_workers, name='assign_bulk_workers'),
     path('bulk/<int:request_id>/start/', bulk_views.start_bulk_work, name='start_bulk_work'),
+    path('bulk/<int:request_id>/rapid/', bulk_views.rapid_bulk_book, name='rapid_bulk_book'),
+    path('bulk/<int:request_id>/approve/', bulk_views.approve_bulk_fulfillment, name='approve_bulk_fulfillment'),
+    path('bulk/<int:request_id>/reject/', bulk_views.reject_bulk_fulfillment, name='reject_bulk_fulfillment'),
+    path('bulk/<int:request_id>/review/', bulk_views.submit_bulk_review, name='submit_bulk_review'),
+    path('bulk/<int:request_id>/pay/', bulk_views.make_bulk_payment, name='make_bulk_payment'),
+    path('bulk/<int:request_id>/pay/manual/', bulk_views.manual_bulk_payment, name='manual_bulk_payment'),
+    path('bulk/<int:request_id>/pay/callback/', bulk_views.bulk_payment_callback, name='bulk_payment_callback'),
 ]

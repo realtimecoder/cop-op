@@ -4,4 +4,10 @@ staticfiles/
 media/
 *.sqlite3
 .env
-myvenv/ 
+myvenv/
+.claude/
+.vscode/
+.idea/
+*.log
+db.sqlite3
+ 

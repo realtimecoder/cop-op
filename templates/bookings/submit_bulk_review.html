@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Rate Bulk Service" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card" style="max-width: 500px; margin: 0 auto;">
+      <div class="text-center mb-0" style="margin-bottom:20px;">
+        <div class="category-icon" style="margin:0 auto 14px;"><svg><use href="#icon-star"/></svg></div>
+        <h1 style="font-size:1.5rem;">{% trans "Rate the experience" %}</h1>
+        <p class="muted">{% trans "Your feedback will be shared with all workers assigned to this request." %}</p>
+      </div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label>{% trans "Rating" %}</label>
+          <div class="rating-selector" style="display: flex; justify-content: center; gap: 15px; font-size: 1.5rem; margin-bottom: 20px;">
+            {% for i in "54321" %}
+            <label style="cursor:pointer;">
+              <input type="radio" name="rating" value="{{ i }}" {% if forloop.first %}checked{% endif %}> {{ i }}★
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="comment">{% trans "Your comments" %}</label>
+          <textarea id="comment" name="comment" rows="4" placeholder="{% trans 'How was the service?' %}"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Submit Review" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

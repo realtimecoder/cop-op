@@ -10,7 +10,7 @@
 
     <div class="table-wrap">
       <table class="data-table">
-        <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Phone" %}</th><th>{% trans "Skill grade" %}</th><th>{% trans "Documents" %}</th><th>{% trans "Society" %}</th><th>{% trans "Status" %}</th><th>{% trans "Action" %}</th></tr></thead>
+        <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Phone" %}</th><th>{% trans "Categories" %}</th><th>{% trans "Documents" %}</th><th>{% trans "Society" %}</th><th>{% trans "Status" %}</th><th>{% trans "Action" %}</th></tr></thead>
         <tbody>
           {% for worker in workers %}
           <tr>
@@ -18,10 +18,23 @@
               <a href="{% url 'dashboard:worker_detail' worker.id %}" class="font-bold hover:underline">{{ worker.user.get_full_name|default:"—" }}</a>
             </td>
             <td>{{ worker.user.phone_number }}</td>
-            <td>{{ worker.get_skill_grade_display }}</td>
             <td>
-              <span class="badge badge-outline">{{ worker.documents.count }} {% trans "uploaded" %}</span>
-              <a href="{% url 'dashboard:worker_detail' worker.id %}" class="text-sm text-primary hover:underline ml-1">{% trans "View" %}</a>
+              <div class="flex flex-wrap gap-1">
+                {% for cat in worker.categories.all %}
+                <span class="badge badge-outline" style="font-size:0.7rem;">{{ cat.name }}</span>
+                {% empty %}<span class="muted text-xs">{% trans "None" %}</span>{% endfor %}
+              </div>
+            </td>
+            <td class="flex flex-col gap-1">
+              {% if worker.certificate %}
+              <a href="{{ worker.certificate.url }}" target="_blank" class="text-xs text-primary hover:underline">{% trans "Certificate" %}</a>
+              {% endif %}
+              {% if worker.address_proof %}
+              <a href="{{ worker.address_proof.url }}" target="_blank" class="text-xs text-primary hover:underline">{% trans "Address Proof" %}</a>
+              {% endif %}
+              {% if not worker.certificate and not worker.address_proof %}
+              <span class="muted text-xs">{% trans "No docs" %}</span>
+              {% endif %}
             </td>
             <td>{% if worker.society %}{{ worker.society.name }}{% else %}<span class="muted">{% trans "Unclaimed" %}</span>{% endif %}</td>
             <td><span class="status-pill">{{ worker.get_verification_status_display }}</span></td>
@@ -30,7 +43,7 @@
               <form method="post" action="{% url 'dashboard:verify_worker' worker.id %}">{% csrf_token %}<input type="hidden" name="decision" value="reject"><button class="btn btn-danger btn-sm" type="submit">{% trans "Reject" %}</button></form>
             </td>
           </tr>
-          {% empty %}<tr><td colspan="6" class="muted">{% trans "No pending verifications." %}</td></tr>{% endfor %}
+          {% empty %}<tr><td colspan="7" class="muted">{% trans "No pending verifications." %}</td></tr>{% endfor %}
         </tbody>
       </table>
     </div>

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Nearest Workers" %} — Co-opSeva{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">{% trans "Nearest Available Workers" %}</span>
+        <h1>{% trans "Professionals for" %} {{ service.name }}</h1>
+      </div>
+      <a href="{% url 'bookings:booking_request' service.id %}" class="btn btn-primary">{% trans "Book Now" %}</a>
+    </div>
+
+    <p class="muted">{% trans "Based on your current location" %} ({{ lat }}, {{ lng }})</p>
+
+    <div class="grid grid-2 mt-3">
+      {% for worker, score in workers %}
+      <div class="card">
+        <div class="flex justify-between align-center">
+          <div class="flex gap-3 align-center">
+            <div class="worker-avatar" style="width:48px;height:48px;font-size:1.2rem;">
+              {% if worker.user.profile_photo %}
+                <img src="{{ worker.user.profile_photo.url }}" alt="">
+              {% else %}
+                {{ worker.user.first_name|first|upper|default:"U" }}
+              {% endif %}
+            </div>
+            <div>
+              <h3 style="margin:0;">{{ worker.user.get_full_name|default:worker.user.phone_number }}</h3>
+              <p class="muted text-xs">
+                {{ worker.society.name|default:"Independent" }}
+                {% if worker.society.federation %} ({{ worker.society.federation.name }}){% endif %}
+              </p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="badge badge-verified" style="background:var(--teal-soft); color:var(--teal-deep);">
+              {{ score }}% {% trans "Match" %}
+            </span>
+          </div>
+        </div>
+        <div class="divider my-3"></div>
+        <div class="grid grid-2 text-xs">
+          <div><strong>{% trans "Rating" %}:</strong> {{ worker.average_rating }}/5</div>
+          <div><strong>{% trans "Experience" %}:</strong> {{ worker.years_experience }} {% trans "yrs" %}</div>
+          <div><strong>{% trans "Grade" %}:</strong> {{ worker.get_skill_grade_display }}</div>
+          <div><strong>{% trans "Jobs" %}:</strong> {{ worker.completed_jobs }}</div>
+        </div>
+        <div class="mt-3">
+          <a href="{% url 'bookings:create_booking' service.id worker.id %}" class="btn btn-outline btn-block btn-sm">{% trans "Select Worker" %}</a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state" style="grid-column: span 2;">
+        <svg><use href="#icon-empty"/></svg>
+        <p>{% trans "No verified workers found nearby for this service." %}</p>
+        <a href="{% url 'core:home' %}" class="btn btn-accent">{% trans "Back to Home" %}</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

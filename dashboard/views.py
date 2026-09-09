@@ -263,7 +263,8 @@ def overview(request):
         'total_workers': total_workers,
         'total_customers': total_customers,
         'pending_verifications': WorkerProfile.objects.filter(
-            verification_status=WorkerProfile.VerificationStatus.UNDER_REVIEW).count(),
+            verification_status__in=[WorkerProfile.VerificationStatus.PENDING,
+                                      WorkerProfile.VerificationStatus.UNDER_REVIEW]).count(),
         'pending_category_requests': WorkerCategoryChangeRequest.objects.filter(
             status=WorkerCategoryChangeRequest.Status.PENDING).count(),
         'open_complaints': open_complaints,
@@ -435,19 +436,33 @@ def decide_category_change(request, request_id):
 @login_required
 @user_passes_test(is_staff_role, login_url='core:home')
 def complaints_queue(request):
-    complaints = Complaint.objects.select_related('booking', 'raised_by').order_by('-created_at')
+    """Queue for staff to manage complaints.
+    - Platform Admin: Sees all.
+    - Federation/Society Admin: Sees complaints assigned to them or their organization."""
+    complaints = Complaint.objects.select_related('booking', 'bulk_request', 'raised_by').order_by('-created_at')
 
     user = request.user
     if not is_platform_admin(user):
+        # Filter: Show complaints assigned directly to this user OR related to their organization
         own_federation = getattr(user, 'managed_federation', None)
         own_society = getattr(user, 'managed_society', None)
 
+        # Base filter: complaints assigned to me
+        q_assigned = models.Q(assigned_to=user)
+
         if own_federation:
-            complaints = complaints.filter(booking__worker__society__federation=own_federation)
+            # Federation admin sees everything in their federation
+            q_org = models.Q(booking__worker__society__federation=own_federation) | \
+                   models.Q(bulk_request__assigned_society__federation=own_federation)
+            complaints = complaints.filter(q_assigned | q_org)
         elif own_society:
-            complaints = complaints.filter(booking__worker__society=own_society)
+            # Society operator sees everything in their society
+            q_org = models.Q(booking__worker__society=own_society) | \
+                   models.Q(bulk_request__assigned_society=own_society)
+            complaints = complaints.filter(q_assigned | q_org)
         else:
-            complaints = complaints.none()
+            # Not an admin of any org, only see what's assigned to me
+            complaints = complaints.filter(q_assigned)
 
     return render(request, 'dashboard/complaints_queue.html', {'complaints': complaints})
 

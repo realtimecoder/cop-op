@@ -11,9 +11,9 @@ from workers.models import WorkerProfile, WorkerBlockedDate
 from payments.models import Payment, Invoice
 from payments import razorpay_client
 from reviews.models import Review
-from .models import Booking, Complaint, BookingRequest
+from .models import Booking, Complaint, BookingRequest, BulkServiceRequest
 from .forms import BookingForm, ComplaintForm, BookingRequestForm
-from .services import find_best_worker
+from .services import find_best_worker, find_best_workers
 
 
 def _worker_occupied_dates(worker):
@@ -63,7 +63,11 @@ def booking_request(request, service_id):
 @login_required
 def booking_choice(request, request_id):
     """Step 2: The Choice. Rapid Book (Algo) vs Manual selection."""
-    booking_req = get_object_or_404(BookingRequest, id=request_id, customer=request.user)
+    try:
+        booking_req = BookingRequest.objects.get(id=request_id, customer=request.user)
+    except BookingRequest.DoesNotExist:
+        messages.info(request, "This booking request has already been processed or no longer exists.")
+        return redirect('bookings:my_bookings')
     service = booking_req.service
 
     if request.method == 'POST':
@@ -134,7 +138,11 @@ def booking_choice(request, request_id):
 @login_required
 def finalize_booking_from_request(request, request_id, worker_id):
     """Finalizes a booking using details from a pre-filled BookingRequest."""
-    booking_req = get_object_or_404(BookingRequest, id=request_id, customer=request.user)
+    try:
+        booking_req = BookingRequest.objects.get(id=request_id, customer=request.user)
+    except BookingRequest.DoesNotExist:
+        messages.info(request, "This booking request has already been processed or no longer exists.")
+        return redirect('bookings:my_bookings')
     worker = get_object_or_404(WorkerProfile, id=worker_id, verification_status=WorkerProfile.VerificationStatus.VERIFIED)
     service = booking_req.service
 
@@ -428,6 +436,14 @@ def confirm_completion(request, booking_id):
     if booking.status != Booking.Status.WORK_COMPLETED:
         messages.error(request, "This booking isn't awaiting confirmation.")
         return redirect('bookings:booking_detail', booking_id=booking.id)
+
+    # Increment completed jobs for the worker
+    if booking.worker:
+        worker = booking.worker
+        worker.completed_jobs += 1
+        worker.last_worked_date = timezone.localdate()
+        worker.save(update_fields=['completed_jobs', 'last_worked_date'])
+
     booking.status = Booking.Status.CUSTOMER_CONFIRMED
     booking.save(update_fields=['status', 'updated_at'])
     messages.success(request, "Thanks for confirming — you can now pay for this booking.")
@@ -560,6 +576,62 @@ def razorpay_callback(request, booking_id):
 
 
 @login_required
+@require_POST
+def manual_payment(request, booking_id):
+    """Bypass Razorpay for testing: allows manually marking payment as success or fail."""
+    booking = get_object_or_404(Booking, id=booking_id, customer=request.user)
+    action = request.POST.get('action')
+    amount = booking.total_amount
+
+    if action == 'success':
+        # Use simulation logic from make_payment
+        payment, _created = Payment.objects.get_or_create(
+            booking=booking,
+            defaults={'method': Payment.Method.UPI, 'amount': amount, 'status': Payment.Status.SUCCESS, 'is_simulated': True}
+        )
+        if not _created:
+            payment.status = Payment.Status.SUCCESS
+            payment.is_simulated = True
+
+        payment.compute_settlement()
+        payment.settled_at = timezone.now()
+        payment.save()
+
+        Invoice.objects.get_or_create(payment=payment, defaults={
+            'invoice_number': Invoice.generate_number(booking.id)})
+
+        booking.status = Booking.Status.PAYMENT_SETTLED
+        booking.save(update_fields=['status'])
+
+        # Wallet Credits
+        from payments.models import Wallet
+        if booking.worker:
+            worker_wallet, _ = Wallet.objects.get_or_create(user=booking.worker.user)
+            worker_wallet.credit(payment.worker_payout, transaction_type='booking_earning', reference=f"Payment {payment.reference_id}")
+
+        if booking.worker and booking.worker.society:
+            society_op = booking.worker.society.operator
+            if society_op:
+                society_wallet, _ = Wallet.objects.get_or_create(user=society_op)
+                society_wallet.credit(payment.cooperative_fee, transaction_type='cooperative_fee', reference=f"Payment {payment.reference_id}")
+
+        messages.success(request, "Payment successfully simulated. Invoice generated and worker wallet updated.")
+    elif action == 'fail':
+        payment, _created = Payment.objects.get_or_create(
+            booking=booking,
+            defaults={'method': Payment.Method.UPI, 'amount': amount, 'status': Payment.Status.FAILED}
+        )
+        if not _created:
+            payment.status = Payment.Status.FAILED
+        payment.save()
+        messages.error(request, "Payment failed as simulated.")
+    else:
+        messages.warning(request, "Invalid payment action.")
+
+    return redirect('bookings:booking_detail', booking_id=booking.id)
+
+
+@login_required
 def submit_review(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, customer=request.user)
     if hasattr(booking, 'review'):
@@ -574,9 +646,7 @@ def submit_review(request, booking_id):
         all_ratings = worker.reviews.all()
         if all_ratings.exists():
             worker.average_rating = round(sum(r.rating for r in all_ratings) / all_ratings.count(), 2)
-        worker.completed_jobs += 1
-        worker.last_worked_date = timezone.localdate()
-        worker.save(update_fields=['average_rating', 'completed_jobs', 'last_worked_date'])
+            worker.save(update_fields=['average_rating'])
         booking.status = Booking.Status.RATED
         booking.save(update_fields=['status'])
         messages.success(request, "Thank you for rating this service.")
@@ -586,17 +656,72 @@ def submit_review(request, booking_id):
 
 
 @login_required
-def file_complaint(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id, customer=request.user)
+@login_required
+@login_required
+def file_complaint(request, booking_id=None, bulk_request_id=None):
+    """Handles complaints for both regular bookings and bulk requests."""
+    if booking_id:
+        booking = get_object_or_404(Booking, id=booking_id)
+        if booking.customer != request.user:
+            return HttpResponseForbidden("You can only file a complaint for your own booking.")
+    elif bulk_request_id:
+        bulk_request = get_object_or_404(BulkServiceRequest, id=bulk_request_id)
+        if bulk_request.institution != request.user:
+            return HttpResponseForbidden("You can only file a complaint for your own bulk request.")
+    else:
+        return HttpResponseForbidden("No booking or bulk request ID provided.")
+
     if request.method == 'POST':
         form = ComplaintForm(request.POST)
         if form.is_valid():
             complaint = form.save(commit=False)
-            complaint.booking = booking
             complaint.raised_by = request.user
+
+            # Assign complaint to the society head
+            society_head = None
+            if booking_id:
+                complaint.booking = booking
+                if booking.worker and booking.worker.society and booking.worker.society.operator:
+                    society_head = booking.worker.society.operator
+            else:
+                complaint.bulk_request = bulk_request
+                if bulk_request.assigned_society and bulk_request.assigned_society.operator:
+                    society_head = bulk_request.assigned_society.operator
+
+            complaint.assigned_to = society_head
             complaint.save()
             messages.success(request, "Complaint registered. Our support team will review it shortly.")
-            return redirect('bookings:booking_detail', booking_id=booking.id)
+            if booking_id:
+                return redirect('bookings:booking_detail', booking_id=booking_id)
+            else:
+                return redirect('bookings:bulk_request_detail', request_id=bulk_request_id)
     else:
         form = ComplaintForm()
-    return render(request, 'bookings/file_complaint.html', {'form': form, 'booking': booking})
+
+    return render(request, 'bookings/file_complaint.html', {
+        'form': form, 'booking': booking if booking_id else None, 'bulk_request': bulk_request if bulk_request_id else None
+    })
+
+@login_required
+def find_nearest_workers(request, service_id):
+    """Allows a user to find the best verified workers for a specific service
+    based on their current coordinates."""
+    service = get_object_or_404(Service, id=service_id, is_active=True)
+
+    # Get customer coordinates
+    lat = request.user.latitude
+    lng = request.user.longitude
+
+    if not lat or not lng:
+        messages.warning(request, "Please update your current location in your profile to find the nearest workers.")
+        return redirect('accounts:profile')
+
+    # Use the matching engine to find the best workers (which includes distance)
+    workers_with_scores = find_best_workers(service, lat, lng, limit=10)
+
+    return render(request, 'bookings/nearest_workers.html', {
+        'service': service,
+        'workers': workers_with_scores,
+        'lat': lat,
+        'lng': lng,
+    })

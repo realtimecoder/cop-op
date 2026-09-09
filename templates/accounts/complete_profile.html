@@ -7,52 +7,130 @@
     <div class="form-card wide">
       <h1 style="font-size:1.5rem;">{% trans "Complete your profile" %}</h1>
       <p class="muted">{% trans "Tell us a little about you to personalise your Co-opSeva experience." %}</p>
-      <form method="post" novalidate id="profile-form" data-role="{{ request.user.role }}">
+
+      <form method="post" novalidate enctype="multipart/form-data" id="profile-form">
         {% csrf_token %}
+
+        {% if request.user.role == 'worker' %}
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "First name" %}</label>{{ form.first_name }}</div>
+          <div class="form-group"><label>{% trans "Last name" %}</label>{{ form.last_name }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>{% trans "Address" %}</label>
+          <div class="flex gap-2">
+            {{ form.address }}
+            <button type="button" class="btn btn-outline btn-sm" onclick="getLocation()">
+              <svg style="width:14px; height:14px; vertical-align:middle;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+              {% trans "Current Location" %}
+            </button>
+          </div>
+          <input type="hidden" name="latitude" id="id_latitude">
+          <input type="hidden" name="longitude" id="id_longitude">
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
+          <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
+        </div>
+        <script>
+        function getLocation() {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              document.getElementById('id_latitude').value = position.coords.latitude;
+              document.getElementById('id_longitude').value = position.coords.longitude;
+              alert('Location captured successfully!');
+            }, function(error) {
+              alert('Unable to retrieve your location. Please enter your address manually.');
+            });
+          } else {
+            alert('Geolocation is not supported by your browser.');
+          }
+        }
+        </script>
+
+        <div class="form-group">
+          <label>{% trans "Preferred language" %}</label>{{ form.preferred_language }}
+        </div>
+
+        <div class="divider mt-3 mb-3">{% trans "Professional Details" %}</div>
+
+        <div class="form-group">
+          <label>{% trans "Services you provide" %}</label>
+          <div class="checkbox-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+            {{ form.categories }}
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>{% trans "Skill Grade" %}</label>
+            {{ form.skill_grade }}
+          </div>
+          <div class="form-group">
+            <label>{% trans "Years of Experience" %}</label>
+            {{ form.years_experience }}
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>{% trans "Certification / Skill Certificate" %}</label>
+            {{ form.certificate }}
+          </div>
+          <div class="form-group">
+            <label>{% trans "Address Proof" %}</label>
+            {{ form.address_proof }}
+          </div>
+        </div>
+
+        <p class="muted" style="font-size: 0.85rem; margin-top: 10px;">{% trans "Your profile will be reviewed by an administrator before you can start receiving work." %}</p>
+
+        {% else %}
         <div class="grid grid-2">
           <div class="form-group"><label>{% trans "First name" %}</label>{{ form.first_name }}</div>
           <div class="form-group"><label>{% trans "Last name" %}</label>{{ form.last_name }}</div>
         </div>
         <div style="display:none;">{{ form.role }}</div>
-        <div class="form-group" id="society-group" style="display:none;">
-          <label>{% trans "Join a Cooperative Society" %}</label>{{ form.society }}
+        <div class="form-group">
+          <label>{% trans "Address" %}</label>
+          <div class="flex gap-2">
+            {{ form.address }}
+            <button type="button" class="btn btn-outline btn-sm" onclick="getLocation()">
+              <svg style="width:14px; height:14px; vertical-align:middle;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+              {% trans "Current Location" %}
+            </button>
+          </div>
+          <input type="hidden" name="latitude" id="id_latitude">
+          <input type="hidden" name="longitude" id="id_longitude">
         </div>
-        <div class="form-group"><label>{% trans "Address" %}</label>{{ form.address }}</div>
         <div class="grid grid-2">
           <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
           <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
         </div>
+        <script>
+        function getLocation() {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              document.getElementById('id_latitude').value = position.coords.latitude;
+              document.getElementById('id_longitude').value = position.coords.longitude;
+              alert('Location captured successfully!');
+            }, function(error) {
+              alert('Unable to retrieve your location. Please enter your address manually.');
+            });
+          } else {
+            alert('Geolocation is not supported by your browser.');
+          }
+        }
+        </script>
         <div class="form-group">
           <label>{% trans "Preferred language" %}</label>{{ form.preferred_language }}
         </div>
-        <button type="submit" class="btn btn-primary btn-block">{% trans "Save and continue" %}</button>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-block mt-3">{% trans "Save and continue" %}</button>
       </form>
     </div>
   </div>
 </section>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  var roleField = document.querySelector('select[name="role"]');
-  var societyGroup = document.getElementById('society-group');
-  if (!societyGroup) return;
-
-  // Since roleField is now hidden, we get the role from the session or a hidden input if available
-  // But for now, let's assume the role is handled by the backend and we just need a way
-  // to know if it's a worker to show the society group.
-  // To make this work without the visible role field, we'll use a small trick:
-  // We can check the URL or a data attribute, but since it's a POST form,
-  // we should probably rely on the backend to render the hidden field or handle the display.
-
-  // However, a better way is to have the backend include the role in a data attribute on the form.
-  var form = document.getElementById('profile-form');
-  var userRole = form.dataset.role;
-
-  if (userRole === 'worker') {
-    societyGroup.style.display = 'block';
-  }
-});
-</script>
 {% endblock %}
