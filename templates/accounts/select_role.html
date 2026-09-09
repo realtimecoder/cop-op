@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Select Your Role" %} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="form-card" style="max-width: 600px; margin: 0 auto;">
+      <div class="text-center mb-0" style="margin-bottom:20px;">
+        <div class="category-icon" style="margin:0 auto 14px;"><svg><use href="#icon-user"/></svg></div>
+        <h1 style="font-size:1.5rem;">{% trans "Welcome to Co-opSeva" %}</h1>
+        <p class="muted">{% trans "Please tell us who you are so we can set up your account correctly." %}</p>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="role-selector" style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;">
+          <label class="role-option" style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px;">
+            <input type="radio" name="role" value="customer" checked>
+            <div>
+              <strong>{% trans "Customer" %}</strong><br>
+              <span class="muted" style="font-size: 0.9rem;">{% trans "I want to book services for my home or office." %}</span>
+            </div>
+          </label>
+          <label class="role-option" style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px;">
+            <input type="radio" name="role" value="builder">
+            <div>
+              <strong>{% trans "Institutional / Builder" %}</strong><br>
+              <span class="muted" style="font-size: 0.9rem;">{% trans "I manage large-scale projects and need multiple workers." %}</span>
+            </div>
+          </label>
+          <label class="role-option" style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px;">
+            <input type="radio" name="role" value="worker">
+            <div>
+              <strong>{% trans "Service Worker" %}</strong><br>
+              <span class="muted" style="font-size: 0.9rem;">{% trans "I am a skilled professional looking for work." %}</span>
+            </div>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Continue" %}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

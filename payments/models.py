@@ -19,7 +19,7 @@ class Wallet(models.Model):
 
     def credit(self, amount, transaction_type='earning', reference=None):
         amount = Decimal(str(amount)) if not isinstance(amount, Decimal) else amount
-        self.balance += amount
+        self.balance = Decimal(str(self.balance)) + amount
         self.save()
         return WalletTransaction.objects.create(
             wallet=self, amount=amount, transaction_type='credit',
@@ -75,7 +75,8 @@ class Payment(models.Model):
         REFUNDED = 'refunded', 'Refunded'
         PARTIALLY_REFUNDED = 'partial_refund', 'Partially refunded'
 
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='payment')
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='payment', null=True, blank=True)
+    bulk_request = models.OneToOneField('bookings.BulkServiceRequest', on_delete=models.CASCADE, related_name='payment', null=True, blank=True)
     reference_id = models.CharField(max_length=40, unique=True, default=uuid.uuid4, editable=False)
     method = models.CharField(max_length=20, choices=Method.choices, default=Method.UPI)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
@@ -102,26 +103,45 @@ class Payment(models.Model):
         return f"Payment {self.reference_id} - {self.get_status_display()}"
 
     def compute_settlement(self):
-        worker = self.booking.worker
-        # Use Decimal for all financial calculations to avoid precision errors and TypeErrors
-        pct = Decimal(str(worker.payout_percentage)) if worker else Decimal('78.0')
+        # Case 1: Regular Booking
+        if self.booking:
+            worker = self.booking.worker
+            pct = Decimal(str(worker.payout_percentage)) if worker else Decimal('78.0')
+            amount = self.amount
+            self.worker_payout = (amount * pct / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            gross_cooperative_fee = amount - self.worker_payout
+            from workers.models import PlatformConfig
+            comm_pct = Decimal(str(PlatformConfig.get('DEFAULT_COMMISSION', '10.0')))
+            if worker and worker.society and worker.society.federation:
+                comm_pct = Decimal(str(worker.society.federation.commission_percent))
+            self.platform_commission = (gross_cooperative_fee * comm_pct / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            self.cooperative_fee = gross_cooperative_fee - self.platform_commission
 
-        # Total amount as Decimal
-        amount = self.amount
+        # Case 2: Bulk Service Request
+        elif self.bulk_request:
+            amount = self.amount
+            # Total worker payout is sum of each worker's share
+            total_worker_payout = Decimal('0.00')
+            assignments = self.bulk_request.assignments.all()
+            for assignment in assignments:
+                pct = Decimal(str(assignment.worker.payout_percentage))
+                share = (amount * (pct / Decimal('100'))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                # We don't store individual worker payouts in the Payment model,
+                # but we compute them here to determine the total cooperative fee.
+                total_worker_payout += share
 
-        # Worker Payout = amount * payout_percentage / 100
-        self.worker_payout = (amount * pct / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            self.worker_payout = total_worker_payout
+            gross_cooperative_fee = amount - total_worker_payout
 
-        gross_cooperative_fee = amount - self.worker_payout
+            from workers.models import PlatformConfig
+            # Use the first worker's federation for commission if available
+            comm_pct = Decimal(str(PlatformConfig.get('DEFAULT_COMMISSION', '10.0')))
+            first_worker = assignments.first().worker if assignments.exists() else None
+            if first_worker and first_worker.society and first_worker.society.federation:
+                comm_pct = Decimal(str(first_worker.society.federation.commission_percent))
 
-        # Calculate platform commission from the cooperative fee
-        from workers.models import PlatformConfig
-        comm_pct = Decimal(str(PlatformConfig.get('DEFAULT_COMMISSION', '10.0')))
-        if worker and worker.society and worker.society.federation:
-            comm_pct = Decimal(str(worker.society.federation.commission_percent))
-
-        self.platform_commission = (gross_cooperative_fee * comm_pct / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        self.cooperative_fee = gross_cooperative_fee - self.platform_commission
+            self.platform_commission = (gross_cooperative_fee * comm_pct / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            self.cooperative_fee = gross_cooperative_fee - self.platform_commission
 
 
 class Invoice(models.Model):

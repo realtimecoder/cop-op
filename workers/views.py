@@ -146,13 +146,25 @@ def my_dashboard(request):
     with the review received and income earned per job, total lifetime
     earnings, and quick links to edit profile / manage availability."""
     profile, _created = WorkerProfile.objects.get_or_create(user=request.user)
+    # Regular bookings
     bookings = (profile.bookings
                 .select_related('service', 'customer', 'payment', 'review')
                 .order_by('-created_at')[:30])
 
-    total_income = Payment.objects.filter(
-        booking__worker=profile, status=Payment.Status.SUCCESS
-    ).aggregate(total=Sum('worker_payout'))['total'] or 0
+    # Bulk assignments
+    bulk_assignments = (profile.bulk_assignments
+                       .select_related('bulk_request__service', 'bulk_request__institution')
+                       .order_by('-assigned_at')[:30])
+
+    # Total lifetime earnings from wallet balance
+    wallet = getattr(request.user, 'wallet', None)
+    total_income = wallet.balance if wallet else 0
+
+
+    pending_category_request = profile.category_change_requests.filter(
+        status=WorkerCategoryChangeRequest.Status.PENDING).first()
+
+
 
     pending_category_request = profile.category_change_requests.filter(
         status=WorkerCategoryChangeRequest.Status.PENDING).first()
@@ -164,7 +176,7 @@ def my_dashboard(request):
 
     return render(request, 'workers/my_dashboard.html', {
         'profile': profile, 'bookings': bookings, 'total_income': total_income,
-        'pending_category_request': pending_category_request,
+        'bulk_assignments': bulk_assignments, 'pending_category_request': pending_category_request,
         'blocked_dates': profile.blocked_dates.filter(date__gte=timezone.localdate()).order_by('date'),
         'pending_invites': pending_invites,
     })

@@ -13,12 +13,25 @@ def find_best_workers(service, customer_lat=None, customer_lng=None, limit=5):
     Ranks based on the WorkerProfile's recommended_score (Distance, Work Distribution, Rating, etc.).
     Returns a list of (worker, score) tuples.
     """
-    # 1. Filter: Verified, Available, and offers the specific service
+    # 1. Filter: Verified, Available, linked to a society, and offers the specific service
+    # Debugging: Let's see how many workers exist before filtering by service
+    all_verified_available = WorkerProfile.objects.filter(
+        verification_status='verified',
+        is_available_now=True,
+        society__isnull=False
+    ).count()
+
     workers = WorkerProfile.objects.filter(
         verification_status='verified',
         is_available_now=True,
+        society__isnull=False,
         offerings__service=service
     ).select_related('user').distinct()
+
+    match_count = workers.count()
+    if match_count == 0 and all_verified_available > 0:
+        logger.warning(f"Found {all_verified_available} verified available workers in societies, but 0 offer service '{service.name}'. "
+                       f"Ensure workers have completed onboarding and selected the correct categories.")
 
     if not workers.exists():
         return []

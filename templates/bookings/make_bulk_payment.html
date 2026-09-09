@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Pay for Bulk Request" %} #{{ bulk.id }} — Co-opSeva{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">{% trans "Payment" %}</span><h1 style="margin-bottom:0;">{% trans "Settle Bulk Order" %}</h1></div>
+    </div>
+
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+      <div>
+        <div class="card">
+          <h3 class="mt-0">{% trans "Order Summary" %}</h3>
+          <div class="divider my-3"></div>
+          <div class="flex justify-between align-center mb-2">
+            <span>{% trans "Service" %}</span>
+            <strong>{{ bulk.service.name }}</strong>
+          </div>
+          <div class="flex justify-between align-center mb-2">
+            <span>{% trans "Total Amount" %}</span>
+            <strong style="font-size:1.2rem; color:var(--teal-deep);">₹{{ bulk.total_amount }}</strong>
+          </div>
+          <p class="muted text-xs mt-3">{% trans "This amount includes visit charges and labour for all assigned workers." %}</p>
+        </div>
+
+        <div class="card mt-3">
+          <h3 class="mt-0">{% trans "Payment Method" %}</h3>
+          <form method="post">
+            {% csrf_token %}
+            <div class="flex gap-2 mt-3">
+              <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+                <input type="radio" name="method" value="upi" checked> {% trans "UPI" %}
+              </label>
+              <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+                <input type="radio" name="method" value="card"> {% trans "Card" %}
+              </label>
+              <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+                <input type="radio" name="method" value="netbanking"> {% trans "Net Banking" %}
+              </label>
+            </div>
+            <button class="btn btn-primary btn-block mt-4" type="submit">{% trans "Proceed to Pay" %}</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="mt-0">{% trans "Payment Security" %}</h3>
+        <p class="muted text-sm mt-2">{% trans "Your payment is processed securely via Razorpay. You will be redirected to the official Razorpay checkout page." %}</p>
+        <div class="divider my-3"></div>
+        <ul class="text-xs muted" style="list-style:none; padding:0; line-height:1.6;">
+          <li>✓ {% trans "Encrypted Transaction" %}</li>
+          <li>✓ {% trans "Instant Invoice Generation" %}</li>
+          <li>✓ {% trans "Automated Worker Payouts" %}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
