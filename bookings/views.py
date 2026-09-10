@@ -99,8 +99,8 @@ def booking_choice(request, request_id):
 
         if choice == 'rapid':
             # Rapid Book: Find best worker and finalize booking immediately
-            customer_lat = request.user.latitude
-            customer_lng = request.user.longitude
+            customer_lat = booking_req.latitude or request.user.latitude
+            customer_lng = booking_req.longitude or request.user.longitude
             best_worker = find_best_worker(service, customer_lat, customer_lng)
 
             if not best_worker:
@@ -136,6 +136,8 @@ def booking_choice(request, request_id):
                 scheduled_date=booking_req.scheduled_date,
                 scheduled_time=booking_req.scheduled_time,
                 address=booking_req.address,
+                latitude=booking_req.latitude,
+                longitude=booking_req.longitude,
                 city=booking_req.city,
                 pincode=booking_req.pincode,
                 instructions=booking_req.instructions,
@@ -302,6 +304,8 @@ def create_booking(request, service_id, worker_id):
                 booking.customer = request.user
                 booking.service = service
                 booking.worker = worker
+                booking.latitude = request.POST.get('latitude')
+                booking.longitude = request.POST.get('longitude')
 
                 # Pricing logic: Federation Pricing -> Independent Society Override -> Global
                 visit_charge = service.category.fixed_visit_charge

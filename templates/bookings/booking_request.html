@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}{% trans "Confirm booking details" %} — Co-opSeva{% endblock %}
 {% block content %}
 <section class="section">
@@ -15,6 +15,21 @@
 
         <form method="post" novalidate>
           {% csrf_token %}
+          <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initAutocomplete" async defer></script>
+          <script src="{% static 'js/address-autocomplete.js' %}"></script>
+          <script>
+            function initAutocomplete() {
+                initAddressAutocomplete('id_address', {
+                    address: 'id_address',
+                    city: 'id_city',
+                    state: 'id_state',
+                    country: 'id_country',
+                    pincode: 'id_pincode',
+                    latitude: 'id_latitude',
+                    longitude: 'id_longitude'
+                });
+            }
+          </script>
           <div class="grid grid-2">
             <div class="form-group">
               <label>{% trans "Date" %}</label>{{ form.scheduled_date }}
@@ -27,6 +42,8 @@
           <div class="form-group"><label>{% trans "Service address" %}</label>{{ form.address }}
             {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
           </div>
+          {{ form.latitude }}
+          {{ form.longitude }}
           <div class="grid grid-2">
             <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
             <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>

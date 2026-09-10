@@ -8,10 +8,20 @@ function initAddressAutocomplete(searchInputId, fieldMappings) {
     const searchInput = document.getElementById(searchInputId);
     if (!searchInput) return;
 
-    const autocomplete = new google.maps.places.Autocomplete(searchInput, {
-        types: ['address'],
-        componentRestrictions: { country: 'IN' } // Restrict to India as per Co-opSeva context
-    });
+    // Initialize autocomplete immediately without requesting browser geolocation
+    // This removes the "Allow Location" popup
+    setupAutocomplete(searchInput, fieldMappings, null);
+}
+
+function setupAutocomplete(searchInput, fieldMappings, bounds) {
+    const options = {
+        types: [],
+        componentRestrictions: { country: 'IN' },
+        bounds: bounds,
+        strictBounds: false
+    };
+
+    const autocomplete = new google.maps.places.Autocomplete(searchInput, options);
 
     autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
@@ -37,18 +47,23 @@ function initAddressAutocomplete(searchInputId, fieldMappings) {
             if (lngField) lngField.value = place.geometry.location.lng();
         }
 
-        // 3. Address Components (City, Pincode)
+        // 3. Address Components (City, State, Country, Pincode)
         let city = '';
+        let state = '';
+        let country = '';
         let pincode = '';
 
         place.address_components.forEach(component => {
             const types = component.types;
             if (types.includes('locality')) {
                 city = component.long_name;
+            } else if (types.includes('administrative_area_level_1')) {
+                state = component.long_name;
+            } else if (types.includes('country')) {
+                country = component.long_name;
             } else if (types.includes('postal_code')) {
                 pincode = component.long_name;
             } else if (types.includes('administrative_area_level_2') && !city) {
-                // Fallback for city if locality is missing
                 city = component.long_name;
             }
         });
@@ -56,6 +71,14 @@ function initAddressAutocomplete(searchInputId, fieldMappings) {
         if (fieldMappings.city) {
             const cityField = document.getElementById(fieldMappings.city);
             if (cityField) cityField.value = city;
+        }
+        if (fieldMappings.state) {
+            const stateField = document.getElementById(fieldMappings.state);
+            if (stateField) stateField.value = state;
+        }
+        if (fieldMappings.country) {
+            const countryField = document.getElementById(fieldMappings.country);
+            if (countryField) countryField.value = country;
         }
         if (fieldMappings.pincode) {
             const pincodeField = document.getElementById(fieldMappings.pincode);

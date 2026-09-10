@@ -129,6 +129,7 @@ def verify_otp(request):
                             messages.error(request, _("Your account is registered as a %s, not a %s.") % (user.get_role_display(), login_role))
                             return redirect('accounts:login')
 
+<<<<<<< Updated upstream
                 login(request, user)
                 del request.session['otp_phone']
                 del request.session['otp_id']
@@ -139,6 +140,10 @@ def verify_otp(request):
                 else:
                     messages.success(request, _("Welcome back, %(name)s!") % {'name': user.get_full_name() or user.phone_number})
                     response = redirect('core:home')
+=======
+                request.session.pop('otp_phone', None)
+                request.session.pop('otp_id', None)
+>>>>>>> Stashed changes
                 return _apply_language(request, response, user)
             else:
                 messages.error(request, _("Incorrect or expired OTP. Please try again."))
@@ -150,10 +155,27 @@ def verify_otp(request):
 @login_required
 def complete_profile(request):
     if request.method == 'POST':
+<<<<<<< Updated upstream
         form = RegistrationForm(request.POST, instance=request.user)
         if form.is_valid():
             user = form.save()
             _geocode_and_save_location(user)
+=======
+        if request.user.role == User.Role.WORKER:
+            form = WorkerRegistrationForm(request.POST, request.FILES)
+            if form.is_valid():
+                try:
+                    user = request.user
+                    user.first_name = form.cleaned_data['first_name']
+                    user.last_name = form.cleaned_data['last_name']
+                    user.address = form.cleaned_data['address']
+                    user.city = form.cleaned_data['city']
+                    user.state = form.cleaned_data['state']
+                    user.country = form.cleaned_data['country']
+                    user.pincode = form.cleaned_data['pincode']
+                    user.preferred_language = form.cleaned_data['preferred_language']
+                    user.save()
+>>>>>>> Stashed changes
 
             # Society joining logic for workers
             if user.role == User.Role.WORKER:
@@ -164,10 +186,21 @@ def complete_profile(request):
                     form = RegistrationForm(request.POST, instance=request.user)
                     return render(request, 'accounts/complete_profile.html', {'form': form})
 
+<<<<<<< Updated upstream
                 # Assign worker to selected society
                 profile, _created = WorkerProfile.objects.get_or_create(user=user)
                 profile.society = society_id
                 profile.save(update_fields=['society'])
+=======
+                    profile, _created = WorkerProfile.objects.get_or_create(user=user)
+                    profile.certificate = form.cleaned_data['certificate']
+                    profile.address_proof = form.cleaned_data['address_proof']
+                    profile.skill_grade = form.cleaned_data['skill_grade']
+                    profile.years_experience = form.cleaned_data['years_experience'] or 0
+                    profile.verification_status = WorkerProfile.VerificationStatus.PENDING
+                    profile.save()
+                    profile.categories.set(form.cleaned_data['categories'])
+>>>>>>> Stashed changes
 
                 messages.success(request, _("Profile completed and society joined. Welcome to Co-opSeva!"))
                 response = redirect('workers:onboarding')
