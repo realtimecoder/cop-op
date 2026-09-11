@@ -64,6 +64,9 @@
           <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
           <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
           <a href="{% url 'core:government_opportunities' %}" class="rainbow-blink">{% trans "Government opportunities" %}</a>
+          {% if not user.worker_profile.society %}
+          <a href="{% url 'workers:society_list' %}" class="blink-join-society">{% trans "Join Society" %}</a>
+          {% endif %}
 
           <div class="nav-dropdown">
             <button class="dropdown-toggle">{% trans "More" %} <svg style="width:10px;height:10px;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
