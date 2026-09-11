@@ -2,6 +2,20 @@
 {% load i18n %}
 {% block title %}{% trans "Worker dashboard" %} — Co-opSeva{% endblock %}
 {% block content %}
+<style>
+  @keyframes blink-red-black {
+    0% { background-color: #ff0000; color: white; }
+    50% { background-color: #000000; color: white; }
+    100% { background-color: #ff0000; color: white; }
+  }
+  .blink-join-society {
+    animation: blink-red-black 0.8s infinite;
+    color: white !important;
+    font-weight: bold;
+    border: none;
+    text-align: center;
+  }
+</style>
 <section class="section">
   <div class="container">
     <div class="section-head">
@@ -101,6 +115,9 @@
               <tr><th>{% trans "Society" %}</th><td>{{ profile.society|default:"—" }}</td></tr>
             </tbody>
           </table>
+          {% if not profile.society %}
+          <a href="#" class="btn btn-block mt-2 blink-join-society">{% trans "Join Society" %}</a>
+          {% endif %}
           {% if not profile.society and pending_invites %}
           <div class="alert alert-info mt-2" style="padding:12px; font-size:0.85rem;">
             <p style="margin-bottom:8px;"><strong>{% trans "Invitations received:" %}</strong></p>
