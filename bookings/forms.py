@@ -42,12 +42,14 @@ class BookingForm(forms.ModelForm):
 class BookingRequestForm(forms.ModelForm):
     class Meta:
         model = BookingRequest
-        fields = ['scheduled_date', 'scheduled_time', 'address', 'city', 'pincode',
+        fields = ['scheduled_date', 'scheduled_time', 'address', 'latitude', 'longitude', 'city', 'pincode',
                   'instructions', 'workers_required', 'duration_days', 'hours_booked']
         widgets = {
             'scheduled_date': forms.DateInput(attrs={'class': 'input-field', 'type': 'date'}),
             'scheduled_time': forms.TimeInput(attrs={'class': 'input-field', 'type': 'time'}),
             'address': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Full service address'}),
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
             'city': forms.TextInput(attrs={'class': 'input-field'}),
             'pincode': forms.TextInput(attrs={'class': 'input-field'}),
             'instructions': forms.Textarea(attrs={'class': 'input-field', 'rows': 3,

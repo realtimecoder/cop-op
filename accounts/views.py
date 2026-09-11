@@ -101,8 +101,8 @@ def verify_otp(request):
                     login(request, user)
                     response = redirect('accounts:select_role')
 
-                del request.session['otp_phone']
-                del request.session['otp_id']
+                request.session.pop('otp_phone', None)
+                request.session.pop('otp_id', None)
                 return _apply_language(request, response, user)
             else:
                 messages.error(request, _("Incorrect or expired OTP. Please try again."))
@@ -138,11 +138,13 @@ def complete_profile(request):
                     user.last_name = form.cleaned_data['last_name']
                     user.address = form.cleaned_data['address']
                     user.city = form.cleaned_data['city']
+                    user.state = form.cleaned_data['state']
+                    user.country = form.cleaned_data['country']
                     user.pincode = form.cleaned_data['pincode']
                     user.preferred_language = form.cleaned_data['preferred_language']
                     user.save()
 
-                    # Use browser-provided coordinates if available, otherwise fallback to geocoding
+                    # Geocode if coordinates aren't provided
                     lat = request.POST.get('latitude')
                     lng = request.POST.get('longitude')
                     if lat and lng:
@@ -156,7 +158,7 @@ def complete_profile(request):
                     profile.certificate = form.cleaned_data['certificate']
                     profile.address_proof = form.cleaned_data['address_proof']
                     profile.skill_grade = form.cleaned_data['skill_grade']
-                    profile.years_experience = form.cleaned_data['years_experience']
+                    profile.years_experience = form.cleaned_data['years_experience'] or 0
                     profile.verification_status = WorkerProfile.VerificationStatus.PENDING
                     profile.save()
                     profile.categories.set(form.cleaned_data['categories'])
@@ -167,7 +169,6 @@ def complete_profile(request):
                 except Exception as e:
                     messages.error(request, f"Error saving profile: {str(e)}")
             else:
-                # This is crucial: tell the user WHY the form is invalid
                 for field, errors in form.errors.items():
                     for error in errors:
                         messages.error(request, f"{field}: {error}")
