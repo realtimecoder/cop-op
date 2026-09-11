@@ -26,6 +26,9 @@ def worker_list_for_service(request, service_id, request_id=None):
     "Use my location" button) and a Google Maps API key is configured,
     workers are annotated with real road distance/ETA via the Distance
     Matrix API and can be sorted by genuine nearest-first order."""
+    import logging
+    logger = logging.getLogger(__name__)
+
     service = get_object_or_404(Service, id=service_id, is_active=True)
     offerings = WorkerServiceOffering.objects.filter(
         service=service, worker__verification_status=WorkerProfile.VerificationStatus.VERIFIED
@@ -40,26 +43,33 @@ def worker_list_for_service(request, service_id, request_id=None):
     used_service_address = False
     geo_available = False
 
+    logger.info("GEO DEBUG: Worker list for service %s, request_id=%s, GET lat=%s, lng=%s",
+                service_id, request_id, customer_lat, customer_lng)
+
     # 1. Try request_id (Service Address)
     if not customer_lat and not customer_lng and request_id:
         try:
             booking_req = BookingRequest.objects.get(id=request_id)
+            logger.info("GEO DEBUG: Found BookingRequest %s. Lat=%s, Lng=%s",
+                        request_id, booking_req.latitude, booking_req.longitude)
             if booking_req.latitude and booking_req.longitude:
                 customer_lat = booking_req.latitude
                 customer_lng = booking_req.longitude
                 used_service_address = True
             elif booking_req.address:
-                # Try on-the-fly geocoding if coordinates are missing
                 from .geo import geocode_address
+                logger.info("GEO DEBUG: Geocoding address %s", booking_req.address)
                 coords = geocode_address(booking_req.address, booking_req.city, booking_req.pincode)
                 if coords:
                     customer_lat, customer_lng = coords
                     used_service_address = True
-                    # Save it back so we don't have to geocode every time
                     booking_req.latitude, booking_req.longitude = coords
                     booking_req.save(update_fields=['latitude', 'longitude'])
+                    logger.info("GEO DEBUG: Geocoding successful: %s", coords)
+                else:
+                    logger.info("GEO DEBUG: Geocoding failed for address %s", booking_req.address)
         except BookingRequest.DoesNotExist:
-            pass
+            logger.info("GEO DEBUG: BookingRequest %s not found", request_id)
 
     # 2. Fallback to User Profile Address
     if not customer_lat and not customer_lng and request.user.is_authenticated \
@@ -67,15 +77,18 @@ def worker_list_for_service(request, service_id, request_id=None):
         customer_lat = request.user.latitude
         customer_lng = request.user.longitude
         used_saved_address = True
+        logger.info("GEO DEBUG: Falling back to user profile address: %s, %s", customer_lat, customer_lng)
 
     if customer_lat and customer_lng:
         try:
             customer_lat = float(customer_lat)
             customer_lng = float(customer_lng)
             workers, geo_available = annotate_workers_with_distance(customer_lat, customer_lng, workers)
+            logger.info("GEO DEBUG: Annotated workers. geo_available=%s", geo_available)
         except ValueError:
             customer_lat = customer_lng = None
     else:
+        logger.info("GEO DEBUG: No coordinates found. Using defaults.")
         for w in workers:
             w.distance_km = None
             w.duration_min = None
