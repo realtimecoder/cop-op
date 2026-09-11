@@ -72,9 +72,9 @@
           <li><svg><use href="#icon-sparkle"/></svg>{{ worker.get_skill_grade_display }}</li>
           <li><svg><use href="#icon-clock"/></svg>{{ worker.years_experience }} {% trans "yrs experience" %}</li>
           {% if worker.distance_km is not None %}
-          <li><svg><use href="#icon-map-pin"/></svg>{{ worker.distance_km }} km · {{ worker.duration_text }} {% trans "away" %}</li>
+          <li><svg><use href="#icon-map-pin"/></svg>{{ worker.distance_km }} km away</li>
           {% else %}
-          <li><svg><use href="#icon-map-pin"/></svg>{% trans "within" %} {{ worker.service_radius_km }} km</li>
+          <li><svg><use href="#icon-map-pin"/></svg>{% trans "Distance unavailable" %}</li>
           {% endif %}
           <li><svg><use href="#icon-language"/></svg>{{ worker.languages_spoken }}</li>
         </ul>
