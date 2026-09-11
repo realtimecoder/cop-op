@@ -73,5 +73,17 @@
       </div>
     </div>
   </div>
-</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/address-autocomplete.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  initAddressAutocomplete('id_address', {
+    address: 'id_address',
+    city: 'id_city',
+    pincode: 'id_pincode'
+  });
+});
+</script>
 {% endblock %}
