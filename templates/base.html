@@ -9,6 +9,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+  @keyframes text-blink-red-black {
+    0% { color: #ff0000; }
+    50% { color: #000000; }
+    100% { color: #ff0000; }
+  }
+  .blink-join-society {
+    animation: text-blink-red-black 0.8s infinite;
+    font-weight: bold;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+  }
+</style>
 {% block extra_head %}{% endblock %}
 </head>
 <body class="{% if user.is_authenticated %}{% if user.is_superuser %}theme-platform_admin{% else %}theme-{{ user.role }}{% endif %}{% endif %}">
