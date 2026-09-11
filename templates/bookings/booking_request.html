@@ -24,7 +24,15 @@
               {% for error in form.scheduled_time.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
             </div>
           </div>
-          <div class="form-group"><label>{% trans "Service address" %}</label>{{ form.address }}
+          <div class="form-group">
+            <label>{% trans "Service address" %}</label>
+            <div style="display: flex; gap: 8px;">
+              {{ form.address }}
+              <button type="button" id="btn-current-location" class="btn btn-secondary" style="white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                <svg style="width:16px;height:16px;" fill="currentColor"><use href="#icon-location"/></svg>
+                {% trans "Current Location" %}
+              </button>
+            </div>
             {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
           </div>
           <div class="grid grid-2">
