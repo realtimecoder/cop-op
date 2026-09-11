@@ -2,20 +2,6 @@
 {% load i18n %}
 {% block title %}{% trans "Worker dashboard" %} — Co-opSeva{% endblock %}
 {% block content %}
-<style>
-  @keyframes blink-red-black {
-    0% { background-color: #ff0000; color: white; }
-    50% { background-color: #000000; color: white; }
-    100% { background-color: #ff0000; color: white; }
-  }
-  .blink-join-society {
-    animation: blink-red-black 0.8s infinite;
-    color: white !important;
-    font-weight: bold;
-    border: none;
-    text-align: center;
-  }
-</style>
 <section class="section">
   <div class="container">
     <div class="section-head">
@@ -25,14 +11,9 @@
 
     {% if not profile.is_verified %}
     <div class="alert alert-warning" style="position:static;margin-bottom:20px;">
-      <b>{% trans "Your account is awaiting admin verification." %}</b>
-      {% trans "You cannot receive work until your profile is verified by an administrator. Upload your documents and wait for the verification process to complete." %}
+      <b>{% trans "Your profile is not visible to customers yet." %}</b>
+      {% trans "Customers can only see and book verified workers. Upload your documents and wait for your cooperative society to verify your profile." %}
       <a href="{% url 'workers:documents' %}" style="text-decoration:underline;">{% trans "Upload documents" %}</a>
-    </div>
-    {% elif not profile.society %}
-    <div class="alert alert-info" style="position:static;margin-bottom:20px;">
-      <b>{% trans "Registration incomplete." %}</b>
-      {% trans "You are verified, but not yet completely registered. To start receiving work, you must join a cooperative society. Please wait for an invitation or contact a society operator." %}
     </div>
     {% endif %}
 
@@ -73,27 +54,6 @@
             </tbody>
           </table>
         </div>
-        <h3 class="mt-4">{% trans "Bulk Assignments" %}</h3>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead><tr>
-              <th>{% trans "Service" %}</th><th>{% trans "Institution" %}</th><th>{% trans "Assigned" %}</th>
-              <th>{% trans "Status" %}</th><th>{% trans "Payout" %}</th><th></th>
-            </tr></thead>
-            <tbody>
-              {% for ba in bulk_assignments %}
-              <tr>
-                <td>{{ ba.bulk_request.service.name }}</td>
-                <td>{{ ba.bulk_request.institution.get_full_name|default:ba.bulk_request.institution.phone_number }}</td>
-                <td>{{ ba.assigned_at|date:"d M Y" }}</td>
-                <td><span class="status-pill">{{ ba.bulk_request.get_status_display }}</span></td>
-                <td style="font-family:var(--font-mono);">₹{{ ba.payout_amount }}</td>
-                <td><a href="{% url 'bookings:bulk_request_detail' ba.bulk_request.id %}" class="btn btn-outline btn-sm">{% trans "View" %}</a></td>
-              </tr>
-              {% empty %}<tr><td colspan="6" class="muted">{% trans "No bulk assignments yet." %}</td></tr>{% endfor %}
-            </tbody>
-          </table>
-        </div>
       </div>
 
       <div>
@@ -115,20 +75,6 @@
               <tr><th>{% trans "Society" %}</th><td>{{ profile.society|default:"—" }}</td></tr>
             </tbody>
           </table>
-          {% if not profile.society %}
-          <a href="#" class="btn btn-block mt-2 blink-join-society">{% trans "Join Society" %}</a>
-          {% endif %}
-          {% if not profile.society and pending_invites %}
-          <div class="alert alert-info mt-2" style="padding:12px; font-size:0.85rem;">
-            <p style="margin-bottom:8px;"><strong>{% trans "Invitations received:" %}</strong></p>
-            {% for invite in pending_invites %}
-            <div class="flex justify-between align-center" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-              <span>{{ invite.society.name }}</span>
-              <a href="{% url 'workers:accept_society_invite' invite.id %}" class="btn btn-primary btn-sm">{% trans "Join" %}</a>
-            </div>
-            {% endfor %}
-          </div>
-          {% endif %}
           <a href="{% url 'workers:edit_profile' %}" class="btn btn-primary btn-block mt-2">{% trans "Edit profile" %}</a>
         </div>
 
