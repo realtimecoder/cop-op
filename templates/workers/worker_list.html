@@ -92,7 +92,7 @@
              class="btn btn-accent btn-sm book-worker-btn"
              style="flex:1;"
              data-distance="{{ worker.distance_km }}"
-             data-url="{% url 'bookings:create_booking' service.id worker.id %}">{% trans "Book" %}</a>
+             data-url="{% url 'bookings:create_booking' service.id worker.id %}">{% trans, "Book" %}</a>
           {% endif %}
         </div>
       </div>
@@ -160,7 +160,6 @@ document.addEventListener('DOMContentLoaded', function () {
       alert("{% trans 'Location permission was denied. You can still sort by rating or experience.' %}");
     });
   });
-});
 
   // Distance Confirmation Logic
   const modal = document.getElementById('distance-modal');
@@ -171,23 +170,28 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.book-worker-btn').forEach(button => {
     button.addEventListener('click', function(e) {
       e.preventDefault();
-      const distance = this.getAttribute('data-distance');
+      const distanceStr = this.getAttribute('data-distance');
       const url = this.getAttribute('data-url');
 
-      if (distance) {
-        msg.textContent = `{% trans "This worker is" %} ${distance} km {% trans "away from your location. Do you want to continue?" %}`;
-        confirmBtn.href = url;
-        modal.style.display = 'flex';
-      } else {
-        // If distance is not available, just book directly
-        window.location.href = url;
+      if (distanceStr) {
+        const distance = parseFloat(distanceStr);
+        if (!isNaN(distance) && distance > 5) {
+          msg.textContent = `{% trans "This worker is" %} ${distance} km {% trans "away from your location. Do you want to continue?" %}`;
+          confirmBtn.href = url;
+          modal.style.display = 'flex';
+          return;
+        }
       }
+      // If distance is <= 5km, not available, or NaN, book directly
+      window.location.href = url;
     });
   });
 
-  cancelBtn.addEventListener('click', function() {
-    modal.style.display = 'none';
-  });
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', function() {
+      modal.style.display = 'none';
+    });
+  }
 });
 </script>
 {% endblock %}
