@@ -12,7 +12,6 @@ reason, callers fall back to the existing rating-based recommended_score()
 ranking — the feature degrades gracefully rather than breaking the page.
 """
 import logging
-
 import requests
 from django.conf import settings
 
@@ -21,30 +20,10 @@ logger = logging.getLogger(__name__)
 DISTANCE_MATRIX_URL = "https://maps.googleapis.com/maps/api/distancematrix/json"
 GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
-
 def is_configured():
     return bool(settings.GOOGLE_MAPS_API_KEY)
 
-
 def geocode_address(address, city="", pincode=""):
-    """
-    Converts a typed street address into (lat, lng) using Google's
-    Geocoding API — this is what actually lets "nearest worker" work
-    from a plain typed address, instead of only from the browser's GPS
-    button. Called automatically whenever a customer or worker saves
-    their profile address (see accounts/views.py).
-
-    Returns (lat, lng) tuple, or None if geocoding wasn't possible
-    (no key configured, address too vague, API error, etc.) — callers
-    should treat None as "leave existing coordinates alone", never as
-    an error to surface to the user, since typed addresses are often
-    incomplete and this must degrade gracefully.
-
-    Note: this uses Google's Geocoding API, which is a *separate* API
-    from Distance Matrx — both must be enabled on the same Google Cloud
-    project for the full nearest-worker flow to work end to end:
-    https://console.cloud.google.com/google/maps-apis/api-list
-    """
     if not is_configured() or not address or not address.strip():
         return None
 
@@ -60,7 +39,6 @@ def geocode_address(address, city="", pincode=""):
         return None
 
     if data.get("status") != "OK":
-        logger.info("Google Geocoding could not resolve %r: status=%s", full_address, data.get("status"))
         return None
 
     try:
@@ -69,56 +47,12 @@ def geocode_address(address, city="", pincode=""):
     except (KeyError, IndexError):
         return None
 
-
-def filter_workers_by_distance(workers, customer_lat=None, customer_lng=None):
-    """
-    Implements the strict distance filtering logic:
-    1. Try to find at least 3 workers within expanding radii (3km, 5km, 10km).
-    2. If no one is found within 10km, expand to a hard cap of 50km.
-    3. Limit to top 10 in the 50km fallback.
-
-    Returns the filtered list of workers.
-    """
-    if not customer_lat or not customer_lng:
-        return workers
-
-    # Ensure workers are annotated first (caller should have called annotate_workers_with_distance)
-    # But we check anyway
-    has_dist = any(getattr(w, 'distance_km', None) is not None for w in workers)
-    if not has_dist:
-        return workers
-
-    radii = [3, 5, 10]
-    selected_workers = []
-
-    for r in radii:
-        nearby = [w for w in workers if getattr(w, 'distance_km', None) is not None and w.distance_km <= r]
-        if len(nearby) >= 3:
-            selected_workers = nearby
-            break
-        if len(nearby) > len(selected_workers):
-            selected_workers = nearby
-
-    if not selected_workers:
-        selected_workers = [w for w in workers if getattr(w, 'distance_km', None) is not None and w.distance_km <= 50]
-        if len(selected_workers) > 10:
-            selected_workers.sort(key=lambda w: w.distance_km)
-            selected_workers = selected_workers[:10]
-
-    return selected_workers
-
 def get_distances(origin_lat, origin_lng, destinations):
     """
     destinations: list of (worker_id, lat, lng) tuples.
     Returns: dict {worker_id: {"distance_km": float, "duration_min": float}}
-    for every destination Google could resolve. Silently skips any it
-    couldn't (e.g. a worker with no saved location).
     """
-    if not is_configured():
-        logger.error("DISTANCE API ERROR: Google Maps API Key is missing from settings.")
-        return {}
-    if not destinations:
-        logger.error("DISTANCE API ERROR: No workers have valid latitude/longitude coordinates.")
+    if not is_configured() or not destinations:
         return {}
 
     dest_str = "|".join(f"{lat},{lng}" for _, lat, lng in destinations)
@@ -135,23 +69,26 @@ def get_distances(origin_lat, origin_lng, destinations):
         response.raise_for_status()
         data = response.json()
     except (requests.RequestException, ValueError) as exc:
-        logger.error("DISTANCE API ERROR: Request failed: %s", exc)
+        logger.error("GEO ERROR: HTTP request failed: %s", exc)
         return {}
 
-    if data.get("status") != "OK":
-        logger.error("DISTANCE API ERROR: Google Distance Matrix returned status=%s", data.get("status"))
+    status = data.get("status")
+    if status != "OK":
+        logger.error("GEO ERROR: Google API returned status: %s", status)
         return {}
 
     results = {}
     try:
-        elements = data["rows"][0]["elements"]
+        rows = data.get("rows", [])
+        if not rows:
+            return {}
+        elements = rows[0].get("elements", [])
     except (KeyError, IndexError):
-        logger.error("DISTANCE API ERROR: Unexpected response structure from Google API.")
         return {}
 
     for (worker_id, _lat, _lng), element in zip(destinations, elements):
-        if element.get("status") != "OK":
-            logger.warning("DISTANCE API ERROR: Element status for worker %s is %s", worker_id, element.get("status"))
+        elem_status = element.get("status")
+        if elem_status != "OK":
             continue
         results[worker_id] = {
             "distance_km": round(element["distance"]["value"] / 1000, 1),
@@ -159,14 +96,13 @@ def get_distances(origin_lat, origin_lng, destinations):
             "distance_text": element["distance"]["text"],
             "duration_text": element["duration"]["text"],
         }
-    return results
 
+    return results
 
 def filter_workers_by_distance(workers, customer_lat=None, customer_lng=None):
     """
     Zomato-style distance filtering.
-    Instead of cutting off strictly at 3/5/10km, we keep all workers within 50km.
-    The actual priority (3km -> 5km -> 10km) is handled by sorting in the view.
+    Keep all workers within 50km.
     """
     if not customer_lat or not customer_lng:
         return workers
@@ -175,7 +111,6 @@ def filter_workers_by_distance(workers, customer_lat=None, customer_lng=None):
     if not has_dist:
         return workers
 
-    # Keep all workers within 50km.
     selected_workers = [w for w in workers if getattr(w, 'distance_km', None) is not None and w.distance_km <= 50]
 
     if len(selected_workers) > 50:
@@ -184,13 +119,7 @@ def filter_workers_by_distance(workers, customer_lat=None, customer_lng=None):
 
     return selected_workers
 
-
 def annotate_workers_with_distance(customer_lat, customer_lng, workers):
-    """
-    Takes a list of WorkerProfile objects, attaches `.distance_km`,
-    `.duration_min`, `.duration_text` to each (None if unavailable), and
-    returns (workers, geo_available_bool).
-    """
     if not customer_lat or not customer_lng:
         for w in workers:
             w.distance_km = None
