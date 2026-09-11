@@ -55,47 +55,55 @@ def get_distances(origin_lat, origin_lng, destinations):
     if not is_configured() or not destinations:
         return {}
 
-    dest_str = "|".join(f"{lat},{lng}" for _, lat, lng in destinations)
-    params = {
-        "origins": f"{origin_lat},{origin_lng}",
-        "destinations": dest_str,
-        "mode": "driving",
-        "units": "metric",
-        "key": settings.GOOGLE_MAPS_API_KEY,
-    }
-
-    try:
-        response = requests.get(DISTANCE_MATRIX_URL, params=params, timeout=5)
-        response.raise_for_status()
-        data = response.json()
-    except (requests.RequestException, ValueError) as exc:
-        logger.error("GEO ERROR: HTTP request failed: %s", exc)
-        return {}
-
-    status = data.get("status")
-    if status != "OK":
-        logger.error("GEO ERROR: Google API returned status: %s", status)
-        return {}
-
     results = {}
-    try:
-        rows = data.get("rows", [])
-        if not rows:
-            return {}
-        elements = rows[0].get("elements", [])
-    except (KeyError, IndexError):
-        return {}
+    # Google Distance Matrix API has a limit on the number of elements (origins * destinations).
+    # To avoid MAX_DIMENSIONS_EXCEEDED, we process destinations in chunks.
+    CHUNK_SIZE = 25
 
-    for (worker_id, _lat, _lng), element in zip(destinations, elements):
-        elem_status = element.get("status")
-        if elem_status != "OK":
-            continue
-        results[worker_id] = {
-            "distance_km": round(element["distance"]["value"] / 1000, 1),
-            "duration_min": round(element["duration"]["value"] / 60),
-            "distance_text": element["distance"]["text"],
-            "duration_text": element["duration"]["text"],
+    for i in range(0, len(destinations), CHUNK_SIZE):
+        chunk = destinations[i:i + CHUNK_SIZE]
+        dest_str = "|".join(f"{lat},{lng}" for _, lat, lng in chunk)
+
+        params = {
+            "origins": f"{origin_lat},{origin_lng}",
+            "destinations": dest_str,
+            "mode": "driving",
+            "units": "metric",
+            "key": settings.GOOGLE_MAPS_API_KEY,
         }
+
+        try:
+            response = requests.get(DISTANCE_MATRIX_URL, params=params, timeout=5)
+            response.raise_for_status()
+            data = response.json()
+        except (requests.RequestException, ValueError) as exc:
+            logger.error("GEO ERROR: HTTP request failed for chunk %d: %s", i, exc)
+            continue
+
+        status = data.get("status")
+        if status != "OK":
+            logger.error("GEO ERROR: Google API returned status: %s for chunk %d", status, i)
+            continue
+
+        try:
+            rows = data.get("rows", [])
+            if not rows:
+                continue
+            elements = rows[0].get("elements", [])
+
+            for (worker_id, _lat, _lng), element in zip(chunk, elements):
+                elem_status = element.get("status")
+                if elem_status != "OK":
+                    continue
+                results[worker_id] = {
+                    "distance_km": round(element["distance"]["value"] / 1000, 1),
+                    "duration_min": round(element["duration"]["value"] / 60),
+                    "distance_text": element["distance"]["text"],
+                    "duration_text": element["duration"]["text"],
+                }
+        except (KeyError, IndexError) as exc:
+            logger.error("GEO ERROR: Unexpected response structure in chunk %d: %s", i, exc)
+            continue
 
     return results
 
