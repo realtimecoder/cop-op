@@ -30,7 +30,9 @@ def worker_list_for_service(request, service_id, request_id=None):
         service=service, worker__verification_status=WorkerProfile.VerificationStatus.VERIFIED
     ).select_related('worker', 'worker__user')
 
-    sort = request.GET.get('sort', 'recommended')
+    sort = request.GET.get('sort')
+    if not sort:
+        sort = 'nearest' if (customer_lat and customer_lng) else 'recommended'
     workers = [o.worker for o in offerings]
 
     customer_lat = request.GET.get('lat')
