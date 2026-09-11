@@ -10,17 +10,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
 <style>
-  @keyframes blink-red-black {
-    0% { background-color: #ff0000; color: white; }
-    50% { background-color: #000000; color: white; }
-    100% { background-color: #ff0000; color: white; }
+  @keyframes text-blink-red-black {
+    0% { color: #ff0000; }
+    50% { color: #000000; }
+    100% { color: #ff0000; }
   }
   .blink-join-society {
-    animation: blink-red-black 0.8s infinite;
-    color: white !important;
+    animation: text-blink-red-black 0.8s infinite;
     font-weight: bold;
-    border: none;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
     text-align: center;
+    text-decoration: none;
+    display: inline-block;
   }
 </style>
 {% block extra_head %}{% endblock %}
@@ -78,9 +83,6 @@
           <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
           <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
           <a href="{% url 'core:government_opportunities' %}" class="rainbow-blink">{% trans "Government opportunities" %}</a>
-          {% if not user.workerprofile.society %}
-          <a href="#" class="blink-join-society">{% trans "Join Society" %}</a>
-          {% endif %}
 
           <div class="nav-dropdown">
             <button class="dropdown-toggle">{% trans "More" %} <svg style="width:10px;height:10px;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
