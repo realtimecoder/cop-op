@@ -48,6 +48,16 @@ def worker_list_for_service(request, service_id, request_id=None):
                 customer_lat = booking_req.latitude
                 customer_lng = booking_req.longitude
                 used_service_address = True
+            elif booking_req.address:
+                # Try on-the-fly geocoding if coordinates are missing
+                from .geo import geocode_address
+                coords = geocode_address(booking_req.address, booking_req.city, booking_req.pincode)
+                if coords:
+                    customer_lat, customer_lng = coords
+                    used_service_address = True
+                    # Save it back so we don't have to geocode every time
+                    booking_req.latitude, booking_req.longitude = coords
+                    booking_req.save(update_fields=['latitude', 'longitude'])
         except BookingRequest.DoesNotExist:
             pass
 
