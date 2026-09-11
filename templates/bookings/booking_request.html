@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}{% trans "Confirm booking details" %} — Co-opSeva{% endblock %}
 {% block content %}
 <section class="section">
@@ -24,9 +24,19 @@
               {% for error in form.scheduled_time.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
             </div>
           </div>
-          <div class="form-group"><label>{% trans "Service address" %}</label>{{ form.address }}
+          <div class="form-group">
+            <label>{% trans "Service address" %}</label>
+            <div style="display: flex; gap: 8px;">
+              {{ form.address }}
+              <button type="button" id="btn-current-location" class="btn btn-secondary" style="white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                <svg style="width:16px;height:16px;" fill="currentColor"><use href="#icon-location"/></svg>
+                {% trans "Current Location" %}
+              </button>
+            </div>
             {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
           </div>
+          {{ form.latitude }}
+          {{ form.longitude }}
           <div class="grid grid-2">
             <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
             <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
@@ -74,4 +84,25 @@
     </div>
   </div>
 </section>
+
+<script src="{% static 'js/address-autocomplete.js' %}"></script>
+<script>
+  function initAutocomplete() {
+    console.log("Google Maps callback: initAutocomplete called");
+    if (typeof initAddressAutocomplete === 'function') {
+      initAddressAutocomplete('id_address', {
+        address: 'id_address',
+        city: 'id_city',
+        state: 'id_state',
+        country: 'id_country',
+        pincode: 'id_pincode',
+        latitude: 'id_latitude',
+        longitude: 'id_longitude'
+      });
+    } else {
+      console.error("initAddressAutocomplete is not defined. Check script loading order.");
+    }
+  }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initAutocomplete" async defer></script>
 {% endblock %}
