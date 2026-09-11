@@ -94,11 +94,11 @@ def get_distances(origin_lat, origin_lng, destinations):
         response.raise_for_status()
         data = response.json()
     except (requests.RequestException, ValueError) as exc:
-        logger.warning("Google Distance Matrix request failed: %s", exc)
+        logger.error("Google Distance Matrix request failed: %s", exc, exc_info=True)
         return {}
 
     if data.get("status") != "OK":
-        logger.warning("Google Distance Matrix returned status=%s", data.get("status"))
+        logger.error("Google Distance Matrix returned status=%s. Data: %s", data.get("status"), data)
         return {}
 
     results = {}
