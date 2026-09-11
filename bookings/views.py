@@ -47,6 +47,16 @@ def booking_request(request, service_id):
             booking_req = form.save(commit=False)
             booking_req.customer = request.user
             booking_req.service = service
+
+            # Geocode the service address provided in the form
+            coords = geocode_address(
+                booking_req.address,
+                city=booking_req.city,
+                pincode=booking_req.pincode
+            )
+            if coords:
+                booking_req.latitude, booking_req.longitude = coords
+
             booking_req.save()
             return redirect('bookings:booking_choice', request_id=booking_req.id)
         else:

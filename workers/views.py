@@ -7,6 +7,7 @@ from django.utils import timezone
 from catalog.models import Service
 from payments.models import Payment
 from .models import WorkerProfile, WorkerServiceOffering, WorkerBlockedDate, WorkerCategoryChangeRequest, SocietyInvite
+from bookings.models import BookingRequest
 from .forms import (WorkerOnboardingForm, WorkerDocumentForm, WorkerProfileEditForm,
                      WorkerCategoryChangeRequestForm, WorkerBlockedDateForm)
 from .geo import annotate_workers_with_distance, is_configured as maps_configured
@@ -36,14 +37,23 @@ def worker_list_for_service(request, service_id, request_id=None):
     customer_lat = request.GET.get('lat')
     customer_lng = request.GET.get('lng')
     used_saved_address = False
+    used_service_address = False
     geo_available = False
 
+    # 1. Try request_id (Service Address)
+    if not customer_lat and not customer_lng and request_id:
+        try:
+            booking_req = BookingRequest.objects.get(id=request_id)
+            if booking_req.latitude and booking_req.longitude:
+                customer_lat = booking_req.latitude
+                customer_lng = booking_req.longitude
+                used_service_address = True
+        except BookingRequest.DoesNotExist:
+            pass
+
+    # 2. Fallback to User Profile Address
     if not customer_lat and not customer_lng and request.user.is_authenticated \
             and request.user.latitude is not None and request.user.longitude is not None:
-        # No GPS button click this visit — but the customer already has a
-        # geocoded address on file (saved automatically from their profile
-        # address via Google Geocoding), so use that as the origin instead
-        # of requiring them to click "Find nearest to me" every time.
         customer_lat = request.user.latitude
         customer_lng = request.user.longitude
         used_saved_address = True
@@ -77,6 +87,7 @@ def worker_list_for_service(request, service_id, request_id=None):
         'geo_available': geo_available,
         'maps_configured': maps_configured(),
         'used_saved_address': used_saved_address,
+        'used_service_address': used_service_address,
         'customer_lat': customer_lat, 'customer_lng': customer_lng,
         'request_id': request_id,
     })

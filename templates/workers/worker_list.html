@@ -28,6 +28,10 @@
     <div class="alert alert-info" style="position:static;margin-bottom:20px;max-width:640px;">
       {% trans "Live distance and travel time will appear here once the platform's Google Maps API key is configured. Sorting by rating, experience and availability still works normally." %}
     </div>
+    {% elif used_service_address and geo_available %}
+    <div class="alert alert-info" style="position:static;margin-bottom:20px;max-width:640px;">
+      {% trans "Showing distance from the service address you provided." %}
+    </div>
     {% elif used_saved_address and geo_available %}
     <div class="alert alert-info" style="position:static;margin-bottom:20px;max-width:640px;">
       {% trans "Showing distance from your saved profile address. Click 'Find nearest to me' to use your current location instead." %}
