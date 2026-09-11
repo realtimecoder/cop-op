@@ -99,4 +99,25 @@
     </div>
   </div>
 </section>
+
+<script src="{% static 'js/address-autocomplete.js' %}"></script>
+<script>
+  function initAutocomplete() {
+    console.log("Google Maps callback: initAutocomplete called");
+    if (typeof initAddressAutocomplete === 'function') {
+      initAddressAutocomplete('id_address', {
+        address: 'id_address',
+        city: 'id_city',
+        state: 'id_state',
+        country: 'id_country',
+        pincode: 'id_pincode',
+        latitude: 'id_latitude',
+        longitude: 'id_longitude'
+      });
+    } else {
+      console.error("initAddressAutocomplete is not defined. Check script loading order.");
+    }
+  }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initAutocomplete" async defer></script>
 {% endblock %}
