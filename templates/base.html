@@ -61,6 +61,9 @@
       {% else %}
         {% if user.is_authenticated and user.role == 'worker' %}
           {# Worker Specific Navbar #}
+          {% if not user.worker_profile.society %}
+          <a href="#" class="blink-join-society">{% trans "Join Society" %}</a>
+          {% endif %}
           <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
           <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
           <a href="{% url 'core:government_opportunities' %}" class="rainbow-blink">{% trans "Government opportunities" %}</a>
