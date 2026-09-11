@@ -119,6 +119,29 @@ def get_distances(origin_lat, origin_lng, destinations):
     return results
 
 
+def filter_workers_by_distance(workers, customer_lat=None, customer_lng=None):
+    """
+    Zomato-style distance filtering.
+    Instead of cutting off strictly at 3/5/10km, we keep all workers within 50km.
+    The actual priority (3km -> 5km -> 10km) is handled by sorting in the view.
+    """
+    if not customer_lat or not customer_lng:
+        return workers
+
+    has_dist = any(getattr(w, 'distance_km', None) is not None for w in workers)
+    if not has_dist:
+        return workers
+
+    # Keep all workers within 50km.
+    selected_workers = [w for w in workers if getattr(w, 'distance_km', None) is not None and w.distance_km <= 50]
+
+    if len(selected_workers) > 50:
+        selected_workers.sort(key=lambda w: w.distance_km)
+        selected_workers = selected_workers[:50]
+
+    return selected_workers
+
+
 def annotate_workers_with_distance(customer_lat, customer_lng, workers):
     """
     Takes a list of WorkerProfile objects, attaches `.distance_km`,

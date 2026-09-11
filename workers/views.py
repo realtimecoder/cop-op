@@ -62,7 +62,15 @@ def worker_list_for_service(request, service_id, request_id=None):
             w.duration_text = None
 
     if sort == 'nearest' and geo_available:
-        workers.sort(key=lambda w: (w.distance_km is None, w.distance_km or 0))
+        def get_tier(w):
+            dist = getattr(w, 'distance_km', None)
+            if dist is None: return 4
+            if dist <= 3: return 1
+            if dist <= 5: return 2
+            if dist <= 10: return 3
+            return 4
+
+        workers.sort(key=lambda w: (get_tier(w), w.distance_km or 999, -w.average_rating))
     elif sort == 'rating':
         workers.sort(key=lambda w: w.average_rating, reverse=True)
     elif sort == 'experience':
