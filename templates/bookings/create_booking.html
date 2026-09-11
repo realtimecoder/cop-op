@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n %}
 {% block title %}{% trans "Confirm booking" %} — Co-opSeva{% endblock %}
 {% block content %}
 <section class="section">
@@ -28,8 +28,6 @@
           <div class="form-group"><label>{% trans "Service address" %}</label>{{ form.address }}
             {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
           </div>
-          <input type="hidden" name="latitude" id="id_latitude">
-          <input type="hidden" name="longitude" id="id_longitude">
           <div class="grid grid-2">
             <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
             <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
@@ -83,21 +81,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/address-autocomplete.js' %}"></script>
-<script>
-function initAutocomplete() {
-    initAddressAutocomplete('id_address', {
-        address: 'id_address',
-        city: 'id_city',
-        state: 'id_state',
-        country: 'id_country',
-        pincode: 'id_pincode',
-        latitude: 'id_latitude',
-        longitude: 'id_longitude'
-    });
-}
-</script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initAutocomplete" async defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var occupied = {{ occupied_dates_json|safe }};

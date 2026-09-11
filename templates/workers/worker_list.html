@@ -2,6 +2,49 @@
 {% load i18n %}
 {% block title %}{% trans "Choose a worker" %} — {{ service.name }}{% endblock %}
 {% block content %}
+<style>
+  .distance-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+  .distance-modal {
+    background: white;
+    padding: 32px;
+    border-radius: 24px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    border: 1px solid #B1D3B9;
+    animation: modalFadeIn 0.3s ease;
+  }
+  @keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .distance-modal h3 {
+    color: #35858E;
+    margin-top: 0;
+    font-family: Georgia, serif;
+  }
+  .distance-modal p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .distance-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+</style>
+
 <section class="section">
   <div class="container">
     <div class="section-head">
@@ -83,16 +126,14 @@
           <a href="{% url 'workers:worker_public_profile' worker.id %}" class="btn btn-outline btn-sm" style="flex:1;">{% trans "View profile" %}</a>
           {% if request_id %}
           <a href="{% url 'bookings:finalize_booking_from_request' request_id worker.id %}"
-             class="btn btn-accent btn-sm book-worker-btn"
-             style="flex:1;"
-             data-distance="{{ worker.distance_km }}"
-             data-url="{% url 'bookings:finalize_booking_from_request' request_id worker.id %}">{% trans "Book" %}</a>
+             class="btn btn-accent btn-sm js-book-link"
+             data-distance="{{ worker.distance_km|default:'0' }}"
+             style="flex:1;">{% trans "Book" %}</a>
           {% else %}
           <a href="{% url 'bookings:create_booking' service.id worker.id %}"
-             class="btn btn-accent btn-sm book-worker-btn"
-             style="flex:1;"
-             data-distance="{{ worker.distance_km }}"
-             data-url="{% url 'bookings:create_booking' service.id worker.id %}">{% trans "Book" %}</a>
+             class="btn btn-accent btn-sm js-book-link"
+             data-distance="{{ worker.distance_km|default:'0' }}"
+             style="flex:1;">{% trans "Book" %}</a>
           {% endif %}
         </div>
       </div>
@@ -104,21 +145,18 @@
       {% endfor %}
     </div>
   </div>
-</section>
 
-<!-- Distance Confirmation Modal -->
-<div id="distance-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
-  <div class="form-card" style="max-width:400px; text-align:center; padding:32px;">
-    <div style="font-size:3rem; margin-bottom:16px;">📍</div>
-    <h2 style="margin-bottom:12px;">{% trans "Confirm Worker" %}</h2>
-    <p id="distance-msg" class="muted" style="margin-bottom:24px;"></p>
-    <div class="flex gap-2">
-      <button id="distance-cancel" class="btn btn-outline btn-sm" style="flex:1;">{% trans "Choose Another" %}</button>
-      <a id="distance-confirm" href="#" class="btn btn-accent btn-sm" style="flex:1;">{% trans "Yes, Continue" %}</a>
+  <div class="distance-modal-overlay" id="distance-modal-overlay">
+    <div class="distance-modal">
+      <h3>{% trans "Distance Warning" %}</h3>
+      <p id="distance-warning-text">{% trans "This worker is more than 5km away. It may take longer to arrive. Do you still want to proceed?" %}</p>
+      <div class="distance-modal-actions">
+        <button class="btn btn-outline btn-sm" id="distance-modal-cancel">{% trans "Cancel" %}</button>
+        <button class="btn btn-primary btn-sm" id="distance-modal-confirm">{% trans "Yes, Proceed" %}</button>
+      </div>
     </div>
   </div>
-</div>
-
+</section>
 {% endblock %}
 
 {% block extra_js %}
@@ -161,37 +199,39 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Distance Confirmation Logic
-  const modal = document.getElementById('distance-modal');
-  const msg = document.getElementById('distance-msg');
-  const confirmBtn = document.getElementById('distance-confirm');
-  const cancelBtn = document.getElementById('distance-cancel');
+  // Distance Warning Popup
+  var modalOverlay = document.getElementById('distance-modal-overlay');
+  var modalConfirm = document.getElementById('distance-modal-confirm');
+  var modalCancel = document.getElementById('distance-modal-cancel');
+  var pendingUrl = null;
 
-  document.querySelectorAll('.book-worker-btn').forEach(button => {
-    button.addEventListener('click', function(e) {
-      e.preventDefault();
-      const distanceStr = this.getAttribute('data-distance');
-      const url = this.getAttribute('data-url');
+  document.querySelectorAll('.js-book-link').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      var distance = parseFloat(this.getAttribute('data-distance'));
+      if (!isNaN(distance) && distance > 5) {
+        e.preventDefault();
+        pendingUrl = this.href;
 
-      if (distanceStr) {
-        const distance = parseFloat(distanceStr);
-        if (!isNaN(distance) && distance > 5) {
-          msg.textContent = `{% trans "This worker is" %} ${distance} km {% trans "away from your location. Do you want to continue?" %}`;
-          confirmBtn.href = url;
-          modal.style.display = 'flex';
-          return;
+        var warningText = document.getElementById('distance-warning-text');
+        if (warningText) {
+          warningText.textContent = `This worker is ${distance} km away. It may take longer to arrive. Do you still want to proceed?`;
         }
+
+        modalOverlay.style.display = 'flex';
       }
-      // If distance is <= 5km, not available, or NaN, book directly
-      window.location.href = url;
     });
   });
 
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', function() {
-      modal.style.display = 'none';
-    });
-  }
+  modalConfirm.addEventListener('click', function () {
+    if (pendingUrl) {
+      window.location.href = pendingUrl;
+    }
+  });
+
+  modalCancel.addEventListener('click', function () {
+    modalOverlay.style.display = 'none';
+    pendingUrl = null;
+  });
 });
 </script>
 {% endblock %}

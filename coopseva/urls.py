@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
+from django.shortcuts import redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,6 +15,8 @@ urlpatterns = [
     path('payments/', include('payments.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('', include('core.urls')),
+    # Fallback for missing namespace in society_list calls
+    path('societies-fallback/', lambda r: redirect('dashboard:society_list'), name='society_list'),
 ]
 
 if settings.DEBUG:

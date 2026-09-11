@@ -73,14 +73,14 @@ def booking_choice(request, request_id):
     if request.method == 'POST':
         choice = request.POST.get('choice')
 
-        if choice == 'rapid':
-            # Rapid Book: Find best worker and finalize booking immediately
+        if choice == 'auto':
+            # Auto Book: Find best worker and finalize booking immediately
             customer_lat = booking_req.latitude or request.user.latitude
             customer_lng = booking_req.longitude or request.user.longitude
             best_worker = find_best_worker(service, customer_lat, customer_lng)
 
             if not best_worker:
-                messages.error(request, "No available workers found for rapid booking. Please select one manually.")
+                messages.error(request, "No available workers found for auto booking. Please select one manually.")
                 return redirect('bookings:booking_choice', request_id=request_id)
 
             # Pricing logic (reuse same as create_booking)
@@ -125,7 +125,7 @@ def booking_choice(request, request_id):
                 status=Booking.Status.ASSIGNED
             )
             booking_req.delete()
-            messages.success(request, f"Rapid Book successful! {best_worker.user.get_full_name()} has been assigned.")
+            messages.success(request, f"Auto Book successful! {best_worker.user.get_full_name()} has been assigned.")
             return redirect('bookings:booking_detail', booking_id=booking.id)
 
         elif choice == 'manual':

@@ -7,7 +7,7 @@ from django.utils import translation
 from django.utils.translation import gettext as _
 from django.conf import settings
 
-from .forms import PhoneForm, OTPVerifyForm, RegistrationForm, ProfileUpdateForm, WorkerRegistrationForm
+from .forms import PhoneForm, OTPVerifyForm, RegistrationForm, ProfileUpdateForm
 from .models import OTPRequest
 from workers.geo import geocode_address
 from workers.models import Society, WorkerProfile
@@ -65,7 +65,7 @@ def login_request(request):
 
 
 def verify_otp(request):
-    """Step 2: verify OTP and log in, or route to role selection if new user."""
+    """Step 2: verify OTP. New users go to role selection. Existing users log in."""
     phone = request.session.get('otp_phone')
     otp_id = request.session.get('otp_id')
     if not phone or not otp_id:
@@ -87,22 +87,27 @@ def verify_otp(request):
 
                 try:
                     user = User.objects.get(phone_number=phone)
-                    login(request, user)
-                    messages.success(request, _("Welcome back, %(name)s!") % {'name': user.get_full_name() or user.phone_number})
-                    response = redirect('core:home')
+                    is_new = False
                 except User.DoesNotExist:
-                    # New user: route to role selection
                     user = User.objects.create(
                         phone_number=phone,
                         username=phone,
                         is_phone_verified=True,
-                        role=User.Role.CUSTOMER # Temporary default
+                        role=User.Role.CUSTOMER # Default, will be updated in select_role
                     )
-                    login(request, user)
-                    response = redirect('accounts:select_role')
+                    is_new = True
 
-                request.session.pop('otp_phone', None)
-                request.session.pop('otp_id', None)
+                login(request, user)
+                del request.session['otp_phone']
+                del request.session['otp_id']
+
+                if is_new:
+                    response = redirect('accounts:select_role')
+                elif not user.first_name:
+                    response = redirect('accounts:complete_profile')
+                else:
+                    messages.success(request, _("Welcome back, %(name)s!") % {'name': user.get_full_name() or user.phone_number})
+                    response = redirect('core:home')
                 return _apply_language(request, response, user)
             else:
                 messages.error(request, _("Incorrect or expired OTP. Please try again."))
@@ -113,105 +118,44 @@ def verify_otp(request):
 
 @login_required
 def select_role(request):
-    """New user chooses their role before completing the profile."""
+    """Step 3: New users select their role before completing profile."""
     if request.method == 'POST':
         role = request.POST.get('role')
-        valid_roles = [User.Role.CUSTOMER, User.Role.BUILDER, User.Role.WORKER]
-        if role in valid_roles:
-            request.user.role = role
-            request.user.save(update_fields=['role'])
+        if role in User.Role.values:
+            user = request.user
+            user.role = role
+            user.save(update_fields=['role'])
+            messages.success(request, _("Role updated successfully."))
             return redirect('accounts:complete_profile')
         else:
-            messages.error(request, "Please select a valid role.")
-    return render(request, 'accounts/select_role.html')
+            messages.error(request, _("Please select a valid role."))
 
+    return render(request, 'accounts/select_role.html')
 
 @login_required
 def complete_profile(request):
     if request.method == 'POST':
-        if request.user.role == User.Role.WORKER:
-            form = WorkerRegistrationForm(request.POST, request.FILES)
-            if form.is_valid():
-                try:
-                    user = request.user
-                    user.first_name = form.cleaned_data['first_name']
-                    user.last_name = form.cleaned_data['last_name']
-                    user.address = form.cleaned_data['address']
-                    user.city = form.cleaned_data['city']
-                    user.state = form.cleaned_data['state']
-                    user.country = form.cleaned_data['country']
-                    user.pincode = form.cleaned_data['pincode']
-                    user.preferred_language = form.cleaned_data['preferred_language']
-                    user.save()
+        form = RegistrationForm(request.POST, instance=request.user)
+        if form.is_valid():
+            user = form.save()
+            _geocode_and_save_location(user)
 
-                    # Geocode if coordinates aren't provided
-                    lat = request.POST.get('latitude')
-                    lng = request.POST.get('longitude')
-                    if lat and lng:
-                        user.latitude = float(lat)
-                        user.longitude = float(lng)
-                        user.save(update_fields=['latitude', 'longitude'])
-                    else:
-                        _geocode_and_save_location(user)
-
-                    profile, _created = WorkerProfile.objects.get_or_create(user=user)
-                    profile.certificate = form.cleaned_data['certificate']
-                    profile.address_proof = form.cleaned_data['address_proof']
-                    profile.skill_grade = form.cleaned_data['skill_grade']
-                    profile.years_experience = form.cleaned_data['years_experience'] or 0
-                    profile.verification_status = WorkerProfile.VerificationStatus.PENDING
-                    profile.save()
-                    profile.categories.set(form.cleaned_data['categories'])
-
-                    messages.success(request, _("Profile submitted successfully. Your account is now pending admin approval."))
-                    response = redirect('core:home')
-                    return _apply_language(request, response, user)
-                except Exception as e:
-                    messages.error(request, f"Error saving profile: {str(e)}")
+            if user.role == User.Role.WORKER:
+                messages.success(request, _("Profile completed and welcome to Co-opSeva!"))
+                response = redirect('workers:onboarding')
             else:
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"{field}: {error}")
-                messages.error(request, "Please correct the errors in the form.")
-        else:
-            form = RegistrationForm(request.POST, instance=request.user)
-            if form.is_valid():
-                user = form.save()
-                _geocode_and_save_location(user)
                 messages.success(request, _("Profile completed. Welcome to Co-opSeva!"))
                 response = redirect('core:home')
-                return _apply_language(request, response, user)
-            else:
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"{field}: {error}")
-                messages.error(request, "Please correct the errors in the form.")
+
+            return _apply_language(request, response, user)
     else:
-        if request.user.role == User.Role.WORKER:
-            form = WorkerRegistrationForm()
-        else:
-            form = RegistrationForm(instance=request.user)
-            if hasattr(form, 'fields') and 'role' in form.fields:
-                form.fields['role'].initial = request.user.role
+        form = RegistrationForm(instance=request.user)
 
-    return render(request, 'accounts/complete_profile.html', {'form': form})
+    return render(request, 'accounts/complete_profile.html', {
+        'form': form,
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY
+    })
 
-
-@login_required
-def update_current_location(request):
-    """Updates user's coordinates from browser geolocation."""
-    if request.method == 'POST':
-        lat = request.POST.get('latitude')
-        lng = request.POST.get('longitude')
-        if lat and lng:
-            user = request.user
-            user.latitude = float(lat)
-            user.longitude = float(lng)
-            user.save(update_fields=['latitude', 'longitude'])
-            messages.success(request, _("Current location updated successfully."))
-        else:
-            messages.error(request, _("Invalid location data received."))
-    return redirect('accounts:profile')
 
 @login_required
 def profile(request):

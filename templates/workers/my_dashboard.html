@@ -17,8 +17,9 @@
     </div>
     {% elif not profile.society %}
     <div class="alert alert-info" style="position:static;margin-bottom:20px;">
-      <b>{% trans "Registration incomplete." %}</b>
-      {% trans "You are verified, but not yet completely registered. To start receiving work, you must join a cooperative society. Please wait for an invitation or contact a society operator." %}
+      <b>{% trans "Almost there!" %}</b>
+      {% trans "Your identity and skills are verified, but you are not yet part of a cooperative society. To be fully active on the platform and receive bookings, you must join a society." %}
+      <a href="{% url 'workers:worker_society_list' %}" style="text-decoration:underline; margin-left:5px;">{% trans "Browse Societies" %}</a>
     </div>
     {% endif %}
 
@@ -80,6 +81,17 @@
               <tr><th>{% trans "Society" %}</th><td>{{ profile.society|default:"—" }}</td></tr>
             </tbody>
           </table>
+          {% if not profile.society and pending_invites %}
+          <div class="alert alert-info mt-2" style="padding:12px; font-size:0.85rem;">
+            <p style="margin-bottom:8px;"><strong>{% trans "Invitations received:" %}</strong></p>
+            {% for invite in pending_invites %}
+            <div class="flex justify-between align-center" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+              <span>{{ invite.society.name }}</span>
+              <a href="{% url 'workers:accept_society_invite' invite.id %}" class="btn btn-primary btn-sm">{% trans "Join" %}</a>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
           <a href="{% url 'workers:edit_profile' %}" class="btn btn-primary btn-block mt-2">{% trans "Edit profile" %}</a>
         </div>
 

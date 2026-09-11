@@ -70,6 +70,43 @@ def geocode_address(address, city="", pincode=""):
         return None
 
 
+def filter_workers_by_distance(workers, customer_lat=None, customer_lng=None):
+    """
+    Implements the strict distance filtering logic:
+    1. Try to find at least 3 workers within expanding radii (3km, 5km, 10km).
+    2. If no one is found within 10km, expand to a hard cap of 50km.
+    3. Limit to top 10 in the 50km fallback.
+
+    Returns the filtered list of workers.
+    """
+    if not customer_lat or not customer_lng:
+        return workers
+
+    # Ensure workers are annotated first (caller should have called annotate_workers_with_distance)
+    # But we check anyway
+    has_dist = any(getattr(w, 'distance_km', None) is not None for w in workers)
+    if not has_dist:
+        return workers
+
+    radii = [3, 5, 10]
+    selected_workers = []
+
+    for r in radii:
+        nearby = [w for w in workers if getattr(w, 'distance_km', None) is not None and w.distance_km <= r]
+        if len(nearby) >= 3:
+            selected_workers = nearby
+            break
+        if len(nearby) > len(selected_workers):
+            selected_workers = nearby
+
+    if not selected_workers:
+        selected_workers = [w for w in workers if getattr(w, 'distance_km', None) is not None and w.distance_km <= 50]
+        if len(selected_workers) > 10:
+            selected_workers.sort(key=lambda w: w.distance_km)
+            selected_workers = selected_workers[:10]
+
+    return selected_workers
+
 def get_distances(origin_lat, origin_lng, destinations):
     """
     destinations: list of (worker_id, lat, lng) tuples.
@@ -94,11 +131,11 @@ def get_distances(origin_lat, origin_lng, destinations):
         response.raise_for_status()
         data = response.json()
     except (requests.RequestException, ValueError) as exc:
-        logger.error("Google Distance Matrix request failed: %s", exc, exc_info=True)
+        logger.warning("Google Distance Matrix request failed: %s", exc)
         return {}
 
     if data.get("status") != "OK":
-        logger.error("Google Distance Matrix returned status=%s. Data: %s", data.get("status"), data)
+        logger.warning("Google Distance Matrix returned status=%s", data.get("status"))
         return {}
 
     results = {}

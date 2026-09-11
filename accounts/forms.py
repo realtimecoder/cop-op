@@ -34,32 +34,25 @@ class OTPVerifyForm(forms.Form):
 
 class RegistrationForm(forms.ModelForm):
     """Used right after first-time OTP verification to complete the profile."""
-    society = forms.ModelChoiceField(
-        queryset=apps.get_model('workers', 'Society').objects.none(),
-        required=False,
-        widget=forms.Select(attrs={'class': 'input-field'}),
-        label="Join a Cooperative Society"
-    )
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'role', 'address', 'city', 'state', 'country', 'pincode', 'preferred_language']
+        fields = ['first_name', 'last_name', 'role', 'country', 'state', 'address', 'city', 'pincode', 'preferred_language']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'First name'}),
             'last_name': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Last name'}),
             'role': forms.Select(attrs={'class': 'input-field'}),
-            'address': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Address'}),
-            'city': forms.Select(attrs={'class': 'input-field'}),
-            'state': forms.Select(attrs={'class': 'input-field'}),
             'country': forms.Select(attrs={'class': 'input-field'}),
+            'state': forms.Select(attrs={'class': 'input-field'}),
+            'city': forms.Select(attrs={'class': 'input-field'}),
+            'address': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Address'}),
             'pincode': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'PIN code'}),
             'preferred_language': forms.Select(attrs={'class': 'input-field'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['first_name'].required = False
-        self.fields['last_name'].required = False
+        # Public self-registration is limited to customer / builder / worker.
         self.fields['role'].choices = [
             (User.Role.CUSTOMER, 'Customer'),
             (User.Role.BUILDER, 'Builder / Institutional Customer'),
@@ -70,56 +63,16 @@ class RegistrationForm(forms.ModelForm):
                                                                   attrs={'class': 'input-field'})
 
 
-class WorkerRegistrationForm(forms.Form):
-    """Specialized form for Worker profile completion, including categories and documents."""
-    first_name = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'First name'}))
-    last_name = forms.CharField(max_length=150, required=False, widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Last name'}))
-    address = forms.CharField(max_length=255, widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Address'}))
-    city = forms.CharField(max_length=100, widget=forms.Select(attrs={'class': 'input-field'}))
-    state = forms.CharField(max_length=100, widget=forms.Select(attrs={'class': 'input-field'}))
-    country = forms.CharField(max_length=100, widget=forms.Select(attrs={'class': 'input-field'}))
-    pincode = forms.CharField(max_length=10, widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'PIN code'}))
-    preferred_language = forms.ChoiceField(
-        choices=[], # Populated in __init__
-        widget=forms.Select(attrs={'class': 'input-field'})
-    )
-    categories = forms.ModelMultipleChoiceField(
-        queryset=apps.get_model('catalog', 'ServiceCategory').objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        label="Services you provide"
-    )
-    skill_grade = forms.ChoiceField(
-        choices=apps.get_model('workers', 'WorkerProfile').SkillGrade.choices,
-        widget=forms.Select(attrs={'class': 'input-field'}),
-        label="Skill Grade"
-    )
-    years_experience = forms.IntegerField(
-        required=False,
-        min_value=0,
-        widget=forms.NumberInput(attrs={'class': 'input-field', 'placeholder': '0'}),
-        label="Years of Experience"
-    )
-    certificate = forms.FileField(required=True, widget=forms.FileInput(attrs={'class': 'input-file'}))
-    address_proof = forms.FileField(required=True, widget=forms.FileInput(attrs={'class': 'input-file'}))
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        from django.conf import settings
-        self.fields['preferred_language'].choices = settings.LANGUAGES
-
-
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'address', 'city', 'state', 'country', 'pincode',
+        fields = ['first_name', 'last_name', 'address', 'city', 'pincode',
                   'emergency_contact', 'preferred_language', 'profile_photo']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'input-field'}),
             'last_name': forms.TextInput(attrs={'class': 'input-field'}),
             'address': forms.TextInput(attrs={'class': 'input-field'}),
-            'city': forms.Select(attrs={'class': 'input-field'}),
-            'state': forms.Select(attrs={'class': 'input-field'}),
-            'country': forms.Select(attrs={'class': 'input-field'}),
+            'city': forms.TextInput(attrs={'class': 'input-field'}),
             'pincode': forms.TextInput(attrs={'class': 'input-field'}),
             'emergency_contact': forms.TextInput(attrs={'class': 'input-field'}),
             'preferred_language': forms.Select(attrs={'class': 'input-field'}),

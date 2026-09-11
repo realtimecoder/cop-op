@@ -31,7 +31,7 @@ Co-opSeva is a Django-based marketplace for verified cooperative labour services
 ### Core Apps
 - `accounts`: Custom `User` model, OTP-based login, and role management. Handles the "Smart Onboarding" flow: `login_request` $\rightarrow$ `verify_otp` $\rightarrow$ `select_role` $\rightarrow$ `complete_profile`.
 - `catalog`: Service taxonomy (`ServiceCategory` $\rightarrow$ `Service`).
-- `bookings`: Booking lifecycle. Manages individual `Booking` records and institutional `BulkServiceRequest` $\rightarrow$ `BulkAssignment` flows (including "Rapid Booking" via the matching engine).
+- `bookings`: Booking lifecycle. Manages individual `Booking` records and institutional `BulkServiceRequest` $\rightarrow$ `BulkAssignment` flows (including "Auto Booking" via the matching engine).
 - `workers`: Manages the cooperative hierarchy (`Federation` $\rightarrow$ `Society` $\rightarrow$ `WorkerProfile`). Tracks worker skill grades, certificates, and `WorkerServiceOffering` (linking workers to services).
 - `dashboard`: Role-specific administrative and moderation interfaces (e.g., Worker Verification Queue, Federation Pricing).
 - `payments`: Digital wallet, payout splits, and platform commissions via Razorpay.

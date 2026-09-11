@@ -1,43 +1,49 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% trans "Select Your Role" %} — Co-opSeva{% endblock %}
+
+{% block title %}{% trans "Select Role" %} — Co-opSeva{% endblock %}
+
 {% block content %}
 <section class="section">
   <div class="container">
-    <div class="form-card" style="max-width: 600px; margin: 0 auto;">
-      <div class="text-center mb-0" style="margin-bottom:20px;">
-        <div class="category-icon" style="margin:0 auto 14px;"><svg><use href="#icon-user"/></svg></div>
-        <h1 style="font-size:1.5rem;">{% trans "Welcome to Co-opSeva" %}</h1>
-        <p class="muted">{% trans "Please tell us who you are so we can set up your account correctly." %}</p>
-      </div>
+    <div class="form-card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+      <div class="category-icon" style="margin: 0 auto 20px;"><svg><use href="#icon-user"/></svg></div>
+      <h1 style="font-size: 1.6rem; margin-bottom: 10px;">{% trans "Tell us who you are" %}</h1>
+      <p class="muted mb-4">{% trans "Select your role to customize your experience on the platform." %}</p>
+
       <form method="post">
         {% csrf_token %}
-        <div class="role-selector" style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;">
-          <label class="role-option" style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px;">
-            <input type="radio" name="role" value="customer" checked>
-            <div>
-              <strong>{% trans "Customer" %}</strong><br>
-              <span class="muted" style="font-size: 0.9rem;">{% trans "I want to book services for my home or office." %}</span>
-            </div>
+        <div class="role-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;">
+          <label class="role-option" style="cursor: pointer; border: 2px solid #E6EEC9; padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 12px; transition: all 0.3s ease;">
+            <input type="radio" name="role" value="customer" checked style="width: 18px; height: 18px;">
+            <span style="font-weight: 600; color: #35858E;">{% trans "Customer" %}</span>
           </label>
-          <label class="role-option" style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px;">
-            <input type="radio" name="role" value="builder">
-            <div>
-              <strong>{% trans "Institutional / Builder" %}</strong><br>
-              <span class="muted" style="font-size: 0.9rem;">{% trans "I manage large-scale projects and need multiple workers." %}</span>
-            </div>
+          <label class="role-option" style="cursor: pointer; border: 2px solid #E6EEC9; padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 12px; transition: all 0.3s ease;">
+            <input type="radio" name="role" value="builder" style="width: 18px; height: 18px;">
+            <span style="font-weight: 600; color: #35858E;">{% trans "Institutional" %}</span>
           </label>
-          <label class="role-option" style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px;">
-            <input type="radio" name="role" value="worker">
-            <div>
-              <strong>{% trans "Service Worker" %}</strong><br>
-              <span class="muted" style="font-size: 0.9rem;">{% trans "I am a skilled professional looking for work." %}</span>
-            </div>
+          <label class="role-option" style="cursor: pointer; border: 2px solid #E6EEC9; padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 12px; transition: all 0.3s ease;">
+            <input type="radio" name="role" value="worker" style="width: 18px; height: 18px;">
+            <span style="font-weight: 600; color: #35858E;">{% trans "Worker" %}</span>
           </label>
         </div>
-        <button type="submit" class="btn btn-primary btn-block">{% trans "Continue" %}</button>
+        <button type="submit" class="btn btn-primary btn-block">{% trans "Continue to Profile" %}</button>
       </form>
     </div>
   </div>
 </section>
+
+<style>
+  .role-option:hover {
+    border-color: #35858E;
+    background: #f9fbf7;
+  }
+  .role-option input:checked + span {
+    color: #35858E;
+    font-weight: 800;
+  }
+  .role-option input:checked {
+    accent-color: #35858E;
+  }
+</style>
 {% endblock %}

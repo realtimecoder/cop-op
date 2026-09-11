@@ -11,16 +11,7 @@
       <p class="muted mt-2">₹{{ order.amount|floatformat:0 }}0 {% trans "paise" %} · {% trans "Booking" %} #{{ booking.id }}</p>
       <p class="help-text">{% trans "Use Razorpay's test card 4111 1111 1111 1111, any future expiry, any CVV — or any test UPI ID." %}</p>
       <button id="pay-btn" class="btn btn-primary btn-block mt-2">{% trans "Open Razorpay checkout" %}</button>
-
-      <div class="mt-4 pt-3 border-top">
-        <p class="small muted mb-2">{% trans "Developer Bypass (Testing Only)" %}</p>
-        <form action="{% url 'bookings:manual_payment' booking.id %}" method="POST">
-          {% csrf_token %}
-          <button type="submit" name="action" value="success" class="btn btn-success btn-sm btn-block mb-1">{% trans "Simulate Success Payment" %}</button>
-          <button type="submit" name="action" value="fail" class="btn btn-danger btn-sm btn-block">{% trans "Simulate Failed Payment" %}</button>
-        </form>
-      </div>
-      <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-ghost btn-block mt-3">{% trans "Cancel" %}</a>
+      <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-ghost btn-block mt-1">{% trans "Cancel" %}</a>
     </div>
   </div>
 </section>

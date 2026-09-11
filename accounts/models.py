@@ -22,13 +22,12 @@ class User(AbstractUser):
         PLATFORM_ADMIN = 'platform_admin', 'Platform Administrator'
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
-    phone_number = models.CharField(max_length=15, unique=True, db_index=True)
-    REQUIRED_FIELDS = ['phone_number']
+    phone_number = models.CharField(max_length=15, unique=True, db_index=True, null=True, blank=True)
     preferred_language = models.CharField(max_length=8, default='en')
     address = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
-    state = models.CharField(max_length=100, blank=True)
-    country = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
     pincode = models.CharField(max_length=10, blank=True)
     profile_photo = models.ImageField(upload_to='profile_photos/', blank=True, null=True)
     emergency_contact = models.CharField(max_length=15, blank=True)

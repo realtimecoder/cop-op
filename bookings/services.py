@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Q
 from workers.models import WorkerProfile
-from workers.geo import annotate_workers_with_distance
+from workers.geo import annotate_workers_with_distance, filter_workers_by_distance
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,10 @@ def find_best_workers(service, customer_lat=None, customer_lng=None, limit=5):
 
     # 2. Annotate with real road distance if coordinates are available
     workers, geo_available = annotate_workers_with_distance(customer_lat, customer_lng, list(workers))
+
+    # Apply strict distance filtering to ensure we don't match workers from distant cities
+    if geo_available:
+        workers = filter_workers_by_distance(workers, customer_lat, customer_lng)
 
     # 3. Scoring Logic using the model's unified recommended_score
     scored_workers = []

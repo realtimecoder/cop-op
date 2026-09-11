@@ -44,7 +44,7 @@
             <td><a href="{% url 'dashboard:society_workers_list' society.id %}" class="font-bold hover:underline">{{ society.name }}</a></td>
             <td>{% if society.federation %}<span class="badge badge-verified">{{ society.federation.name }}</span>{% else %}<span class="muted">{% trans "Independent" %}</span>{% endif %}</td>
             <td>
-              {% if society.operator %}<span class="badge badge-verified">{{ society.operator.get_full_name|default:society.operator.phone_number }}</span>{% else %}<span class="badge badge-warning">{% trans "No head assigned" %}</span>{% endif %}
+              {% if society.operator %}<span class="badge badge-verified">{{ society.operator.phone_number }}</span>{% else %}<span class="badge badge-warning">{% trans "No head assigned" %}</span>{% endif %}
             </td>
             <td>{{ society.worker_count }}</td>
             <td>

@@ -9,25 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
-<style>
-  @keyframes text-blink-red-black {
-    0% { color: #ff0000; }
-    50% { color: #000000; }
-    100% { color: #ff0000; }
-  }
-  .blink-join-society {
-    animation: text-blink-red-black 0.8s infinite;
-    font-weight: bold;
-    background: transparent !important;
-    background-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-  }
-</style>
 {% block extra_head %}{% endblock %}
 </head>
 <body class="{% if user.is_authenticated %}{% if user.is_superuser %}theme-platform_admin{% else %}theme-{{ user.role }}{% endif %}{% endif %}">
@@ -80,14 +61,11 @@
       {% else %}
         {% if user.is_authenticated and user.role == 'worker' %}
           {# Worker Specific Navbar #}
-          {% if not user.worker_profile.society %}
-          <a href="#" class="blink-join-society">{% trans "Join Society" %}</a>
-          {% endif %}
           <a href="{% url 'catalog:category_list' %}">{% trans "Browse services" %}</a>
           <a href="{% url 'core:how_it_works' %}">{% trans "How it works" %}</a>
           <a href="{% url 'core:government_opportunities' %}" class="rainbow-blink">{% trans "Government opportunities" %}</a>
           {% if not user.worker_profile.society %}
-          <a href="{% url 'workers:society_list' %}" class="blink-join-society">{% trans "Join Society" %}</a>
+          <a href="{% url 'workers:worker_society_list' %}" class="blink-join-society">{% trans "Join Society" %}</a>
           {% endif %}
 
           <div class="nav-dropdown">

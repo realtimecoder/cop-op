@@ -50,10 +50,6 @@
         <a href="{% url 'bookings:booking_request' service.id %}" class="btn btn-primary btn-block mt-3">
           {% trans "Book this service" %} <svg><use href="#icon-arrow-right"/></svg>
         </a>
-        <a href="{% url 'bookings:find_nearest_workers' service.id %}" class="btn btn-outline btn-block mt-2">
-          <svg style="width:14px;height:14px;vertical-align:middle;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
-          {% trans "Find Nearest Workers" %}
-        </a>
       </div>
     </div>
   </div>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n %}
 {% block title %}{% trans "My profile" %} — Co-opSeva{% endblock %}
 {% block content %}
 <section class="section">
@@ -22,143 +22,6 @@
 
       <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-        <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initAutocomplete" async defer></script>
-        <script src="{% static 'js/address-autocomplete.js' %}"></script>
-        <script>
-        function initAutocomplete() {
-            initAddressAutocomplete('id_address', {
-                address: 'id_address',
-                city: 'id_city',
-                state: 'id_state',
-                country: 'id_country',
-                pincode: 'id_pincode',
-                latitude: 'id_latitude',
-                longitude: 'id_longitude'
-            });
-        }
-
-        async function fetchCountries() {
-            try {
-                const response = await fetch('https://countriesnow.space/api/v0.1/countries');
-                const data = await response.json();
-                const countrySelect = document.getElementById('id_country');
-                if (!countrySelect) return;
-                countrySelect.innerHTML = '<option value="">{% trans "Select Country" %}</option>';
-                data.data.forEach(country => {
-                    const option = document.createElement('option');
-                    option.value = country.name;
-                    option.textContent = country.name;
-                    if (country.name === "{{ request.user.country }}") option.selected = true;
-                    countrySelect.appendChild(option);
-                });
-            } catch (error) { console.error('Error fetching countries:', error); }
-        }
-
-        async function fetchStates(country) {
-            const stateSelect = document.getElementById('id_state');
-            if (!stateSelect) return;
-            stateSelect.innerHTML = '<option value="">{% trans "Select State" %}</option>';
-            try {
-                const response = await fetch('https://countriesnow.space/api/v0.1/countries/states', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ country: country })
-                });
-                const data = await response.json();
-                if (data.error) return;
-                data.data.forEach(state => {
-                    const option = document.createElement('option');
-                    option.value = state;
-                    option.textContent = state;
-                    if (state === "{{ request.user.state }}") option.selected = true;
-                    stateSelect.appendChild(option);
-                });
-            } catch (error) { console.error('Error fetching states:', error); }
-        }
-
-        async function fetchCities(country, state) {
-            const citySelect = document.getElementById('id_city');
-            if (!citySelect) return;
-            citySelect.innerHTML = '<option value="">{% trans "Select City" %}</option>';
-            try {
-                const response = await fetch('https://countriesnow.space/api/v0.1/countries/state/cities', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ country: country, state: state })
-                });
-                const data = await response.json();
-                if (data.error) return;
-                data.data.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    if (city === "{{ request.user.city }}") option.selected = true;
-                    citySelect.appendChild(option);
-                });
-            } catch (error) { console.error('Error fetching cities:', error); }
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            await fetchCountries();
-            if ("{{ request.user.country }}") {
-                document.getElementById('id_country').value = "{{ request.user.country }}";
-                await fetchStates("{{ request.user.country }}");
-                if ("{{ request.user.state }}") {
-                    document.getElementById('id_state').value = "{{ request.user.state }}";
-                    await fetchCities("{{ request.user.country }}", "{{ request.user.state }}");
-                    if ("{{ request.user.city }}") {
-                        document.getElementById('id_city').value = "{{ request.user.city }}";
-                    }
-                }
-            }
-
-            const countrySelect = document.getElementById('id_country');
-            const stateSelect = document.getElementById('id_state');
-            const citySelect = document.getElementById('id_city');
-
-            if (countrySelect) {
-                countrySelect.addEventListener('change', (e) => {
-                    fetchStates(e.target.value);
-                    if (citySelect) citySelect.innerHTML = '<option value="">{% trans "Select City" %}</option>';
-                });
-            }
-            if (stateSelect) {
-                stateSelect.addEventListener('change', (e) => {
-                    fetchCities(countrySelect.value, e.target.value);
-                });
-            }
-        });
-
-        function updateCurrentLocation() {
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-              const lat = position.coords.latitude;
-              const lng = position.coords.longitude;
-              fetch("{% url 'accounts:update_location' %}", {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded',
-                  'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: `lat=${lat}&lng=${lng}`
-              })
-              .then(response => {
-                if (response.ok) {
-                  alert('Location updated successfully!');
-                  location.reload();
-                } else {
-                  alert('Failed to update location on server.');
-                }
-              })
-              .catch(error => alert('Error updating location: ' + error));
-            }, function(error) {
-              alert('Unable to retrieve your location. Please enter your address manually.');
-            });
-          } else {
-            alert('Geolocation is not supported by your browser.');
-          }
-        }
-        </script>
         <div class="grid grid-2">
           <div class="form-group"><label>{% trans "First name" %}</label>{{ form.first_name }}
             {% for error in form.first_name.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
@@ -167,24 +30,12 @@
             {% for error in form.last_name.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
           </div>
         </div>
-        <div class="grid grid-3">
-          <div class="form-group"><label>{% trans "Country" %}</label>{{ form.country }}</div>
-          <div class="form-group"><label>{% trans "State" %}</label>{{ form.state }}</div>
-          <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
-        </div>
-        <div class="form-group">
-          <label>{% trans "Address" %}</label>
-          <div class="flex gap-2">
-            {{ form.address }}
-            <button type="button" class="btn btn-outline btn-sm" onclick="updateCurrentLocation()">
-              <svg style="width:14px; height:14px; vertical-align:middle;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
-              {% trans "Use Current Location" %}
-            </button>
-          </div>
+        <div class="form-group"><label>{% trans "Address" %}</label>{{ form.address }}
           {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
         </div>
-        <div class="form-group">
-          <label>{% trans "PIN code" %}</label>{{ form.pincode }}
+        <div class="grid grid-2">
+          <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
+          <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
         </div>
         <div class="form-group"><label>{% trans "Emergency contact" %}</label>{{ form.emergency_contact }}</div>
         <div class="form-group"><label>{% trans "Preferred language" %}</label>{{ form.preferred_language }}</div>

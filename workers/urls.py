@@ -16,6 +16,7 @@ urlpatterns = [
     path('dashboard/availability/<int:block_id>/unblock/', views.unblock_date, name='unblock_date'),
     path('dashboard/accept-invite/<int:invite_id>/', views.accept_society_invite, name='accept_society_invite'),
     path('dashboard/insurance/', views.worker_insurance, name='worker_insurance'),
-    path('societies/', views.society_list_for_workers, name='society_list'),
+    path('societies/', views.society_list_for_workers, name='worker_society_list'),
+    path('societies/<int:society_id>/', views.society_profile, name='society_profile'),
     path('societies/join/<int:society_id>/', views.request_society_join, name='request_society_join'),
 ]
