@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}{% trans "Confirm booking" %} — Co-opSeva{% endblock %}
 {% block content %}
 <section class="section">
@@ -81,8 +81,15 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/address-autocomplete.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  initAddressAutocomplete('id_address', {
+    address: 'id_address',
+    city: 'id_city',
+    pincode: 'id_pincode'
+  });
+
   var occupied = {{ occupied_dates_json|safe }};
   var dateInput = document.getElementById('id_scheduled_date');
   var hint = document.getElementById('date-availability-hint');
