@@ -77,7 +77,11 @@ def get_distances(origin_lat, origin_lng, destinations):
     for every destination Google could resolve. Silently skips any it
     couldn't (e.g. a worker with no saved location).
     """
-    if not is_configured() or not destinations:
+    if not is_configured():
+        logger.error("GEO ERROR: Google Maps API Key is MISSING in settings.py/env")
+        return {}
+    if not destinations:
+        logger.error("GEO ERROR: No workers have coordinates. destinations list is empty.")
         return {}
 
     dest_str = "|".join(f"{lat},{lng}" for _, lat, lng in destinations)
@@ -90,25 +94,35 @@ def get_distances(origin_lat, origin_lng, destinations):
     }
 
     try:
+        logger.info("GEO DEBUG: Requesting distances for origin (%s, %s)", origin_lat, origin_lng)
         response = requests.get(DISTANCE_MATRIX_URL, params=params, timeout=5)
         response.raise_for_status()
         data = response.json()
     except (requests.RequestException, ValueError) as exc:
-        logger.warning("Google Distance Matrix request failed: %s", exc)
+        logger.error("GEO ERROR: HTTP request failed: %s", exc)
         return {}
 
-    if data.get("status") != "OK":
-        logger.warning("Google Distance Matrix returned status=%s", data.get("status"))
+    status = data.get("status")
+    if status != "OK":
+        logger.error("GEO ERROR: Google API returned status: %s", status)
+        # If status is REQUEST_DENIED, it's usually an API key or Billing issue
         return {}
 
     results = {}
     try:
-        elements = data["rows"][0]["elements"]
+        rows = data.get("rows", [])
+        if not rows:
+            logger.error("GEO ERROR: No rows returned in API response")
+            return {}
+        elements = rows[0].get("elements", [])
     except (KeyError, IndexError):
+        logger.error("GEO ERROR: Unexpected response structure")
         return {}
 
     for (worker_id, _lat, _lng), element in zip(destinations, elements):
-        if element.get("status") != "OK":
+        elem_status = element.get("status")
+        if elem_status != "OK":
+            logger.warning("GEO DEBUG: Worker %s distance failed with status: %s", worker_id, elem_status)
             continue
         results[worker_id] = {
             "distance_km": round(element["distance"]["value"] / 1000, 1),
@@ -116,6 +130,8 @@ def get_distances(origin_lat, origin_lng, destinations):
             "distance_text": element["distance"]["text"],
             "duration_text": element["duration"]["text"],
         }
+
+    logger.info("GEO DEBUG: Successfully calculated distances for %d/%d workers", len(results), len(destinations))
     return results
 
 
