@@ -82,9 +82,17 @@
         <div class="flex gap-1 mt-2">
           <a href="{% url 'workers:worker_public_profile' worker.id %}" class="btn btn-outline btn-sm" style="flex:1;">{% trans "View profile" %}</a>
           {% if request_id %}
-          <a href="{% url 'bookings:finalize_booking_from_request' request_id worker.id %}" class="btn btn-accent btn-sm" style="flex:1;">{% trans "Book" %}</a>
+          <a href="{% url 'bookings:finalize_booking_from_request' request_id worker.id %}"
+             class="btn btn-accent btn-sm book-worker-btn"
+             style="flex:1;"
+             data-distance="{{ worker.distance_km }}"
+             data-url="{% url 'bookings:finalize_booking_from_request' request_id worker.id %}">{% trans "Book" %}</a>
           {% else %}
-          <a href="{% url 'bookings:create_booking' service.id worker.id %}" class="btn btn-accent btn-sm" style="flex:1;">{% trans "Book" %}</a>
+          <a href="{% url 'bookings:create_booking' service.id worker.id %}"
+             class="btn btn-accent btn-sm book-worker-btn"
+             style="flex:1;"
+             data-distance="{{ worker.distance_km }}"
+             data-url="{% url 'bookings:create_booking' service.id worker.id %}">{% trans, "Book" %}</a>
           {% endif %}
         </div>
       </div>
@@ -97,6 +105,20 @@
     </div>
   </div>
 </section>
+
+<!-- Distance Confirmation Modal -->
+<div id="distance-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+  <div class="form-card" style="max-width:400px; text-align:center; padding:32px;">
+    <div style="font-size:3rem; margin-bottom:16px;">📍</div>
+    <h2 style="margin-bottom:12px;">{% trans "Confirm Worker" %}</h2>
+    <p id="distance-msg" class="muted" style="margin-bottom:24px;"></p>
+    <div class="flex gap-2">
+      <button id="distance-cancel" class="btn btn-outline btn-sm" style="flex:1;">{% trans "Choose Another" %}</button>
+      <a id="distance-confirm" href="#" class="btn btn-accent btn-sm" style="flex:1;">{% trans "Yes, Continue" %}</a>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -138,6 +160,38 @@ document.addEventListener('DOMContentLoaded', function () {
       alert("{% trans 'Location permission was denied. You can still sort by rating or experience.' %}");
     });
   });
+
+  // Distance Confirmation Logic
+  const modal = document.getElementById('distance-modal');
+  const msg = document.getElementById('distance-msg');
+  const confirmBtn = document.getElementById('distance-confirm');
+  const cancelBtn = document.getElementById('distance-cancel');
+
+  document.querySelectorAll('.book-worker-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      const distanceStr = this.getAttribute('data-distance');
+      const url = this.getAttribute('data-url');
+
+      if (distanceStr) {
+        const distance = parseFloat(distanceStr);
+        if (!isNaN(distance) && distance > 5) {
+          msg.textContent = `{% trans "This worker is" %} ${distance} km {% trans "away from your location. Do you want to continue?" %}`;
+          confirmBtn.href = url;
+          modal.style.display = 'flex';
+          return;
+        }
+      }
+      // If distance is <= 5km, not available, or NaN, book directly
+      window.location.href = url;
+    });
+  });
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', function() {
+      modal.style.display = 'none';
+    });
+  }
 });
 </script>
 {% endblock %}
