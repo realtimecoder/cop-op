@@ -11,7 +11,16 @@
       <div class="flex justify-between items-center">
         <h3 class="mb-0">{{ c.subject }}</h3><span class="status-pill">{{ c.get_status_display }}</span>
       </div>
-      <p class="muted" style="font-size:.82rem;">{% trans "Booking" %} #{{ c.booking.id }} · {{ c.raised_by.get_full_name }} · {{ c.created_at|date:"d M Y" }}</p>
+      <p class="muted" style="font-size:.82rem;">
+        {% if c.booking %}
+          {% trans "Booking" %} #{{ c.booking.id }}
+        {% elif c.bulk_request %}
+          {% trans "Bulk Request" %} #{{ c.bulk_request.id }}
+        {% else %}
+          {% trans "General" %}
+        {% endif %}
+        · {{ c.raised_by.get_full_name }} · {{ c.created_at|date:"d M Y" }}
+      </p>
       <p>{{ c.description }}</p>
       {% if c.status != 'resolved' %}
       <form method="post" action="{% url 'dashboard:resolve_complaint' c.id %}">

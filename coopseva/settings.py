@@ -10,7 +10,9 @@ SECRET_KEY = 'django-insecure-CHANGE-THIS-IN-PRODUCTION-a1b2c3d4e5f6g7h8i9'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'overcoat-cadillac-repurpose.ngrok-free.dev']
+
+CSRF_TRUSTED_ORIGINS = ['https://overcoat-cadillac-repurpose.ngrok-free.dev']
 
 # ------------------------------------------------------------------
 # Applications

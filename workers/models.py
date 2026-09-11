@@ -257,6 +257,12 @@ class WorkerProfile(models.Model):
     verification_officer = models.CharField(max_length=150, blank=True)
     verification_date = models.DateField(null=True, blank=True)
 
+    # Document Uploads for Admin Approval
+    certificate = models.FileField(upload_to='worker_docs/certificates/', blank=True, null=True,
+                                   help_text="Professional certification or skill certificate")
+    address_proof = models.FileField(upload_to='worker_docs/address_proofs/', blank=True, null=True,
+                                     help_text="Govt issued address proof")
+
     skill_grade = models.CharField(max_length=20, choices=SkillGrade.choices, default=SkillGrade.BASIC)
     years_experience = models.PositiveIntegerField(default=0)
     bio = models.TextField(blank=True)

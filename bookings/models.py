@@ -5,7 +5,6 @@ from django.utils import timezone
 from catalog.models import Service
 from workers.models import WorkerProfile
 
-
 class BookingRequest(models.Model):
     """Temporarily holds booking details before a worker is assigned.
     This supports the flow: Service Detail -> Booking Form -> Worker Selection/Rapid Book."""
@@ -155,8 +154,11 @@ class Complaint(models.Model):
         RESOLVED = 'resolved', 'Resolved'
         REJECTED = 'rejected', 'Rejected'
 
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='complaints')
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='complaints', null=True, blank=True)
+    bulk_request = models.ForeignKey('BulkServiceRequest', on_delete=models.CASCADE, related_name='complaints', null=True, blank=True)
     raised_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='complaints')
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_complaints')
+
     subject = models.CharField(max_length=150)
     description = models.TextField()
     status = models.CharField(max_length=15, choices=Status.choices, default=Status.OPEN)
@@ -178,14 +180,22 @@ class BulkServiceRequest(models.Model):
 
     class Status(models.TextChoices):
         REQUESTED = 'requested', 'Requested'
+        PROCESSING = 'processing', 'Processing'
+        AWAITING_APPROVAL = 'awaiting_approval', 'Awaiting approval'
         CLAIMED = 'claimed', 'Claimed by a society'
-        ASSIGNED = 'assigned', 'Workers assigned'
+        ASSIGNED = 'assigned', 'Assigned'
+        ACCEPTED = 'accepted', 'Accepted'
+        WORK_STARTED = 'work_started', 'Work started'
         IN_PROGRESS = 'in_progress', 'In progress'
-        COMPLETED = 'completed', 'Completed'
+        CUSTOMER_CONFIRMED = 'customer_confirmed', 'Customer confirmed'
+        PAYMENT_SETTLED = 'payment_settled', 'Payment settled'
+        WORK_COMPLETED = 'work_completed', 'Work completed'
+        RATED = 'rated', 'Rated'
         CANCELLED = 'cancelled', 'Cancelled'
+        REJECTED = 'rejected', 'Rejected'
 
     institution = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                                     related_name='bulk_requests')
+                                    related_name='bulk_requests')
     service = models.ForeignKey('catalog.Service', on_delete=models.PROTECT, related_name='bulk_requests')
 
     workers_required = models.PositiveIntegerField(default=1)
@@ -197,7 +207,7 @@ class BulkServiceRequest(models.Model):
     pincode = models.CharField(max_length=10, blank=True)
     instructions = models.TextField(blank=True)
 
-    status = models.CharField(max_length=15, choices=Status.choices, default=Status.REQUESTED)
+    status = models.CharField(max_length=25, choices=Status.choices, default=Status.REQUESTED)
 
     # Snapshot pricing at request time, same convention as Booking.
     visit_charge = models.DecimalField(max_digits=8, decimal_places=2)
@@ -216,11 +226,43 @@ class BulkServiceRequest(models.Model):
     def __str__(self):
         return f"Bulk request #{self.id}: {self.workers_required} × {self.service.name}"
 
+    STATUS_FLOW = [
+        Status.REQUESTED, Status.ASSIGNED, Status.PAYMENT_SETTLED, Status.WORK_COMPLETED, Status.RATED,
+    ]
+
     @property
     def total_amount(self):
         """Same fixed-pricing convention as an individual Booking:
-        visit charge (once) + labour charge × workers × days."""
-        return self.visit_charge + (self.labour_charge * self.workers_required * self.duration_days)
+        visit charge (once) + labour charge × workers × days.
+        When awaiting approval or in progress, we bill for actual assigned workers."""
+        worker_count = self.workers_required
+        if self.status in (self.Status.AWAITING_APPROVAL, self.Status.WORK_STARTED, self.Status.WORK_COMPLETED):
+            worker_count = self.workers_assigned_count or self.workers_required
+
+        return self.visit_charge + (self.labour_charge * worker_count * self.duration_days)
+
+    def next_status(self):
+        try:
+            idx = self.STATUS_FLOW.index(self.status)
+        except ValueError:
+            return None
+        if idx + 1 < len(self.STATUS_FLOW):
+            return self.STATUS_FLOW[idx + 1]
+        return None
+
+    def advance_status(self):
+        nxt = self.next_status()
+        if nxt:
+            self.status = nxt
+            self.save(update_fields=['status', 'updated_at'])
+        return self.status
+
+    def progress_percent(self):
+        try:
+            idx = self.STATUS_FLOW.index(self.status)
+            return round((idx + 1) / len(self.STATUS_FLOW) * 100)
+        except ValueError:
+            return 0
 
     @property
     def workers_assigned_count(self):

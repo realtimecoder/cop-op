@@ -56,7 +56,6 @@ class RegistrationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Public self-registration is limited to customer / builder / worker.
         self.fields['role'].choices = [
             (User.Role.CUSTOMER, 'Customer'),
             (User.Role.BUILDER, 'Builder / Institutional Customer'),
@@ -65,6 +64,41 @@ class RegistrationForm(forms.ModelForm):
         from django.conf import settings
         self.fields['preferred_language'].widget = forms.Select(choices=settings.LANGUAGES,
                                                                   attrs={'class': 'input-field'})
+
+
+class WorkerRegistrationForm(forms.Form):
+    """Specialized form for Worker profile completion, including categories and documents."""
+    first_name = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'First name'}))
+    last_name = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Last name'}))
+    address = forms.CharField(max_length=255, widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Address'}))
+    city = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'City'}))
+    pincode = forms.CharField(max_length=10, widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'PIN code'}))
+    preferred_language = forms.ChoiceField(
+        choices=[], # Populated in __init__
+        widget=forms.Select(attrs={'class': 'input-field'})
+    )
+    categories = forms.ModelMultipleChoiceField(
+        queryset=apps.get_model('catalog', 'ServiceCategory').objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        label="Services you provide"
+    )
+    skill_grade = forms.ChoiceField(
+        choices=apps.get_model('workers', 'WorkerProfile').SkillGrade.choices,
+        widget=forms.Select(attrs={'class': 'input-field'}),
+        label="Skill Grade"
+    )
+    years_experience = forms.IntegerField(
+        min_value=0,
+        widget=forms.NumberInput(attrs={'class': 'input-field', 'placeholder': '0'}),
+        label="Years of Experience"
+    )
+    certificate = forms.FileField(required=True, widget=forms.FileInput(attrs={'class': 'input-file'}))
+    address_proof = forms.FileField(required=True, widget=forms.FileInput(attrs={'class': 'input-file'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from django.conf import settings
+        self.fields['preferred_language'].choices = settings.LANGUAGES
 
 
 class ProfileUpdateForm(forms.ModelForm):

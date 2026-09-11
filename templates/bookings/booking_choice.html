@@ -12,10 +12,10 @@
     <form method="post" class="grid grid-2 gap-4">
       {% csrf_token %}
 
-      <div class="card choice-card {% if request.POST.choice == 'rapid' %}selected{% endif %}" onclick="selectCard(this)">
+      <div class="card choice-card {% if request.POST.choice == 'rapid' %}selected{% endif %}" data-card="rapid" onclick="selectCard(this)">
         <input type="radio" name="choice" value="rapid" id="choice-rapid" {% if request.POST.choice == 'rapid' %}checked{% endif %} style="display:none;">
         <div class="selected-indicator">
-          <svg style="width:20px;height:20px;color:var(--teal);"><use href="#icon-check"/></svg>
+          <svg style="width:20px;height:20px;color:var(--white);"><use href="#icon-check"/></svg>
         </div>
         <div class="text-center" style="padding: 24px;">
           <div class="icon-circle" style="margin: 0 auto 16px; background: var(--teal-tint); color: var(--teal);">
@@ -26,10 +26,10 @@
         </div>
       </div>
 
-      <div class="card choice-card {% if request.POST.choice == 'manual' %}selected{% endif %}" onclick="selectCard(this)">
+      <div class="card choice-card {% if request.POST.choice == 'manual' %}selected{% endif %}" data-card="verified" onclick="selectCard(this)">
         <input type="radio" name="choice" value="manual" id="choice-manual" {% if request.POST.choice == 'manual' %}checked{% endif %} style="display:none;">
         <div class="selected-indicator">
-          <svg style="width:20px;height:20px;color:var(--teal);"><use href="#icon-check"/></svg>
+          <svg style="width:20px;height:20px;color:var(--white);"><use href="#icon-check"/></svg>
         </div>
         <div class="text-center" style="padding: 24px;">
           <div class="icon-circle" style="margin: 0 auto 16px; background: var(--bg-muted); color: var(--thread);">
@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-block" style="grid-column: span 2; margin-top: 24px;">
+      <button type="submit" id="continue-btn" class="btn btn-primary btn-block" style="grid-column: span 2; margin-top: 24px;">
         {% trans "Continue" %} <svg><use href="#icon-arrow-right"/></svg>
       </button>
     </form>
@@ -61,14 +61,14 @@
     cursor: pointer;
     background: var(--paper);
   }
-  .choice-card:hover {
+  .choice-card:hover:not(.card-blocked) {
     transform: translateY(-4px);
     border-color: var(--teal);
   }
 
   .selected-indicator {
     position: absolute; top: 12px; right: 12px;
-    width: 24px; height: 24px; background: var(--thread-red);
+    width: 24px; height: 24px; background: var(--teal);
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
     opacity: 0; transform: scale(0); transition: all 0.2s ease;
     pointer-events: none; z-index: 2;
@@ -76,12 +76,18 @@
   .selected-indicator svg { color: var(--white) !important; width: 14px; height: 14px; }
 
   .choice-card.selected {
-    border-color: var(--thread-red);
-    box-shadow: 0 0 0 1px var(--thread-red), 0 4px 12px rgba(168, 65, 47, 0.2);
+    border-color: var(--teal);
+    box-shadow: 0 0 0 1px var(--teal), 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1;
   }
   .choice-card.selected .selected-indicator {
     opacity: 1; transform: scale(1);
+  }
+  .choice-card.card-blocked {
+    opacity: 0.45;
+    filter: grayscale(80%);
+    pointer-events: none;
+    cursor: not-allowed;
   }
   .icon-circle {
     width: 64px; height: 64px; border-radius: 50%;
@@ -93,17 +99,38 @@
 {% block extra_js %}
 <script>
   function selectCard(card) {
-    // 1. Check the radio input inside the card
+    const cards = document.querySelectorAll('.choice-card');
+    const continueBtn = document.getElementById('continue-btn');
     const input = card.querySelector('input[type="radio"]');
+
     if (input) input.checked = true;
 
-    // 2. Remove 'selected' class from all choice cards
-    document.querySelectorAll('.choice-card').forEach(c => {
-      c.classList.remove('selected');
+    cards.forEach(c => {
+      if (c === card) {
+        c.classList.add('selected');
+        c.classList.remove('card-blocked');
+      } else {
+        c.classList.add('card-blocked');
+        c.classList.remove('selected');
+      }
     });
 
-    // 3. Add 'selected' class to the clicked card
-    card.classList.add('selected');
+    if (continueBtn) continueBtn.disabled = false;
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.choice-card');
+    const continueBtn = document.getElementById('continue-btn');
+
+    // Handle initial state
+    const selectedCard = document.querySelector('.choice-card.selected');
+    if (selectedCard) {
+      const otherCard = Array.from(cards).find(c => c !== selectedCard);
+      if (otherCard) otherCard.classList.add('card-blocked');
+      if (continueBtn) continueBtn.disabled = false;
+    } else if (continueBtn) {
+      continueBtn.disabled = true;
+    }
+  });
 </script>
 {% endblock %}

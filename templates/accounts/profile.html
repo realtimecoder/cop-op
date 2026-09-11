@@ -30,13 +30,53 @@
             {% for error in form.last_name.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
           </div>
         </div>
-        <div class="form-group"><label>{% trans "Address" %}</label>{{ form.address }}
+        <div class="form-group">
+          <label>{% trans "Address" %}</label>
+          <div class="flex gap-2">
+            {{ form.address }}
+            <button type="button" class="btn btn-outline btn-sm" onclick="updateCurrentLocation()">
+              <svg style="width:14px; height:14px; vertical-align:middle;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+              {% trans "Use Current Location" %}
+            </button>
+          </div>
           {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
         </div>
         <div class="grid grid-2">
           <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
           <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
         </div>
+        <script>
+        function updateCurrentLocation() {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              const lat = position.coords.latitude;
+              const lng = position.coords.longitude;
+
+              fetch("{% url 'accounts:update_location' %}", {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `lat=${lat}&lng=${lng}`
+              })
+              .then(response => {
+                if (response.ok) {
+                  alert('Location updated successfully!');
+                  location.reload();
+                } else {
+                  alert('Failed to update location on server.');
+                }
+              })
+              .catch(error => alert('Error updating location: ' + error));
+            }, function(error) {
+              alert('Unable to retrieve your location. Please enter your address manually.');
+            });
+          } else {
+            alert('Geolocation is not supported by your browser.');
+          }
+        }
+        </script>
         <div class="form-group"><label>{% trans "Emergency contact" %}</label>{{ form.emergency_contact }}</div>
         <div class="form-group"><label>{% trans "Preferred language" %}</label>{{ form.preferred_language }}</div>
         <div class="form-group">

@@ -11,6 +11,17 @@
           <span class="status-pill">{{ bulk.get_status_display }}</span>
         </div>
 
+        {% if status_steps %}
+        <div class="pipeline-tracker mt-4">
+          {% for step in status_steps %}
+          <div class="pipeline-step {% if step.done %}done{% elif step.current %}current{% endif %}">
+            <div class="step-dot"></div>
+            <span class="step-label">{{ step.label }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="table-wrap mt-3">
           <table class="data-table">
             <tbody>
@@ -27,34 +38,58 @@
         <h3 class="mt-4">{% trans "Assigned workers" %} ({{ assignments.count }}/{{ bulk.workers_required }})</h3>
         <div class="table-wrap">
           <table class="data-table">
-            <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Status" %}</th><th>{% trans "Payout" %}</th></tr></thead>
+            <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Society / Federation" %}</th><th>{% trans "Status" %}</th><th>{% trans "Payout" %}</th></tr></thead>
             <tbody>
               {% for a in assignments %}
-              <tr>
-                <td>{{ a.worker.user.get_full_name|default:a.worker.user.phone_number }}</td>
+              <tr style="vertical-align: middle;">
+                <td>
+                  <a href="{% url 'dashboard:worker_detail' a.worker.id %}" class="font-bold hover:underline" target="_blank">
+                    {{ a.worker.user.get_full_name|default:a.worker.user.phone_number }}
+                  </a>
+                </td>
+                <td>
+                  <div class="text-xs">
+                    {% if a.worker.society %}
+                      {{ a.worker.society.name }}{% if a.worker.society.federation %} ({{ a.worker.society.federation.name }}){% endif %}
+                    {% else %}
+                      <span class="muted">{% trans "Independent" %}</span>
+                    {% endif %}
+                  </div>
+                </td>
                 <td>{% if a.is_completed %}<span class="badge badge-verified">{% trans "Completed" %}</span>{% else %}<span class="badge badge-warning">{% trans "In progress" %}</span>{% endif %}</td>
                 <td style="font-family:var(--font-mono)">{% if a.payout_amount %}₹{{ a.payout_amount }}{% else %}—{% endif %}</td>
               </tr>
-              {% empty %}<tr><td colspan="3" class="muted">{% trans "No workers assigned yet." %}</td></tr>{% endfor %}
+              {% empty %}<tr><td colspan="4" class="muted">{% trans "No workers assigned yet." %}</td></tr>{% endfor %}
             </tbody>
           </table>
         </div>
 
         <div class="flex gap-1 mt-3" style="flex-wrap:wrap;">
           {% if is_institution %}
+            {% if bulk.status == 'requested' %}
+            <a href="{% url 'bookings:rapid_bulk_book' bulk.id %}" class="btn btn-accent btn-sm">{% trans "Rapid Order (Auto-Book)" %}</a>
+            {% endif %}
+            {% if bulk.status == 'awaiting_approval' %}
+            <form method="post" action="{% url 'bookings:approve_bulk_fulfillment' bulk.id %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Accept partial fulfillment" %}</button></form>
+            <form method="post" action="{% url 'bookings:reject_bulk_fulfillment' bulk.id %}">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Reject" %}</button></form>
+            {% endif %}
             {% if bulk.status == 'requested' or bulk.status == 'claimed' %}
             <form method="post" action="{% url 'bookings:cancel_bulk_request' bulk.id %}">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Cancel request" %}</button></form>
             {% endif %}
-            {% if bulk.status == 'in_progress' %}
+            {% if bulk.status == 'payment_settled' %}
             <form method="post" action="{% url 'bookings:confirm_bulk_completion' bulk.id %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Confirm work is done" %}</button></form>
             {% endif %}
+            {% if bulk.status == 'assigned' %}
+            <a href="{% url 'bookings:make_bulk_payment' bulk.id %}" class="btn btn-primary btn-sm">{% trans "Pay Now" %}</a>
+            {% endif %}
+            {% if bulk.status == 'work_completed' %}
+            <a href="{% url 'bookings:submit_bulk_review' bulk.id %}" class="btn btn-accent btn-sm">{% trans "Rate Service" %}</a>
+            {% endif %}
+            <a href="{% url 'bookings:file_complaint_bulk' bulk_request_id=bulk.id %}" class="btn btn-outline btn-sm">{% trans "Raise Complaint" %}</a>
           {% endif %}
           {% if is_assigned_society_operator %}
             {% if bulk.status == 'claimed' or bulk.status == 'assigned' %}
             <a href="{% url 'bookings:assign_bulk_workers' bulk.id %}" class="btn btn-primary btn-sm">{% trans "Assign / manage workers" %}</a>
-            {% endif %}
-            {% if bulk.status == 'assigned' and bulk.is_fully_staffed %}
-            <form method="post" action="{% url 'bookings:start_bulk_work' bulk.id %}">{% csrf_token %}<button class="btn btn-accent btn-sm" type="submit">{% trans "Mark as in progress" %}</button></form>
             {% endif %}
           {% endif %}
         </div>
