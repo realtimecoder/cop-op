@@ -114,7 +114,11 @@ def get_distances(origin_lat, origin_lng, destinations):
     for every destination Google could resolve. Silently skips any it
     couldn't (e.g. a worker with no saved location).
     """
-    if not is_configured() or not destinations:
+    if not is_configured():
+        logger.error("DISTANCE API ERROR: Google Maps API Key is missing from settings.")
+        return {}
+    if not destinations:
+        logger.error("DISTANCE API ERROR: No workers have valid latitude/longitude coordinates.")
         return {}
 
     dest_str = "|".join(f"{lat},{lng}" for _, lat, lng in destinations)
@@ -131,21 +135,23 @@ def get_distances(origin_lat, origin_lng, destinations):
         response.raise_for_status()
         data = response.json()
     except (requests.RequestException, ValueError) as exc:
-        logger.warning("Google Distance Matrix request failed: %s", exc)
+        logger.error("DISTANCE API ERROR: Request failed: %s", exc)
         return {}
 
     if data.get("status") != "OK":
-        logger.warning("Google Distance Matrix returned status=%s", data.get("status"))
+        logger.error("DISTANCE API ERROR: Google Distance Matrix returned status=%s", data.get("status"))
         return {}
 
     results = {}
     try:
         elements = data["rows"][0]["elements"]
     except (KeyError, IndexError):
+        logger.error("DISTANCE API ERROR: Unexpected response structure from Google API.")
         return {}
 
     for (worker_id, _lat, _lng), element in zip(destinations, elements):
         if element.get("status") != "OK":
+            logger.warning("DISTANCE API ERROR: Element status for worker %s is %s", worker_id, element.get("status"))
             continue
         results[worker_id] = {
             "distance_km": round(element["distance"]["value"] / 1000, 1),
