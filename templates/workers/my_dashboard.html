@@ -15,6 +15,11 @@
       {% trans "Customers can only see and book verified workers. Upload your documents and wait for your cooperative society to verify your profile." %}
       <a href="{% url 'workers:documents' %}" style="text-decoration:underline;">{% trans "Upload documents" %}</a>
     </div>
+    {% elif not profile.society %}
+    <div class="alert alert-info" style="position:static;margin-bottom:20px;">
+      <b>{% trans "Registration incomplete." %}</b>
+      {% trans "You are verified, but not yet completely registered. To start receiving work, you must join a cooperative society. Please wait for an invitation or contact a society operator." %}
+    </div>
     {% endif %}
 
     <div class="grid grid-4">
