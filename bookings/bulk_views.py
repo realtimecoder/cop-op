@@ -28,6 +28,18 @@ def _is_society_operator(user):
     return user.is_authenticated and (user.role == User.Role.SOCIETY or user.is_superuser)
 
 
+def _notify_bulk_workers(bulk):
+    """Sends notification to all workers assigned to a bulk request."""
+    assignments = bulk.assignments.all()
+    for assignment in assignments:
+        worker_user = assignment.worker.user
+        Notification.objects.create(
+            user=worker_user,
+            message=f"Bulk Request #{bulk.id} for {bulk.service.name} has been confirmed. Address: {bulk.address}. Please coordinate with your society operator.",
+            link=f"/bookings/bulk/{bulk.id}/"
+        )
+
+
 @login_required
 @user_passes_test(_is_institution, login_url='core:home')
 def create_bulk_request(request):
@@ -173,6 +185,7 @@ def assign_bulk_workers(request, request_id):
                 bulk.status = BulkServiceRequest.Status.AWAITING_APPROVAL
             else:
                 bulk.status = BulkServiceRequest.Status.ASSIGNED
+                _notify_bulk_workers(bulk)
             bulk.save(update_fields=['status'])
         else:
             bulk.status = BulkServiceRequest.Status.CLAIMED
@@ -251,6 +264,7 @@ def rapid_bulk_book(request, request_id):
         bulk.save(update_fields=['assigned_society'])
 
     bulk.status = BulkServiceRequest.Status.ASSIGNED
+    _notify_bulk_workers(bulk)
     bulk.save(update_fields=['status'])
     messages.success(request, f"Rapid Book successful! {count} workers have been assigned. They will be notified to accept.")
     return redirect('bookings:bulk_request_detail', request_id=request_id)
@@ -274,6 +288,7 @@ def approve_bulk_fulfillment(request, request_id):
             link=f"/bookings/bulk/{request_id}/"
         )
 
+    _notify_bulk_workers(bulk)
     messages.success(request, "Partial fulfillment accepted. Workers assigned.")
     return redirect('bookings:bulk_request_detail', request_id=request_id)
 
