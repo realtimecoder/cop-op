@@ -31,4 +31,5 @@ urlpatterns = [
     path('bulk/<int:request_id>/claim/', bulk_views.claim_bulk_request, name='claim_bulk_request'),
     path('bulk/<int:request_id>/assign/', bulk_views.assign_bulk_workers, name='assign_bulk_workers'),
     path('bulk/<int:request_id>/start/', bulk_views.start_bulk_work, name='start_bulk_work'),
+    path('bulk/<int:request_id>/auto-book/', bulk_views.auto_bulk_book, name='auto_bulk_book'),
 ]

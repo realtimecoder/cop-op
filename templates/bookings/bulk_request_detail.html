@@ -42,6 +42,9 @@
 
         <div class="flex gap-1 mt-3" style="flex-wrap:wrap;">
           {% if is_institution %}
+            {% if bulk.status == 'requested' %}
+            <form method="post" action="{% url 'bookings:auto_bulk_book' bulk.id %}" style="display:inline;">{% csrf_token %}<button class="btn btn-accent btn-sm" type="submit">{% trans "Auto Book" %}</button></form>
+            {% endif %}
             {% if bulk.status == 'requested' or bulk.status == 'claimed' %}
             <form method="post" action="{% url 'bookings:cancel_bulk_request' bulk.id %}">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Cancel request" %}</button></form>
             {% endif %}
