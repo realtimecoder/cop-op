@@ -1,6 +1,9 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}{% trans "New bulk service request" %} — Co-opSeva{% endblock %}
+{% block extra_head %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places"></script>
+{% endblock %}
 {% block content %}
 <section class="section">
   <div class="container">
@@ -8,25 +11,65 @@
       <div class="category-icon" style="margin-bottom:14px;"><svg><use href="#icon-workers"/></svg></div>
       <h1 style="font-size:1.4rem;">{% trans "New bulk service request" %}</h1>
       <p class="muted">{% trans "Request multiple workers for a project. A cooperative society will claim your request and assign its own verified workers to it." %}</p>
+
+      {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+      {% endif %}
+
       <form method="post" novalidate>
         {% csrf_token %}
-        <div class="form-group"><label>{% trans "Service" %}</label>{{ form.service }}</div>
-        <div class="grid grid-2">
-          <div class="form-group"><label>{% trans "Number of workers required" %}</label>{{ form.workers_required }}</div>
-          <div class="form-group"><label>{% trans "Duration (days)" %}</label>{{ form.duration_days }}</div>
+        <div class="form-group">
+          <label>{% trans "Service" %}</label>{{ form.service }}
+          {% for error in form.service.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
         </div>
-        <div class="form-group"><label>{% trans "Start date" %}</label>{{ form.start_date }}
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>{% trans "Number of workers required" %}</label>{{ form.workers_required }}
+            {% for error in form.workers_required.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label>{% trans "Duration (days" %}</label>{{ form.duration_days }}
+            {% for error in form.duration_days.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{% trans "Start date" %}</label>{{ form.start_date }}
           {% for error in form.start_date.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
         </div>
-        <div class="form-group"><label>{% trans "Site address" %}</label>{{ form.address }}</div>
-        <div class="grid grid-2">
-          <div class="form-group"><label>{% trans "City" %}</label>{{ form.city }}</div>
-          <div class="form-group"><label>{% trans "PIN code" %}</label>{{ form.pincode }}</div>
+        <div class="form-group">
+          <label>{% trans "Site address" %}</label>{{ form.address }}
+          {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
         </div>
-        <div class="form-group"><label>{% trans "Instructions (optional)" %}</label>{{ form.instructions }}</div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>{% trans "City" %}</label>{{ form.city }}
+            {% for error in form.city.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label>{% trans "PIN code" %}</label>{{ form.pincode }}
+            {% for error in form.pincode.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{% trans "Instructions (optional)" %}</label>{{ form.instructions }}
+          {% for error in form.instructions.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
+        </div>
         <button type="submit" class="btn btn-primary btn-block">{% trans "Submit request" %}</button>
       </form>
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/address-autocomplete.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  initAddressAutocomplete('id_address', {
+    address: 'id_address',
+    city: 'id_city',
+    pincode: 'id_pincode'
+  });
+});
+</script>
 {% endblock %}
