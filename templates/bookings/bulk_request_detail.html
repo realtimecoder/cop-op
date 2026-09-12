@@ -35,8 +35,10 @@
                 <td>{% if a.is_completed %}<span class="badge badge-verified">{% trans "Completed" %}</span>{% else %}<span class="badge badge-warning">{% trans "In progress" %}</span>{% endif %}</td>
                 <td style="font-family:var(--font-mono)">{% if a.payout_amount %}₹{{ a.payout_amount }}{% else %}—{% endif %}</td>
                 <td class="text-right">
-                  {% if is_assigned_worker and a.worker.user == request.user and not a.is_completed and bulk.status == 'in_progress' %}
-                  <form method="post" action="{% url 'bookings:mark_bulk_assignment_complete' bulk.id a.id %}" style="display:inline;">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% trans "Mark Complete" %}</button></form>
+                  {% if is_assigned_worker and a.worker.user == request.user and not a.is_completed %}
+                    {% if bulk.status == 'in_progress' or bulk.status == 'assigned' %}
+                      <form method="post" action="{% url 'bookings:mark_bulk_assignment_complete' bulk.id a.id %}" style="display:inline;">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% trans "Mark Complete" %}</button></form>
+                    {% endif %}
                   {% endif %}
                 </td>
               </tr>
@@ -44,6 +46,13 @@
             </tbody>
           </table>
         </div>
+
+        {% if is_assigned_worker and bulk.status == 'assigned' %}
+        <div class="alert alert-info mt-3" style="padding:12px; font-size:0.85rem;">
+          <svg style="width:14px;height:14px;margin-right:6px;vertical-align:middle;" class="icon"><use href="#icon-info"/></svg>
+          {% trans "The society admin has assigned you to this request. You can mark your work as complete once you finish." %}
+        </div>
+        {% endif %}
 
         <div class="flex gap-1 mt-3" style="flex-wrap:wrap;">
           {% if is_institution %}
