@@ -12,8 +12,8 @@
     <form method="post" class="grid grid-2 gap-4">
       {% csrf_token %}
 
-      <div class="card choice-card {% if request.POST.choice == 'auto' %}selected{% endif %}" onclick="selectCard(this)">
-        <input type="radio" name="choice" value="auto" id="choice-auto" {% if request.POST.choice == 'auto' %}checked{% endif %} style="display:none;">
+      <div class="card choice-card {% if request.POST.choice == 'rapid' %}selected{% endif %}" onclick="selectCard(this)">
+        <input type="radio" name="choice" value="rapid" id="choice-auto" {% if request.POST.choice == 'rapid' %}checked{% endif %} style="display:none;">
         <div class="selected-indicator">
           <svg style="width:20px;height:20px;color:var(--teal);"><use href="#icon-check"/></svg>
         </div>

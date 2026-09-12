@@ -1,6 +1,9 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% block title %}{% trans "New bulk service request" %} — Co-opSeva{% endblock %}
+{% block extra_head %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places"></script>
+{% endblock %}
 {% block content %}
 <section class="section">
   <div class="container">
@@ -34,16 +37,19 @@
           {% for error in form.start_date.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
         </div>
         <div class="form-group">
-          <label>{% trans "Site address" %}</label>{{ form.address }}
+          <label>{% trans "Site address" %}</label>
+          <input type="text" name="address" id="id_address" class="input-field" value="{{ form.address.value|default:'' }}" placeholder="Full service address">
           {% for error in form.address.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
         </div>
         <div class="grid grid-2">
           <div class="form-group">
-            <label>{% trans "City" %}</label>{{ form.city }}
+            <label>{% trans "City" %}</label>
+            <input type="text" name="city" id="id_city" class="input-field" value="{{ form.city.value|default:'' }}">
             {% for error in form.city.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
           </div>
           <div class="form-group">
-            <label>{% trans "PIN code" %}</label>{{ form.pincode }}
+            <label>{% trans "PIN code" %}</label>
+            <input type="text" name="pincode" id="id_pincode" class="input-field" value="{{ form.pincode.value|default:'' }}">
             {% for error in form.pincode.errors %}<p class="error-text">{{ error }}</p>{% endfor %}
           </div>
         </div>
@@ -56,4 +62,17 @@
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/address-autocomplete.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  initAddressAutocomplete('id_address', {
+    address: 'id_address',
+    city: 'id_city',
+    pincode: 'id_pincode'
+  });
+});
+</script>
 {% endblock %}

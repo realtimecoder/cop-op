@@ -50,12 +50,15 @@
         {% if is_assigned_worker and bulk.status == 'assigned' %}
         <div class="alert alert-info mt-3" style="padding:12px; font-size:0.85rem;">
           <svg style="width:14px;height:14px;margin-right:6px;vertical-align:middle;" class="icon"><use href="#icon-info"/></svg>
-          {% trans "The society admin has assigned you to this request. You can mark your work as complete once you finish." %}
+          {% trans "You have been assigned to this request. You can mark your work as complete once you finish." %}
         </div>
         {% endif %}
 
         <div class="flex gap-1 mt-3" style="flex-wrap:wrap;">
           {% if is_institution %}
+            {% if bulk.status == 'requested' %}
+            <a href="{% url 'bookings:rapid_bulk_book' bulk.id %}" class="btn btn-accent btn-sm">{% trans "Auto Book (Fast Match)" %}</a>
+            {% endif %}
             {% if bulk.status == 'requested' or bulk.status == 'claimed' %}
             <form method="post" action="{% url 'bookings:cancel_bulk_request' bulk.id %}">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Cancel request" %}</button></form>
             {% endif %}

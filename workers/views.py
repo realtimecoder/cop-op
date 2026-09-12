@@ -13,7 +13,8 @@ from .models import (
 from .forms import (WorkerOnboardingForm, WorkerDocumentForm, WorkerProfileEditForm,
                      WorkerCategoryChangeRequestForm, WorkerBlockedDateForm)
 from .geo import annotate_workers_with_distance, filter_workers_by_distance, is_configured as maps_configured
-from bookings.models import BulkAssignment, BulkServiceRequest
+from bookings.models import BulkAssignment, BulkServiceRequest, BookingRequest
+from bookings.services import is_worker_available
 
 def society_list_for_workers(request):
     """Lists all available societies for a verified worker to join."""
@@ -92,6 +93,22 @@ def worker_list_for_service(request, service_id, request_id=None):
     workers = [o.worker for o in offerings]
     if request.user.is_authenticated:
         workers = [w for w in workers if w.user_id != request.user.id]
+
+    # Slot-based availability filter: If request_id is provided, we know the desired slot
+    if request_id:
+        try:
+            booking_req = BookingRequest.objects.get(id=request_id)
+            workers = [
+                w for w in workers
+                if is_worker_available(
+                    w,
+                    booking_req.scheduled_date,
+                    start_time=booking_req.scheduled_time,
+                    hours_booked=booking_req.hours_booked
+                )
+            ]
+        except BookingRequest.DoesNotExist:
+            pass
 
     customer_lat = request.GET.get('lat')
     customer_lng = request.GET.get('lng')

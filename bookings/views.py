@@ -13,28 +13,26 @@ from payments import razorpay_client
 from reviews.models import Review
 from .models import Booking, Complaint, BookingRequest
 from .forms import BookingForm, ComplaintForm, BookingRequestForm
-from .services import find_best_worker
+from .services import find_best_worker, is_worker_available
 from workers.geo import geocode_address, get_distances
 
-
-def _worker_occupied_dates(worker):
-    """Dates the worker cannot be booked on: manually blocked days, plus
-    any day already carrying an active (non-cancelled/rejected) booking.
-    Kept simple for the MVP — one confirmed job per worker per day."""
-    blocked = set(worker.blocked_dates.values_list('date', flat=True))
-    booked = set(
-        Booking.objects.filter(worker=worker, status__in=Booking.ACTIVE_STATUSES)
-        .values_list('scheduled_date', flat=True)
-    )
-    return blocked | booked
 
 
 def worker_availability_json(request, worker_id):
     """JSON endpoint the booking-date picker calls to grey out dates the
     worker is already committed on (FR — worker availability check)."""
     worker = get_object_or_404(WorkerProfile, id=worker_id)
-    dates = sorted(_worker_occupied_dates(worker))
-    return JsonResponse({'blocked_dates': [d.isoformat() for d in dates]})
+
+    # Collect all occupied dates for the worker
+    # We check for the next 365 days (rough estimate for calendar view)
+    today = timezone.localdate()
+    occupied_dates = []
+    for i in range(365):
+        check_date = today + timedelta(days=i)
+        if not is_worker_available(worker, check_date):
+            occupied_dates.append(check_date)
+
+    return JsonResponse({'blocked_dates': [d.isoformat() for d in occupied_dates]})
 
 
 @login_required
@@ -84,7 +82,14 @@ def booking_choice(request, request_id):
             # Rapid Book: Find best worker and finalize booking immediately
             customer_lat = request.user.latitude
             customer_lng = request.user.longitude
-            best_worker = find_best_worker(service, customer_user=request.user, customer_lat=customer_lat, customer_lng=customer_lng)
+            best_worker = find_best_worker(
+                service,
+                customer_user=request.user,
+                customer_lat=customer_lat,
+                customer_lng=customer_lng,
+                scheduled_date=booking_req.scheduled_date,
+                scheduled_time=booking_req.scheduled_time
+            )
 
             if not best_worker:
                 messages.error(request, "No available workers found for rapid booking. Please select one manually.")
@@ -235,7 +240,14 @@ def create_emergency_booking(request, service_id):
     customer_lat = request.user.latitude
     customer_lng = request.user.longitude
 
-    best_worker = find_best_worker(service, customer_user=request.user, customer_lat=customer_lat, customer_lng=customer_lng)
+    best_worker = find_best_worker(
+        service,
+        customer_user=request.user,
+        customer_lat=customer_lat,
+        customer_lng=customer_lng,
+        scheduled_date=timezone.localdate(),
+        scheduled_time=timezone.localtime().time()
+    )
 
     if not best_worker:
         messages.error(request, "No available workers found for this service right now. Please try a standard booking.")
@@ -312,9 +324,11 @@ def create_booking(request, service_id, worker_id):
         form = BookingForm(request.POST)
         if form.is_valid():
             chosen_date = form.cleaned_data['scheduled_date']
-            if chosen_date in occupied_dates:
-                messages.error(request, "This worker is already booked on the selected date. "
-                                         "Please choose a different date or another worker.")
+            chosen_time = form.cleaned_data.get('scheduled_time')
+            hours = form.cleaned_data.get('hours_booked') or 1
+            if not is_worker_available(worker, chosen_date, start_time=chosen_time, hours_booked=hours):
+                messages.error(request, "This worker is already booked for the selected slot. "
+                                         "Please choose a different date/time or another worker.")
             elif chosen_date < timezone.localdate():
                 messages.error(request, "Please choose a current or future date.")
             else:
@@ -534,6 +548,14 @@ def my_bookings(request):
 def cancel_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, customer=request.user)
     if request.method == 'POST':
+        # Prevent cancellation if the worker has already accepted the booking
+        # Statuses from ACCEPTED onwards are considered committed
+        if booking.status in (Booking.Status.ACCEPTED, Booking.Status.WORKER_ARRIVING,
+                              Booking.Status.ARRIVED, Booking.Status.WORK_STARTED,
+                              Booking.Status.WORK_COMPLETED):
+            messages.error(request, "{% trans 'This booking cannot be cancelled because the worker has already accepted it.' %}")
+            return redirect('bookings:my_bookings')
+
         booking.status = Booking.Status.CANCELLED
         booking.save(update_fields=['status'])
         messages.info(request, "Booking cancelled.")

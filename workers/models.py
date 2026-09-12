@@ -308,32 +308,23 @@ class WorkerProfile(models.Model):
         return self.verification_status == self.VerificationStatus.VERIFIED
 
     def recommended_score(self, distance_km=2.0):
-        """FR-025 Recommended Ranking formula (Updated for Fairness):
-        Score = 0.30*Rating + 0.20*SkillMatch + 0.15*Availability + 0.10*Distance + 0.15*Fairness + 0.10*Reliability
-        Fairness penalizes workers who worked in the last 1-2 days to ensure equitable work distribution."""
-        rating_component = float(self.average_rating) / 5.0
-        skill_map = {'basic': .5, 'skilled': .65, 'advanced': .8, 'expert': .9, 'certified': 1.0}
-        skill_component = skill_map.get(self.skill_grade, .5)
-        availability_component = 1.0 if self.is_available_now else 0.3
+        """Strict Ranking: Based ONLY on Distance and Fairness (Past Bookings)."""
+        # Distance component (50% weight)
         distance_component = max(0.0, 1 - (distance_km / max(self.service_radius_km, 1)))
-        reliability_component = float(self.reliability_score)
 
-        # Fairness component: penalize very recent work (within 2 days)
+        # Fairness component: penalize recent work (50% weight)
         fairness_component = 1.0
         if self.last_worked_date:
             days_since_work = (timezone.localdate() - self.last_worked_date).days
             if days_since_work == 0:
-                fairness_component = 0.1
-            elif days_since_work == 1:
                 fairness_component = 0.4
-            elif days_since_work == 2:
+            elif days_since_work == 1:
                 fairness_component = 0.7
+            elif days_since_work == 2:
+                fairness_component = 0.9
 
-        score = (0.15 * rating_component + 0.20 * skill_component + 0.15 * availability_component
-                 + 0.25 * distance_component + 0.15 * fairness_component + 0.10 * reliability_component)
+        score = (0.50 * distance_component + 0.50 * fairness_component)
         return round(score * 100, 1)
-
-
 class WorkerDocument(models.Model):
     """FR-009 Document Upload."""
     class DocType(models.TextChoices):

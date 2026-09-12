@@ -13,11 +13,13 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.conf import settings
 
 from accounts.models import User, Notification
+from workers.geo import geocode_address
 from workers.models import WorkerProfile, WorkerServiceOffering
 from .models import BulkServiceRequest, BulkAssignment
 from .bulk_forms import BulkServiceRequestForm
-from .services import find_best_workers
+from .services import find_best_workers, is_worker_available
 from payments.models import Payment, Invoice
+
 from payments import razorpay_client
 
 def _is_institution(user):
@@ -156,6 +158,12 @@ def assign_bulk_workers(request, request_id):
         offerings__service=bulk.service,
     ).distinct().select_related('user')
 
+    # Availability Filter: Only show workers available for the bulk request start date
+    eligible_workers = [
+        w for w in eligible_workers
+        if is_worker_available(w, bulk.start_date, duration_days=bulk.duration_days)
+    ]
+
     if request.method == 'POST':
         selected_ids = request.POST.getlist('worker_ids')
 
@@ -211,27 +219,37 @@ def rapid_bulk_book(request, request_id):
         messages.error(request, "Rapid booking is only available for new requests.")
         return redirect('bookings:bulk_request_detail', request_id=request_id)
 
+    # Use Site Address for distance calculation
+    site_coords = geocode_address(bulk.address, bulk.city, bulk.pincode)
+    if site_coords:
+        lat, lng = site_coords
+    else:
+        lat, lng = request.user.latitude, request.user.longitude
+        messages.warning(request, "Could not geocode site address. Using institution office location for worker matching.")
+
     # 1. Find best candidates using the matching engine
     best_candidates = find_best_workers(
         bulk.service,
-        request.user.latitude,
-        request.user.longitude,
-        limit=bulk.workers_required
+        customer_lat=lat,
+        customer_lng=lng,
+        limit=bulk.workers_required,
+        scheduled_date=bulk.start_date
     )
 
     if not best_candidates:
         messages.error(request, "No available workers found for this service.")
         return redirect('bookings:bulk_request_detail', request_id=request_id)
 
+    # CRITICAL FIX: Explicitly sort candidates by score descending to ensure top rank is picked
+    best_candidates.sort(key=lambda x: x[1], reverse=True)
+
     found_workers = [c[0] for c in best_candidates]
     count = len(found_workers)
 
     if count < bulk.workers_required:
-        # Partial Fulfillment: Assign what we found, then wait for approval
         for worker in found_workers:
             BulkAssignment.objects.get_or_create(bulk_request=bulk, worker=worker)
 
-        # Auto-assign the society of the first matched worker
         if found_workers:
             bulk.assigned_society = found_workers[0].society
             bulk.save(update_fields=['assigned_society'])
@@ -239,28 +257,23 @@ def rapid_bulk_book(request, request_id):
         bulk.status = BulkServiceRequest.Status.AWAITING_APPROVAL
         bulk.save(update_fields=['status'])
 
-        messages.warning(request, f"Only {count} of {bulk.workers_required} workers were found. "
+        messages.warning(request, f"Only {count} of {bulk.workers_required} workers were found. " 
                                 f"Updated total: ₹{bulk.total_amount}. Please review and accept/reject.")
         return redirect('bookings:bulk_request_detail', request_id=request_id)
 
-    # Full Fulfillment: Auto-assign and move to assigned (workers must then accept)
+    # Full Fulfillment
     for worker in found_workers:
         BulkAssignment.objects.get_or_create(bulk_request=bulk, worker=worker)
 
-    # Auto-assign the society of the first matched worker
     if found_workers:
         bulk.assigned_society = found_workers[0].society
         bulk.save(update_fields=['assigned_society'])
 
-    bulk.status = BulkServiceRequest.Status.ASSIGNED
+    bulk.status = BulkServiceRequest.Status.IN_PROGRESS
     _notify_bulk_workers(bulk)
     bulk.save(update_fields=['status'])
     messages.success(request, f"Rapid Book successful! {count} workers have been assigned. They will be notified to accept.")
     return redirect('bookings:bulk_request_detail', request_id=request_id)
-
-
-@login_required
-@user_passes_test(_is_institution, login_url='core:home')
 def approve_bulk_fulfillment(request, request_id):
     """Approves partial fulfillment of a bulk request."""
     bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
@@ -476,7 +489,7 @@ def mark_bulk_assignment_complete(request, request_id, assignment_id):
     assignment = get_object_or_404(BulkAssignment, id=assignment_id, worker__user=request.user)
     bulk = assignment.bulk_request
 
-    if bulk.status != BulkServiceRequest.Status.IN_PROGRESS:
+    if bulk.status not in (BulkServiceRequest.Status.ASSIGNED, BulkServiceRequest.Status.IN_PROGRESS):
         messages.error(request, "Work has not started yet or is already completed.")
         return redirect('bookings:bulk_request_detail', request_id=bulk.id)
 
