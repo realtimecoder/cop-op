@@ -70,7 +70,7 @@
             <a href="{% url 'bookings:make_bulk_payment' bulk.id %}" class="btn btn-accent btn-sm">{% trans "Proceed to Payment" %}</a>
             {% endif %}
           {% endif %}
-          {% if is_assigned_society_operator %}
+          {% if is_assigned_society_operator and not bulk.is_auto_booked %}
             {% if bulk.status == 'claimed' or bulk.status == 'assigned' %}
             <a href="{% url 'bookings:assign_bulk_workers' bulk.id %}" class="btn btn-primary btn-sm">{% trans "Assign / manage workers" %}</a>
             {% endif %}

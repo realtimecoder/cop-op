@@ -252,9 +252,10 @@ def rapid_bulk_book(request, request_id):
         bulk.assigned_society = found_workers[0].society
         bulk.save(update_fields=['assigned_society'])
 
-    bulk.status = BulkServiceRequest.Status.ASSIGNED
+    bulk.status = BulkServiceRequest.Status.IN_PROGRESS
+    bulk.is_auto_booked = True
     _notify_bulk_workers(bulk)
-    bulk.save(update_fields=['status'])
+    bulk.save(update_fields=['status', 'is_auto_booked'])
     messages.success(request, f"Rapid Book successful! {count} workers have been assigned. They will be notified to accept.")
     return redirect('bookings:bulk_request_detail', request_id=request_id)
 
@@ -476,7 +477,7 @@ def mark_bulk_assignment_complete(request, request_id, assignment_id):
     assignment = get_object_or_404(BulkAssignment, id=assignment_id, worker__user=request.user)
     bulk = assignment.bulk_request
 
-    if bulk.status != BulkServiceRequest.Status.IN_PROGRESS:
+    if bulk.status not in (BulkServiceRequest.Status.ASSIGNED, BulkServiceRequest.Status.IN_PROGRESS):
         messages.error(request, "Work has not started yet or is already completed.")
         return redirect('bookings:bulk_request_detail', request_id=bulk.id)
 
@@ -484,7 +485,21 @@ def mark_bulk_assignment_complete(request, request_id, assignment_id):
     assignment.completed_at = timezone.now()
     assignment.save()
 
-    messages.success(request, "Your part of the work has been marked as complete.")
+    # Only auto-advance to WORK_COMPLETED if this was an Auto Book (Rapid Book) request
+    if bulk.is_auto_booked and not bulk.assignments.filter(is_completed=False).exists():
+        bulk.status = BulkServiceRequest.Status.WORK_COMPLETED
+        bulk.save(update_fields=['status'])
+
+        # Notify the customer (Institution) that the entire bulk request is done
+        Notification.objects.create(
+            user=bulk.institution,
+            message=f"Bulk Request #{bulk.id} for {bulk.service.name} has been completed. Please verify and confirm the work.",
+            link=f"/bookings/bulk/{bulk.id}/"
+        )
+        messages.info(request, "You were the last worker to finish! The request has been marked as completed for the customer.")
+    else:
+        messages.success(request, "Your part of the work has been marked as complete.")
+
     return redirect('bookings:bulk_request_detail', request_id=bulk.id)
 
 

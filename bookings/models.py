@@ -214,6 +214,8 @@ class BulkServiceRequest(models.Model):
     instructions = models.TextField(blank=True)
 
     status = models.CharField(max_length=25, choices=Status.choices, default=Status.REQUESTED)
+    is_auto_booked = models.BooleanField(default=False, help_text="True if the request was fulfilled via Rapid Book.")
+    is_auto_booked = models.BooleanField(default=False, help_text="True if the request was fulfilled via Rapid Book.")
 
     # Snapshot pricing at request time, same convention as Booking.
     visit_charge = models.DecimalField(max_digits=8, decimal_places=2)
