@@ -13,7 +13,7 @@ from .models import (
 from .forms import (WorkerOnboardingForm, WorkerDocumentForm, WorkerProfileEditForm,
                      WorkerCategoryChangeRequestForm, WorkerBlockedDateForm)
 from .geo import annotate_workers_with_distance, filter_workers_by_distance, is_configured as maps_configured
-
+from bookings.models import BulkAssignment, BulkServiceRequest
 
 def society_list_for_workers(request):
     """Lists all available societies for a verified worker to join."""
@@ -32,7 +32,6 @@ def society_list_for_workers(request):
     })
 
 
-@login_required
 def request_society_join(request, society_id):
     """Allows a worker to request to join a specific society."""
     if request.user.role != 'worker':
@@ -70,7 +69,6 @@ def worker_list_for_service(request, service_id, request_id=None):
     Matrix API and can be sorted by genuine nearest-first order."""
     service = get_object_or_404(Service, id=service_id, is_active=True)
     # Filter: Verified, Available, linked to a society, and offers the specific service
-    # Also exclude the current user if they are a worker, so they cannot book themselves
     filters = {
         'worker__verification_status': WorkerProfile.VerificationStatus.VERIFIED,
         'worker__is_available_now': True,
@@ -216,7 +214,7 @@ def onboarding(request):
             return redirect('workers:documents')
     else:
         form = WorkerOnboardingForm(instance=profile)
-    return render(request, 'workers/onboarding.html', {'form': form})
+    return render(request, 'workers/onboarding.html', {'form': form, 'profile': profile})
 
 
 @login_required
@@ -249,6 +247,11 @@ def my_dashboard(request):
                 .select_related('service', 'customer', 'payment', 'review')
                 .order_by('-created_at')[:30])
 
+    # Fetch bulk assignments for this worker
+    bulk_assignments = (BulkAssignment.objects.filter(worker=profile)
+                        .select_related('bulk_request__service', 'bulk_request__institution')
+                        .order_by('-assigned_at')[:30])
+
     total_income = Payment.objects.filter(
         booking__worker=profile, status=Payment.Status.SUCCESS
     ).aggregate(total=Sum('worker_payout'))['total'] or 0
@@ -262,7 +265,7 @@ def my_dashboard(request):
     ).select_related('society')
 
     return render(request, 'workers/my_dashboard.html', {
-        'profile': profile, 'bookings': bookings, 'total_income': total_income,
+        'profile': profile, 'bookings': bookings, 'bulk_assignments': bulk_assignments, 'total_income': total_income,
         'pending_category_request': pending_category_request,
         'blocked_dates': profile.blocked_dates.filter(date__gte=timezone.localdate()).order_by('date'),
         'pending_invites': pending_invites,
@@ -394,6 +397,7 @@ def worker_insurance(request):
         'profile': profile,
         'insurance': insurance_data,
     })
+
 
 @login_required
 def accept_society_invite(request, invite_id):
