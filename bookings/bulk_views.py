@@ -252,10 +252,10 @@ def rapid_bulk_book(request, request_id):
         bulk.assigned_society = found_workers[0].society
         bulk.save(update_fields=['assigned_society'])
 
-    bulk.status = BulkServiceRequest.Status.ASSIGNED
+    bulk.status = BulkServiceRequest.Status.IN_PROGRESS
     _notify_bulk_workers(bulk)
     bulk.save(update_fields=['status'])
-    messages.success(request, f"Rapid Book successful! {count} workers have been assigned. They will be notified to accept.")
+    messages.success(request, f"Rapid Book successful! {count} workers have been assigned and work has been started. They will be notified to accept.")
     return redirect('bookings:bulk_request_detail', request_id=request_id)
 
 
@@ -267,7 +267,7 @@ def approve_bulk_fulfillment(request, request_id):
     if bulk.status != BulkServiceRequest.Status.AWAITING_APPROVAL:
         return redirect('bookings:bulk_request_detail', request_id=request_id)
 
-    bulk.status = BulkServiceRequest.Status.ASSIGNED
+    bulk.status = BulkServiceRequest.Status.IN_PROGRESS
     bulk.save(update_fields=['status'])
 
     if bulk.assigned_society and bulk.assigned_society.operator:
