@@ -2,6 +2,55 @@
 {% load i18n static %}
 {% block title %}{% trans "Confirm booking" %} — Co-opSeva{% endblock %}
 {% block extra_head %}
+<style>
+  .distance-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+  .distance-modal {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    text-align: center;
+    animation: modalFadeIn 0.3s ease-out;
+  }
+  @keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .distance-modal h3 {
+    margin-top: 0;
+    color: var(--thread-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .distance-modal p {
+    margin-bottom: 24px;
+    line-height: 1.5;
+    color: #444;
+  }
+  .distance-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .distance-modal-actions .btn {
+    flex: 1;
+    padding: 10px;
+    font-weight: 600;
+  }
+</style>
 <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places"></script>
 {% endblock %}
 {% block content %}
@@ -51,10 +100,6 @@
           </div>
           {% endif %}
 
-          <div class="form-group checkbox-row">{{ form.is_emergency }} <label class="mb-0">{% trans "This is an emergency booking" %}</label></div>
-          <div class="form-group checkbox-row">{{ form.is_recurring }} <label class="mb-0">{% trans "Make this a recurring booking" %}</label></div>
-          <div class="form-group" data-recurrence-row style="display:none;"><label>{% trans "Frequency" %}</label>{{ form.recurrence_frequency }}</div>
-
           <button type="submit" class="btn btn-primary btn-block" id="confirm-booking-btn">{% trans "Confirm booking" %}</button>
         </form>
       </div>
@@ -62,7 +107,7 @@
       <div>
         <div class="card worker-card">
           <div class="worker-card-top">
-            <div class="worker-avatar">{{ worker.user.first_name|first|upper|default:"W" }}</div>
+            <div class="worker-avatar">{% if worker.user.first_name %}{{ worker.user.first_name|first|upper }}{% else %}W{% endif %}</div>
             <div><h3 style="margin-bottom:2px;">{{ worker.user.get_full_name }}</h3><span class="badge badge-verified"><svg><use href="#icon-check"/></svg>{% trans "Verified" %}</span></div>
           </div>
           <div class="rating-row"><svg><use href="#icon-star"/></svg>{{ worker.average_rating }}</div>
@@ -81,6 +126,19 @@
     </div>
   </div>
 </section>
+
+<!-- Distance Warning Modal -->
+<div id="distance-modal" class="distance-modal-overlay">
+  <div class="distance-modal">
+    <h3 style="color:var(--thread-red);"><svg style="width:24px;height:24px;"><use href="#icon-alert"/></svg> {% trans "Distance Warning" %}</h3>
+    <p>{% trans "The worker is more than 5km away from your service address. Do you still want to proceed with the booking?" %}</p>
+    <div class="distance-modal-actions">
+      <button type="button" class="btn btn-outline" id="dist-cancel">{% trans "Cancel" %}</button>
+      <button type="button" class="btn btn-accent" id="dist-proceed">{% trans "Proceed" %}</button>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -97,6 +155,38 @@ document.addEventListener('DOMContentLoaded', function () {
   var dateInput = document.getElementById('id_scheduled_date');
   var hint = document.getElementById('date-availability-hint');
   var submitBtn = document.getElementById('confirm-booking-btn');
+
+  // Use form submit event instead of button click for better reliability
+  var bookingForm = document.getElementById('booking-form');
+  var distModal = document.getElementById('distance-modal');
+  var distCancel = document.getElementById('dist-cancel');
+  var distProceed = document.getElementById('dist-proceed');
+
+  if (bookingForm) {
+    bookingForm.addEventListener('submit', function(e) {
+      var dist = {% if worker_distance is not none %}{{ worker_distance }}{% else %}null{% endif %};
+      console.log("Booking distance check:", dist);
+
+      if (dist !== null && dist > 5) {
+        e.preventDefault(); // Stop form submission
+        distModal.style.display = 'flex'; // Show custom popup
+      }
+    });
+  }
+
+  if (distCancel) {
+    distCancel.addEventListener('click', function() {
+      distModal.style.display = 'none';
+    });
+  }
+
+  if (distProceed) {
+    distProceed.addEventListener('click', function() {
+      distModal.style.display = 'none';
+      bookingForm.submit(); // Manually trigger form submission
+    });
+  }
+
   var today = new Date().toISOString().split('T')[0];
   if (dateInput) {
     dateInput.setAttribute('min', today);

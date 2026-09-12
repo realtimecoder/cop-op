@@ -5,10 +5,10 @@
 <section class="section">
   <div class="container">
     <span class="eyebrow">{% trans "Customer history" %}</span>
-    <h1>{{ customer.get_full_name|default:customer.phone_number }}</h1>
+    <h1>{% if customer.get_full_name %}{{ customer.get_full_name }}{% else %}{{ customer.phone_number }}{% endif %}</h1>
     <div class="grid grid-4">
       <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Phone" %}</h3><p class="mb-0">{{ customer.phone_number }}</p></div>
-      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Address" %}</h3><p class="mb-0">{{ customer.address|default:"—" }}, {{ customer.city }}</p></div>
+      <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Address" %}</h3><p class="mb-0">{% if customer.address %}{{ customer.address }}{% else %}—{% endif %}, {{ customer.city }}</p></div>
       <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Total bookings" %}</h3><p style="font-family:var(--font-mono);font-size:1.4rem;font-weight:700;margin:0;">{{ bookings.count }}</p></div>
       <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Total spend" %}</h3><p style="font-family:var(--font-mono);font-size:1.4rem;font-weight:700;color:var(--marigold-deep);margin:0;">₹{{ total_spend }}</p></div>
     </div>
@@ -19,7 +19,7 @@
         <thead><tr><th>{% trans "Service" %}</th><th>{% trans "Worker" %}</th><th>{% trans "Date" %}</th><th>{% trans "Status" %}</th><th>{% trans "Amount" %}</th></tr></thead>
         <tbody>
           {% for b in bookings %}
-          <tr><td>{{ b.service.name }}</td><td>{{ b.worker.user.get_full_name|default:"—" }}</td><td>{{ b.scheduled_date }}</td><td><span class="status-pill">{{ b.get_status_display }}</span></td><td style="font-family:var(--font-mono)">₹{{ b.total_amount }}</td></tr>
+          <tr><td>{{ b.service.name }}</td><td>{% if b.worker.user.get_full_name %}{{ b.worker.user.get_full_name }}{% else %}—{% endif %}</td><td>{{ b.scheduled_date }}</td><td><span class="status-pill">{{ b.get_status_display }}</span></td><td style="font-family:var(--font-mono)">₹{{ b.total_amount }}</td></tr>
           {% empty %}<tr><td colspan="5" class="muted">{% trans "No bookings yet." %}</td></tr>{% endfor %}
         </tbody>
       </table>

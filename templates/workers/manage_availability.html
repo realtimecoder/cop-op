@@ -28,7 +28,7 @@
             <tbody>
               {% for block in upcoming_blocks %}
               <tr>
-                <td>{{ block.date }}</td><td>{{ block.reason|default:"—" }}</td>
+                <td>{{ block.date }}</td><td>{% if block.reason %}{{ block.reason }}{% else %}—{% endif %}</td>
                 <td><form method="post" action="{% url 'workers:unblock_date' block.id %}">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">{% trans "Remove" %}</button></form></td>
               </tr>
               {% empty %}<tr><td colspan="3" class="muted">{% trans "No blocked dates." %}</td></tr>{% endfor %}

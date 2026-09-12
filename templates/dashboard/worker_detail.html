@@ -5,7 +5,7 @@
 <section class="section">
   <div class="container">
     <span class="eyebrow">{% trans "Worker history" %}</span>
-    <h1>{{ worker.user.get_full_name|default:worker.user.phone_number }}</h1>
+    <h1>{% if worker.user.get_full_name %}{{ worker.user.get_full_name }}{% else %}{{ worker.user.phone_number }}{% endif %}</h1>
 
     <div class="grid grid-4">
       <div class="card"><h3 style="font-size:.85rem;color:var(--ink-soft);">{% trans "Status" %}</h3><span class="status-pill">{{ worker.get_verification_status_display }}</span></div>
@@ -18,11 +18,11 @@
       <table class="data-table">
         <tbody>
           <tr><th>{% trans "Phone" %}</th><td>{{ worker.user.phone_number }}</td></tr>
-          <tr><th>{% trans "Address" %}</th><td>{{ worker.user.address|default:"—" }}, {{ worker.user.city }} {{ worker.user.pincode }}</td></tr>
+          <tr><th>{% trans "Address" %}</th><td>{% if worker.user.address %}{{ worker.user.address }}{% else %}—{% endif %}, {{ worker.user.city }} {{ worker.user.pincode }}</td></tr>
           <tr><th>{% trans "Categories" %}</th><td>{% for c in worker.categories.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td></tr>
           <tr><th>{% trans "Skill grade" %}</th><td>{{ worker.get_skill_grade_display }}</td></tr>
           <tr><th>{% trans "Experience" %}</th><td>{{ worker.years_experience }} {% trans "years" %}</td></tr>
-          <tr><th>{% trans "Society" %}</th><td>{{ worker.society|default:"—" }}</td></tr>
+          <tr><th>{% trans "Society" %}</th><td>{% if worker.society %}{{ worker.society }}{% else %}—{% endif %}</td></tr>
           <tr><th>{% trans "Payout %" %}</th><td>{{ worker.payout_percentage }}%</td></tr>
         </tbody>
       </table>
@@ -34,7 +34,7 @@
         <thead><tr><th>{% trans "Service" %}</th><th>{% trans "Customer" %}</th><th>{% trans "Date" %}</th><th>{% trans "Status" %}</th><th>{% trans "Payout" %}</th></tr></thead>
         <tbody>
           {% for b in bookings %}
-          <tr><td>{{ b.service.name }}</td><td>{{ b.customer.get_full_name|default:"—" }}</td><td>{{ b.scheduled_date }}</td><td><span class="status-pill">{{ b.get_status_display }}</span></td>
+          <tr><td>{{ b.service.name }}</td><td>{% if b.customer.get_full_name %}{{ b.customer.get_full_name }}{% else %}—{% endif %}</td><td>{{ b.scheduled_date }}</td><td><span class="status-pill">{{ b.get_status_display }}</span></td>
           <td style="font-family:var(--font-mono)">{% if b.payment %}₹{{ b.payment.worker_payout }}{% else %}—{% endif %}</td></tr>
           {% empty %}<tr><td colspan="5" class="muted">{% trans "No bookings yet." %}</td></tr>{% endfor %}
         </tbody>

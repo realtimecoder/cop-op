@@ -24,7 +24,7 @@
         <tbody id="workerTableBody">
           {% for worker in workers %}
           <tr class="worker-row">
-            <td>{{ worker.user.get_full_name|default:"—" }}</td>
+            <td>{% if worker.user.get_full_name %}{{ worker.user.get_full_name }}{% else %}—{% endif %}</td>
             <td class="phone-col">{{ worker.user.phone_number }}</td>
             <td>{% for c in worker.categories.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
             <td>{{ worker.get_skill_grade_display }}</td>

@@ -1,6 +1,6 @@
 {% load i18n static %}
 <!DOCTYPE html>
-<html lang="{{ CURRENT_LANGUAGE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+<html lang="{% if CURRENT_LANGUAGE %}{{ CURRENT_LANGUAGE }}{% else %}en{% endif %}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -104,13 +104,35 @@
 
     <div class="header-actions">
       {% if user.is_authenticated %}
+        {% if unread_notifications %}
+        <div class="nav-dropdown" style="margin-right:12px;">
+          <button class="dropdown-toggle" style="position:relative; padding:6px;">
+            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="badge" style="position:absolute; top:2px; right:2px; background:var(--thread-red); color:white; font-size:10px; width:14px; height:14px; border-radius:50%; display:flex; align-items:center; justify-content:center;">{{ unread_notifications.count }}</span>
+          </button>
+          <div class="dropdown-menu" style="width:280px; padding:0; overflow:hidden;">
+            <div style="padding:12px; border-bottom:1px solid var(--thread-border); background:var(--thread-bg-light);">
+              <span style="font-weight:600; font-size:.9rem;">{% trans "Notifications" %}</span>
+            </div>
+            {% for n in unread_notifications %}
+              <a href="{% if n.link %}{{ n.link }}{% else %}#{% endif %}" style="padding:12px; font-size:.85rem; border-bottom:1px solid var(--thread-border); display:block; text-decoration:none; color:inherit;">
+                {{ n.message }}
+                <div style="font-size:.7rem; color:var(--thread-muted); margin-top:4px;">{{ n.created_at|timesince }} ago</div>
+              </a>
+            {% endfor %}
+            <div style="padding:8px; text-align:center; background:var(--thread-bg-light);">
+              <a href="#" id="mark-all-read" style="font-size:.75rem; color:var(--thread-accent); text-decoration:none; font-weight:500;">{% trans "Mark all as read" %}</a>
+            </div>
+          </div>
+        </div>
+        {% endif %}
         <a href="{% url 'accounts:profile' %}" class="btn btn-ghost btn-sm">
           {% if user.profile_photo %}
             <img src="{{ user.profile_photo.url }}" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">
           {% else %}
             <svg><use href="#icon-user"/></svg>
           {% endif %}
-          <span class="btn-label-desktop">{{ user.first_name|default:user.phone_number }}</span>
+          <span class="btn-label-desktop">{% if user.first_name %}{{ user.first_name }}{% else %}{{ user.phone_number }}{% endif %}</span>
         </a>
         <a href="{% url 'accounts:logout' %}" class="btn btn-outline btn-sm">{% trans "Log out" %}</a>
       {% else %}
@@ -185,6 +207,28 @@
 </div>
 
 <script src="{% static 'js/app.js' %}"></script>
-{% block extra_js %}{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const markReadBtn = document.getElementById('mark-all-read');
+    if (markReadBtn) {
+        markReadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            fetch("{% url 'accounts:mark_notifications_read' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
 </body>
 </html>

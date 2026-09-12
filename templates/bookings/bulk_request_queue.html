@@ -20,7 +20,7 @@
         <tbody>
           {% for r in unclaimed %}
           <tr>
-            <td>{{ r.service.name }}</td><td>{{ r.institution.get_full_name|default:r.institution.phone_number }}</td>
+            <td>{{ r.service.name }}</td><td>{% if r.institution.get_full_name %}{{ r.institution.get_full_name }}{% else %}{{ r.institution.phone_number }}{% endif %}</td>
             <td>{{ r.workers_required }}</td><td>{{ r.start_date }}</td>
             <td>
               {% if managed_society %}
@@ -41,7 +41,7 @@
         <tbody>
           {% for r in mine %}
           <tr>
-            <td>{{ r.service.name }}</td><td>{{ r.institution.get_full_name|default:r.institution.phone_number }}</td>
+            <td>{{ r.service.name }}</td><td>{% if r.institution.get_full_name %}{{ r.institution.get_full_name }}{% else %}{{ r.institution.phone_number }}{% endif %}</td>
             <td>{{ r.workers_assigned_count }}/{{ r.workers_required }}</td>
             <td><span class="status-pill">{{ r.get_status_display }}</span></td>
             <td><a href="{% url 'bookings:bulk_request_detail' r.id %}" class="btn btn-outline btn-sm">{% trans "View" %}</a></td>

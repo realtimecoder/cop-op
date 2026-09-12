@@ -32,7 +32,7 @@
         <div class="table-wrap mt-3">
           <table class="data-table">
             <tbody>
-              <tr><th>{% trans "Worker" %}</th><td>{{ booking.worker.user.get_full_name|default:"Unassigned" }}</td></tr>
+              <tr><th>{% trans "Worker" %}</th><td>{% if booking.worker.user.get_full_name %}{{ booking.worker.user.get_full_name }}{% else %}Unassigned{% endif %}</td></tr>
               {% if booking.worker and booking.status in 'accepted,worker_arriving,arrived,work_started,work_completed,customer_confirmed,payment_settled,rated' %}
               <tr><th>{% trans "Contact" %}</th><td>{{ booking.worker.user.phone_number }}</td></tr>
               {% endif %}

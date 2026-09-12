@@ -17,7 +17,7 @@
             {% for w in eligible_workers %}
             <tr>
               <td><input type="checkbox" name="worker_ids" value="{{ w.id }}" {% if w.id in already_assigned_ids %}checked disabled{% endif %}></td>
-              <td>{{ w.user.get_full_name|default:w.user.phone_number }}</td>
+              <td>{% if w.user.get_full_name %}{{ w.user.get_full_name }}{% else %}{{ w.user.phone_number }}{% endif %}</td>
               <td>{{ w.get_skill_grade_display }}</td>
               <td>{{ w.average_rating }}</td>
               <td>{% if w.is_available_now %}<span class="badge badge-verified">{% trans "Available now" %}</span>{% else %}<span class="badge badge-warning">{% trans "Busy" %}</span>{% endif %}</td>

@@ -341,6 +341,10 @@ def seed():
     # ------------------------------------------------------------------
     worker_profiles = []
 
+    # All categories currently on the site (from ServiceCategory table),
+    # assigned in full to every worker below.
+    all_categories = list(ServiceCategory.objects.all())
+
     for i in range(50):
         first = FIRST_NAMES[i % len(FIRST_NAMES)]
         last = LAST_NAMES[(i * 3) % len(LAST_NAMES)]
@@ -432,7 +436,7 @@ def seed():
         )
 
         category, service = catalog[service_index]
-        wp.categories.set([category])
+        wp.categories.set(all_categories)
         WorkerServiceOffering.objects.update_or_create(
             worker=wp,
             service=service,

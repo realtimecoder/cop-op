@@ -11,7 +11,7 @@
           {% if request.user.profile_photo %}
             <img src="{{ request.user.profile_photo.url }}" alt="">
           {% else %}
-            {{ request.user.first_name|first|upper|default:"U" }}
+            {% if request.user.first_name %}{{ request.user.first_name|first|upper }}{% else %}U{% endif %}
           {% endif %}
         </div>
       </div>

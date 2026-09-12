@@ -7,7 +7,7 @@
     <div class="grid" style="grid-template-columns:1fr 2fr;gap:32px;align-items:start;">
       <div class="card text-center">
         <div class="worker-avatar" style="width:90px;height:90px;font-size:2rem;margin:0 auto 14px;">
-          {% if worker.user.profile_photo %}<img src="{{ worker.user.profile_photo.url }}" alt="">{% else %}{{ worker.user.first_name|first|upper|default:"W" }}{% endif %}
+          {% if worker.user.profile_photo %}<img src="{{ worker.user.profile_photo.url }}" alt="">{% else %}{% if worker.user.first_name %}{{ worker.user.first_name|first|upper }}{% else %}W{% endif %}{% endif %}
         </div>
         <h2>{{ worker.user.get_full_name }}</h2>
         <span class="badge badge-verified"><svg><use href="#icon-check"/></svg>{% trans "Verified" %}</span>

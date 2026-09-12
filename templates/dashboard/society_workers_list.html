@@ -15,7 +15,7 @@
         <tbody>
           {% for w in workers %}
           <tr>
-            <td>{{ w.user.get_full_name|default:"—" }}</td><td>{{ w.user.phone_number }}</td>
+            <td>{% if w.user.get_full_name %}{{ w.user.get_full_name }}{% else %}—{% endif %}</td><td>{{ w.user.phone_number }}</td>
             <td>{% for c in w.categories.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
             <td><span class="status-pill">{{ w.get_verification_status_display }}</span></td>
             <td>{{ w.booking_count }}</td><td>{{ w.average_rating }}</td>

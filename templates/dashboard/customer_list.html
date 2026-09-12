@@ -12,7 +12,7 @@
         <tbody>
           {% for c in customers %}
           <tr>
-            <td>{{ c.get_full_name|default:"—" }}</td><td>{{ c.phone_number }}</td><td>{{ c.city|default:"—" }}</td>
+            <td>{% if c.get_full_name %}{{ c.get_full_name }}{% else %}—{% endif %}</td><td>{{ c.phone_number }}</td><td>{% if c.city %}{{ c.city }}{% else %}—{% endif %}</td>
             <td>{{ c.booking_count }}</td><td>{{ c.date_joined|date:"d M Y" }}</td>
             <td><a href="{% url 'dashboard:customer_detail' c.id %}" class="btn btn-outline btn-sm">{% trans "View history" %}</a></td>
           </tr>

@@ -7,7 +7,7 @@ from workers.geo import annotate_workers_with_distance, filter_workers_by_distan
 
 logger = logging.getLogger(__name__)
 
-def find_best_workers(service, customer_lat=None, customer_lng=None, limit=5):
+def find_best_workers(service, customer_user=None, customer_lat=None, customer_lng=None, limit=5):
     """
     Matching Engine: Finds the best available workers for a given service.
     Ranks based on the WorkerProfile's recommended_score (Distance, Work Distribution, Rating, etc.).
@@ -27,6 +27,12 @@ def find_best_workers(service, customer_lat=None, customer_lng=None, limit=5):
         society__isnull=False,
         offerings__service=service
     ).select_related('user').distinct()
+
+    # Prevent workers from booking themselves
+    if customer_user:
+        workers = workers.exclude(user=customer_user)
+
+    match_count = workers.count()
 
     match_count = workers.count()
     if match_count == 0 and all_verified_available > 0:
@@ -56,7 +62,7 @@ def find_best_workers(service, customer_lat=None, customer_lng=None, limit=5):
 
     return scored_workers[:limit]
 
-def find_best_worker(service, customer_lat=None, customer_lng=None):
+def find_best_worker(service, customer_user=None, customer_lat=None, customer_lng=None):
     """Helper to get the single best worker."""
-    results = find_best_workers(service, customer_lat, customer_lng, limit=1)
+    results = find_best_workers(service, customer_user=customer_user, customer_lat=customer_lat, customer_lng=customer_lng, limit=1)
     return results[0][0] if results else None

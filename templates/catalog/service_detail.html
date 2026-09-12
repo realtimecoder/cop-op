@@ -8,14 +8,14 @@
       <div>
         <span class="eyebrow">{{ service.category.name }}</span>
         <h1>{{ service.name }}</h1>
-        <p>{{ service.description|default:"Professional, verified service delivered by cooperative-registered workers." }}</p>
+        <p>{% if service.description %}{{ service.description }}{% else %}Professional, verified service delivered by cooperative-registered workers.{% endif %}</p>
 
         <div class="table-wrap mt-3">
           <table class="data-table">
             <tbody>
-              <tr><th>{% trans "Required skill" %}</th><td>{{ service.required_skill|default:"—" }}</td></tr>
+              <tr><th>{% trans "Required skill" %}</th><td>{% if service.required_skill %}{{ service.required_skill }}{% else %}—{% endif %}</td></tr>
               <tr><th>{% trans "Estimated duration" %}</th><td>{{ service.estimated_duration_minutes }} {% trans "minutes" %}</td></tr>
-              <tr><th>{% trans "Tools required" %}</th><td>{{ service.tools_required|default:"—" }}</td></tr>
+              <tr><th>{% trans "Tools required" %}</th><td>{% if service.tools_required %}{{ service.tools_required }}{% else %}—{% endif %}</td></tr>
               <tr><th>{% trans "Warranty" %}</th><td>{{ service.warranty_days }} {% trans "days" %}</td></tr>
               <tr><th>{% trans "Service area" %}</th><td>{{ service.service_area }}</td></tr>
               <tr><th>{% trans "Cancellation policy" %}</th><td>{{ service.cancellation_policy }}</td></tr>

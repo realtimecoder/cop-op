@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% trans "Choose a worker" %} — {{ service.name }}{% endblock %}
-{% block content %}
+{% block extra_head %}
 <style>
   .distance-modal-overlay {
     position: fixed;
@@ -15,36 +14,44 @@
   }
   .distance-modal {
     background: white;
-    padding: 32px;
-    border-radius: 24px;
+    padding: 24px;
+    border-radius: 12px;
     max-width: 400px;
     width: 90%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     text-align: center;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    border: 1px solid #B1D3B9;
-    animation: modalFadeIn 0.3s ease;
+    animation: modalFadeIn 0.3s ease-out;
   }
   @keyframes modalFadeIn {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
   }
   .distance-modal h3 {
-    color: #35858E;
     margin-top: 0;
-    font-family: Georgia, serif;
+    color: var(--thread-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
   .distance-modal p {
-    color: #666;
-    line-height: 1.6;
     margin-bottom: 24px;
+    line-height: 1.5;
+    color: #444;
   }
   .distance-modal-actions {
     display: flex;
     gap: 12px;
     justify-content: center;
   }
+  .distance-modal-actions .btn {
+    flex: 1;
+    padding: 10px;
+    font-weight: 600;
+  }
 </style>
-
+{% endblock %}
+{% block content %}
 <section class="section">
   <div class="container">
     <div class="section-head">
@@ -71,6 +78,10 @@
     <div class="alert alert-info" style="position:static;margin-bottom:20px;max-width:640px;">
       {% trans "Live distance and travel time will appear here once the platform's Google Maps API key is configured. Sorting by rating, experience and availability still works normally." %}
     </div>
+    {% elif used_service_address and geo_available %}
+    <div class="alert alert-info" style="position:static;margin-bottom:20px;max-width:640px;">
+      {% trans "Showing distance from the service address you provided." %}
+    </div>
     {% elif used_saved_address and geo_available %}
     <div class="alert alert-info" style="position:static;margin-bottom:20px;max-width:640px;">
       {% trans "Showing distance from your saved profile address. Click 'Find nearest to me' to use your current location instead." %}
@@ -96,10 +107,10 @@
       <div class="card worker-card">
         <div class="worker-card-top">
           <div class="worker-avatar">
-            {% if worker.user.profile_photo %}<img src="{{ worker.user.profile_photo.url }}" alt="">{% else %}{{ worker.user.first_name|first|upper|default:"W" }}{% endif %}
+            {% if worker.user.profile_photo %}<img src="{{ worker.user.profile_photo.url }}" alt="">{% else %}{% if worker.user.first_name %}{{ worker.user.first_name|first|upper }}{% else %}W{% endif %}{% endif %}
           </div>
           <div>
-            <h3 style="margin-bottom:2px;">{{ worker.user.get_full_name|default:"Worker" }}</h3>
+            <h3 style="margin-bottom:2px;">{% if worker.user.get_full_name %}{{ worker.user.get_full_name }}{% else %}Worker{% endif %}</h3>
             <div class="muted" style="font-size: 0.85rem; margin-bottom: 4px;">
               {% if worker.society %}
                 {{ worker.society.name }}{% if worker.society.federation %} ({{ worker.society.federation.name }} · {{ worker.society.federation.average_rating }} ★){% endif %}
@@ -115,9 +126,9 @@
           <li><svg><use href="#icon-sparkle"/></svg>{{ worker.get_skill_grade_display }}</li>
           <li><svg><use href="#icon-clock"/></svg>{{ worker.years_experience }} {% trans "yrs experience" %}</li>
           {% if worker.distance_km is not None %}
-          <li><svg><use href="#icon-map-pin"/></svg>{{ worker.distance_km }} km away</li>
+          <li><svg><use href="#icon-map-pin"/></svg>{{ worker.distance_km }} km · {{ worker.duration_text }} {% trans "away" %}</li>
           {% else %}
-          <li><svg><use href="#icon-map-pin"/></svg>{% trans "Distance unavailable" %}</li>
+          <li><svg><use href="#icon-map-pin"/></svg>{% trans "within" %} {{ worker.service_radius_km }} km</li>
           {% endif %}
           <li><svg><use href="#icon-language"/></svg>{{ worker.languages_spoken }}</li>
         </ul>
@@ -125,15 +136,11 @@
         <div class="flex gap-1 mt-2">
           <a href="{% url 'workers:worker_public_profile' worker.id %}" class="btn btn-outline btn-sm" style="flex:1;">{% trans "View profile" %}</a>
           {% if request_id %}
-          <a href="{% url 'bookings:finalize_booking_from_request' request_id worker.id %}"
-             class="btn btn-accent btn-sm js-book-link"
-             data-distance="{{ worker.distance_km|default:'0' }}"
-             style="flex:1;">{% trans "Book" %}</a>
+          <button type="button" class="btn btn-accent btn-sm" style="flex:1;"
+                  onclick="handleBookClick('{% url 'bookings:finalize_booking_from_request' request_id worker.id %}', {{ worker.distance_km|default:0 }})">{% trans "Book" %}</button>
           {% else %}
-          <a href="{% url 'bookings:create_booking' service.id worker.id %}"
-             class="btn btn-accent btn-sm js-book-link"
-             data-distance="{{ worker.distance_km|default:'0' }}"
-             style="flex:1;">{% trans "Book" %}</a>
+          <button type="button" class="btn btn-accent btn-sm" style="flex:1;"
+                  onclick="handleBookClick('{% url 'bookings:create_booking' service.id worker.id %}', {{ worker.distance_km|default:0 }})">{% trans "Book" %}</button>
           {% endif %}
         </div>
       </div>
@@ -145,23 +152,53 @@
       {% endfor %}
     </div>
   </div>
+</section>
 
-  <div class="distance-modal-overlay" id="distance-modal-overlay">
-    <div class="distance-modal">
-      <h3>{% trans "Distance Warning" %}</h3>
-      <p id="distance-warning-text">{% trans "This worker is more than 5km away. It may take longer to arrive. Do you still want to proceed?" %}</p>
-      <div class="distance-modal-actions">
-        <button class="btn btn-outline btn-sm" id="distance-modal-cancel">{% trans "Cancel" %}</button>
-        <button class="btn btn-primary btn-sm" id="distance-modal-confirm">{% trans "Yes, Proceed" %}</button>
-      </div>
+<!-- Distance Warning Modal -->
+<div id="distance-modal" class="distance-modal-overlay">
+  <div class="distance-modal">
+    <h3 style="color:var(--thread-red);"><svg style="width:24px;height:24px;"><use href="#icon-alert"/></svg> {% trans "Distance Warning" %}</h3>
+    <p>{% trans "The worker is more than 5km away from your service address. Do you still want to proceed with the booking?" %}</p>
+    <div class="distance-modal-actions">
+      <button type="button" class="btn btn-outline" id="dist-cancel">{% trans "Choose another worker" %}</button>
+      <button type="button" class="btn btn-accent" id="dist-proceed">{% trans "Proceed" %}</button>
     </div>
   </div>
-</section>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // Distance Modal Logic
+  var distModal = document.getElementById('distance-modal');
+  var distCancel = document.getElementById('dist-cancel');
+  var distProceed = document.getElementById('dist-proceed');
+  var pendingUrl = '';
+
+  window.handleBookClick = function(url, distance) {
+    pendingUrl = url;
+    if (distance !== null && distance > 5) {
+      distModal.style.display = 'flex';
+    } else {
+      window.location.href = url;
+    }
+  };
+
+  if (distCancel) {
+    distCancel.addEventListener('click', function() {
+      distModal.style.display = 'none';
+    });
+  }
+
+  if (distProceed) {
+    distProceed.addEventListener('click', function() {
+      distModal.style.display = 'none';
+      window.location.href = pendingUrl;
+    });
+  }
+
   var btn = document.getElementById('locate-btn');
   var label = document.getElementById('locate-btn-label');
   if (!btn) return;
@@ -197,40 +234,6 @@ document.addEventListener('DOMContentLoaded', function () {
       label.textContent = "{% trans 'Find nearest to me' %}";
       alert("{% trans 'Location permission was denied. You can still sort by rating or experience.' %}");
     });
-  });
-
-  // Distance Warning Popup
-  var modalOverlay = document.getElementById('distance-modal-overlay');
-  var modalConfirm = document.getElementById('distance-modal-confirm');
-  var modalCancel = document.getElementById('distance-modal-cancel');
-  var pendingUrl = null;
-
-  document.querySelectorAll('.js-book-link').forEach(function (link) {
-    link.addEventListener('click', function (e) {
-      var distance = parseFloat(this.getAttribute('data-distance'));
-      if (!isNaN(distance) && distance > 5) {
-        e.preventDefault();
-        pendingUrl = this.href;
-
-        var warningText = document.getElementById('distance-warning-text');
-        if (warningText) {
-          warningText.textContent = `This worker is ${distance} km away. It may take longer to arrive. Do you still want to proceed?`;
-        }
-
-        modalOverlay.style.display = 'flex';
-      }
-    });
-  });
-
-  modalConfirm.addEventListener('click', function () {
-    if (pendingUrl) {
-      window.location.href = pendingUrl;
-    }
-  });
-
-  modalCancel.addEventListener('click', function () {
-    modalOverlay.style.display = 'none';
-    pendingUrl = null;
   });
 });
 </script>

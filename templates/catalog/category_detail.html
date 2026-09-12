@@ -8,7 +8,7 @@
       <div>
         <span class="eyebrow">{% trans "Category" %}</span>
         <h1 style="margin-bottom:6px;">{{ category.name }}</h1>
-        <p class="muted mb-0">{{ category.description|default:"" }}</p>
+        <p class="muted mb-0">{% if category.description %}{{ category.description }}{% else %}{% endif %}</p>
       </div>
       <div class="price-ticket" style="min-width:220px;">
         <div class="price-ticket-row"><span>{% trans "Visit charge (all workers)" %}</span><span>₹{{ category.fixed_visit_charge }}</span></div>

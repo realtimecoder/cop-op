@@ -100,9 +100,9 @@
       <a href="{% url 'workers:worker_public_profile' w.id %}" class="card-link">
         <div class="card worker-card">
           <div class="worker-card-top">
-            <div class="worker-avatar">{{ w.user.first_name|first|upper|default:"W" }}</div>
+            <div class="worker-avatar">{% if w.user.first_name %}{{ w.user.first_name|first|upper }}{% else %}W{% endif %}</div>
             <div>
-              <h3 style="margin-bottom:2px;">{{ w.user.get_full_name|default:"Worker" }}</h3>
+              <h3 style="margin-bottom:2px;">{% if w.user.get_full_name %}{{ w.user.get_full_name }}{% else %}Worker{% endif %}</h3>
               <span class="badge badge-verified"><svg><use href="#icon-check"/></svg>{% trans "Verified" %}</span>
             </div>
           </div>

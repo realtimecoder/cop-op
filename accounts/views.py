@@ -8,7 +8,7 @@ from django.utils.translation import gettext as _
 from django.conf import settings
 
 from .forms import PhoneForm, OTPVerifyForm, RegistrationForm, ProfileUpdateForm
-from .models import OTPRequest
+from .models import OTPRequest, Notification
 from workers.geo import geocode_address
 from workers.models import Society, WorkerProfile
 
@@ -195,3 +195,10 @@ def logout_view(request):
     logout(request)
     messages.info(request, _("You have been logged out."))
     return redirect('core:home')
+
+
+@login_required
+def mark_notifications_read(request):
+    """Marks all current user's notifications as read."""
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return JsonResponse({'ok': True})

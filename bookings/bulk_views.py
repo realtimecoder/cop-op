@@ -82,30 +82,19 @@ def bulk_request_detail(request, request_id):
     return render(request, 'bookings/bulk_request_detail.html', {
         'bulk': bulk, 'assignments': assignments,
         'is_institution': is_institution, 'is_assigned_society_operator': is_assigned_society_operator,
+        'is_assigned_worker': is_assigned_worker,
     })
 
 
 @login_required
 @user_passes_test(_is_institution, login_url='core:home')
 def confirm_bulk_completion(request, request_id):
+    """Customer (Institution) confirms work is done, moving it to CUSTOMER_CONFIRMED."""
     bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
-    if request.method == 'POST' and bulk.status == BulkServiceRequest.Status.IN_PROGRESS:
-        bulk.status = BulkServiceRequest.Status.COMPLETED
+    if request.method == 'POST' and bulk.status == BulkServiceRequest.Status.WORK_COMPLETED:
+        bulk.status = BulkServiceRequest.Status.CUSTOMER_CONFIRMED
         bulk.save(update_fields=['status'])
-
-        assignments = list(bulk.assignments.select_related('worker'))
-        if assignments:
-            per_worker_total = bulk.total_amount / len(assignments)
-            for assignment in assignments:
-                pct = float(assignment.worker.payout_percentage) / 100
-                assignment.payout_amount = round(Decimal(per_worker_total) * Decimal(pct), 2)
-                assignment.is_completed = True
-                from django.utils import timezone as tz
-                assignment.completed_at = tz.now()
-                assignment.save(update_fields=['payout_amount', 'is_completed', 'completed_at'])
-                assignment.worker.completed_jobs += 1
-                assignment.worker.save(update_fields=['completed_jobs'])
-        messages.success(request, "Bulk request marked complete. Worker payouts have been recorded.")
+        messages.success(request, "Work confirmed. You can now proceed to payment.")
     return redirect('bookings:bulk_request_detail', request_id=bulk.id)
 
 
@@ -322,8 +311,8 @@ def make_bulk_payment(request, request_id):
     if existing_payment and existing_payment.status == Payment.Status.SUCCESS:
         return redirect('bookings:bulk_request_detail', request_id=request_id)
 
-    if bulk.status != BulkServiceRequest.Status.ASSIGNED:
-        messages.error(request, "Payment can only be made after workers are assigned.")
+    if bulk.status != BulkServiceRequest.Status.CUSTOMER_CONFIRMED:
+        messages.error(request, "Payment can only be made after the customer confirms work completion.")
         return redirect('bookings:bulk_request_detail', request_id=request_id)
 
     if (existing_payment and existing_payment.status == Payment.Status.PENDING
@@ -478,3 +467,46 @@ def submit_bulk_review(request, request_id):
         return redirect('bookings:bulk_request_detail', request_id=request_id)
 
     return render(request, 'bookings/submit_bulk_review.html', {'bulk': bulk})
+
+
+@login_required
+@require_POST
+def mark_bulk_assignment_complete(request, request_id, assignment_id):
+    """Worker marks their specific part of the bulk request as complete."""
+    assignment = get_object_or_404(BulkAssignment, id=assignment_id, worker__user=request.user)
+    bulk = assignment.bulk_request
+
+    if bulk.status != BulkServiceRequest.Status.IN_PROGRESS:
+        messages.error(request, "Work has not started yet or is already completed.")
+        return redirect('bookings:bulk_request_detail', request_id=bulk.id)
+
+    assignment.is_completed = True
+    assignment.completed_at = timezone.now()
+    assignment.save()
+
+    messages.success(request, "Your part of the work has been marked as complete.")
+    return redirect('bookings:bulk_request_detail', request_id=bulk.id)
+
+
+@login_required
+@user_passes_test(_is_society_operator, login_url='core:home')
+def society_confirm_bulk_completion(request, request_id):
+    """Society admin confirms all workers are done and marks the request as WORK_COMPLETED."""
+    bulk = get_object_or_404(BulkServiceRequest, id=request_id, assigned_society__operator=request.user)
+
+    if request.method == 'POST':
+        if bulk.assignments.filter(is_completed=False).exists():
+            messages.error(request, "Some assigned workers have not yet marked their work as complete.")
+            return redirect('bookings:bulk_request_detail', request_id=bulk.id)
+
+        bulk.status = BulkServiceRequest.Status.WORK_COMPLETED
+        bulk.save(update_fields=['status'])
+
+        # Notify customer
+        Notification.objects.create(
+            user=bulk.institution,
+            message=f"Bulk Request #{bulk.id} for {bulk.service.name} has been completed. Please verify and confirm the work.",
+            link=f"/bookings/bulk/{bulk.id}/"
+        )
+        messages.success(request, "Bulk request marked as completed. Customer has been notified.")
+    return redirect('bookings:bulk_request_detail', request_id=bulk.id)

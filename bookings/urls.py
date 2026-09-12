@@ -37,4 +37,6 @@ urlpatterns = [
     path('bulk/<int:request_id>/pay/', bulk_views.make_bulk_payment, name='make_bulk_payment'),
     path('bulk/<int:request_id>/pay/callback/', bulk_views.bulk_payment_callback, name='bulk_payment_callback'),
     path('bulk/<int:request_id>/review/', bulk_views.submit_bulk_review, name='submit_bulk_review'),
+    path('bulk/<int:request_id>/mark-complete/', bulk_views.mark_bulk_assignment_complete, name='mark_bulk_assignment_complete'),
+    path('bulk/<int:request_id>/society-complete/', bulk_views.society_confirm_bulk_completion, name='society_confirm_bulk_completion'),
 ]

@@ -13,7 +13,7 @@
           {% for b in bookings %}
           <tr>
             <td>{{ b.service.name }}</td>
-            <td>{{ b.worker.user.get_full_name|default:"—" }}</td>
+            <td>{% if b.worker.user.get_full_name %}{{ b.worker.user.get_full_name }}{% else %"—{% endif %}</td>
             <td>{{ b.scheduled_date }}</td>
             <td style="font-family:var(--font-mono)">₹{{ b.total_amount }}</td>
             <td><span class="status-pill">{{ b.get_status_display }}</span></td>

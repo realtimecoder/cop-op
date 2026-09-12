@@ -43,7 +43,7 @@
               {% for b in bookings %}
               <tr>
                 <td>{{ b.service.name }}</td>
-                <td>{{ b.customer.get_full_name|default:b.customer.phone_number }}</td>
+                <td>{% if b.customer.get_full_name %}{{ b.customer.get_full_name }}{% else %}{{ b.customer.phone_number }}{% endif %}</td>
                 <td>{{ b.scheduled_date }}</td>
                 <td><span class="status-pill">{{ b.get_status_display }}</span></td>
                 <td style="font-family:var(--font-mono);">
@@ -67,18 +67,18 @@
           <h3 style="margin-bottom:10px;">{% trans "My profile" %}</h3>
           <table class="data-table" style="border:none;">
             <tbody>
-              <tr><th>{% trans "Name" %}</th><td>{{ profile.user.get_full_name|default:"—" }}</td></tr>
+              <tr><th>{% trans "Name" %}</th><td>{% if profile.user.get_full_name %}{{ profile.user.get_full_name }}{% else %}—{% endif %}</td></tr>
               <tr><th>{% trans "Phone" %}</th><td>{{ profile.user.phone_number }}</td></tr>
-              <tr><th>{% trans "Address" %}</th><td>{{ profile.user.address|default:"—" }}, {{ profile.user.city }} {{ profile.user.pincode }}</td></tr>
+              <tr><th>{% trans "Address" %}</th><td>{% if profile.user.address %}{{ profile.user.address }}{% else %}—{% endif %}, {{ profile.user.city }} {{ profile.user.pincode }}</td></tr>
               <tr><th>{% trans "Categories" %}</th><td>
                 {% for cat in profile.categories.all %}<span class="badge badge-verified">{{ cat.name }}</span> {% empty %}<span class="muted">{% trans "None set" %}</span>{% endfor %}
               </td></tr>
               <tr><th>{% trans "Skill grade" %}</th><td>{{ profile.get_skill_grade_display }}</td></tr>
               <tr><th>{% trans "Experience" %}</th><td>{{ profile.years_experience }} {% trans "years" %}</td></tr>
-              <tr><th>{% trans "Languages" %}</th><td>{{ profile.languages_spoken|default:"—" }}</td></tr>
+              <tr><th>{% trans "Languages" %}</th><td>{% if profile.languages_spoken %}{{ profile.languages_spoken }}{% else %}—{% endif %}</td></tr>
               <tr><th>{% trans "Service radius" %}</th><td>{{ profile.service_radius_km }} km</td></tr>
-              <tr><th>{% trans "Bio" %}</th><td>{{ profile.bio|default:"—" }}</td></tr>
-              <tr><th>{% trans "Society" %}</th><td>{{ profile.society|default:"—" }}</td></tr>
+              <tr><th>{% trans "Bio" %}</th><td>{% if profile.bio %}{{ profile.bio }}{% else %}—{% endif %}</td></tr>
+              <tr><th>{% trans "Society" %}</th><td>{% if profile.society %}{{ profile.society }}{% else %}—{% endif %}</td></tr>
             </tbody>
           </table>
           {% if not profile.society and pending_invites %}

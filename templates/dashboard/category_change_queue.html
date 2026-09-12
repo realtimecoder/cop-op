@@ -9,7 +9,7 @@
     {% for req in requests %}
     <div class="card mt-2">
       <div class="flex justify-between items-center" style="flex-wrap:wrap;">
-        <h3 class="mb-0">{{ req.worker.user.get_full_name|default:req.worker.user.phone_number }}</h3>
+        <h3 class="mb-0">{% if req.worker.user.get_full_name %}{{ req.worker.user.get_full_name }}{% else %}{{ req.worker.user.phone_number }}{% endif %}</h3>
         <span class="status-pill">{{ req.get_status_display }}</span>
       </div>
       <p class="muted" style="font-size:.82rem;">{{ req.worker.user.phone_number }} · {{ req.created_at|date:"d M Y" }}</p>
