@@ -6,4 +6,5 @@ def site_context(request):
         'SITE_NAME': 'Co-opSeva',
         'AVAILABLE_LANGUAGES': settings.LANGUAGES,
         'CURRENT_LANGUAGE': getattr(request, 'LANGUAGE_CODE', 'en'),
+        'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY,
     }
