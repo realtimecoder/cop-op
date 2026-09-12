@@ -74,7 +74,7 @@
             {% if bulk.status == 'claimed' or bulk.status == 'assigned' %}
             <a href="{% url 'bookings:assign_bulk_workers' bulk.id %}" class="btn btn-primary btn-sm">{% trans "Assign / manage workers" %}</a>
             {% endif %}
-            {% if bulk.status == 'assigned' and bulk.is_fully_staffed %}
+            {% if bulk.status == 'assigned' %}
             <form method="post" action="{% url 'bookings:start_bulk_work' bulk.id %}">{% csrf_token %}<button class="btn btn-accent btn-sm" type="submit">{% trans "Mark as in progress" %}</button></form>
             {% endif %}
             {% if bulk.status == 'in_progress' %}
