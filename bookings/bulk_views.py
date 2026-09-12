@@ -476,8 +476,8 @@ def mark_bulk_assignment_complete(request, request_id, assignment_id):
     assignment = get_object_or_404(BulkAssignment, id=assignment_id, worker__user=request.user)
     bulk = assignment.bulk_request
 
-    if bulk.status != BulkServiceRequest.Status.IN_PROGRESS:
-        messages.error(request, "Work has not started yet or is already completed.")
+    if bulk.status not in (BulkServiceRequest.Status.ASSIGNED, BulkServiceRequest.Status.IN_PROGRESS, BulkServiceRequest.Status.AWAITING_APPROVAL):
+        messages.error(request, f"Work has not started yet or is already completed. (Current status: {bulk.status})")
         return redirect('bookings:bulk_request_detail', request_id=bulk.id)
 
     assignment.is_completed = True
