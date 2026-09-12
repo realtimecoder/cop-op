@@ -484,7 +484,21 @@ def mark_bulk_assignment_complete(request, request_id, assignment_id):
     assignment.completed_at = timezone.now()
     assignment.save()
 
-    messages.success(request, "Your part of the work has been marked as complete.")
+    # Check if all assigned workers have now completed their work
+    if not bulk.assignments.filter(is_completed=False).exists():
+        bulk.status = BulkServiceRequest.Status.WORK_COMPLETED
+        bulk.save(update_fields=['status'])
+
+        # Notify the customer (Institution) that the entire bulk request is done
+        Notification.objects.create(
+            user=bulk.institution,
+            message=f"Bulk Request #{bulk.id} for {bulk.service.name} has been completed. Please verify and confirm the work.",
+            link=f"/bookings/bulk/{bulk.id}/"
+        )
+        messages.info(request, "You were the last worker to finish! The request has been marked as completed for the customer.")
+    else:
+        messages.success(request, "Your part of the work has been marked as complete.")
+
     return redirect('bookings:bulk_request_detail', request_id=bulk.id)
 
 

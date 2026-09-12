@@ -50,7 +50,7 @@
         {% if is_assigned_worker and bulk.status == 'assigned' %}
         <div class="alert alert-info mt-3" style="padding:12px; font-size:0.85rem;">
           <svg style="width:14px;height:14px;margin-right:6px;vertical-align:middle;" class="icon"><use href="#icon-info"/></svg>
-          {% trans "The society admin has assigned you to this request. You can mark your work as complete once you finish." %}
+          {% trans "You have been assigned to this request. You can mark your work as complete once you finish." %}
         </div>
         {% endif %}
 
@@ -76,9 +76,6 @@
             {% endif %}
             {% if bulk.status == 'assigned' %}
             <form method="post" action="{% url 'bookings:start_bulk_work' bulk.id %}">{% csrf_token %}<button class="btn btn-accent btn-sm" type="submit">{% trans "Mark as in progress" %}</button></form>
-            {% endif %}
-            {% if bulk.status == 'in_progress' %}
-            <form method="post" action="{% url 'bookings:society_confirm_bulk_completion' bulk.id %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Confirm All Work Completed" %}</button></form>
             {% endif %}
           {% endif %}
         </div>
