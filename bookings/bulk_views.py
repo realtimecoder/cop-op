@@ -211,11 +211,19 @@ def rapid_bulk_book(request, request_id):
         messages.error(request, "Rapid booking is only available for new requests.")
         return redirect('bookings:bulk_request_detail', request_id=request_id)
 
+    # Use Site Address for distance calculation
+    site_coords = geocode_address(bulk.address, bulk.city, bulk.pincode)
+    if site_coords:
+        lat, lng = site_coords
+    else:
+        lat, lng = request.user.latitude, request.user.longitude
+        messages.warning(request, "Could not geocode site address. Using institution office location for worker matching.")
+
     # 1. Find best candidates using the matching engine
     best_candidates = find_best_workers(
         bulk.service,
-        request.user.latitude,
-        request.user.longitude,
+        customer_lat=lat,
+        customer_lng=lng,
         limit=bulk.workers_required
     )
 
