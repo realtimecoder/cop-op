@@ -31,4 +31,10 @@ urlpatterns = [
     path('bulk/<int:request_id>/claim/', bulk_views.claim_bulk_request, name='claim_bulk_request'),
     path('bulk/<int:request_id>/assign/', bulk_views.assign_bulk_workers, name='assign_bulk_workers'),
     path('bulk/<int:request_id>/start/', bulk_views.start_bulk_work, name='start_bulk_work'),
+    path('bulk/<int:request_id>/rapid-book/', bulk_views.rapid_bulk_book, name='rapid_bulk_book'),
+    path('bulk/<int:request_id>/approve/', bulk_views.approve_bulk_fulfillment, name='approve_bulk_fulfillment'),
+    path('bulk/<int:request_id>/reject/', bulk_views.reject_bulk_fulfillment, name='reject_bulk_fulfillment'),
+    path('bulk/<int:request_id>/pay/', bulk_views.make_bulk_payment, name='make_bulk_payment'),
+    path('bulk/<int:request_id>/pay/callback/', bulk_views.bulk_payment_callback, name='bulk_payment_callback'),
+    path('bulk/<int:request_id>/review/', bulk_views.submit_bulk_review, name='submit_bulk_review'),
 ]
