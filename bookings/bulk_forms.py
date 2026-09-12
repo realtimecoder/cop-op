@@ -17,9 +17,9 @@ class BulkServiceRequestForm(forms.ModelForm):
             'workers_required': forms.NumberInput(attrs={'class': 'input-field', 'min': 1}),
             'duration_days': forms.NumberInput(attrs={'class': 'input-field', 'min': 1}),
             'start_date': forms.DateInput(attrs={'class': 'input-field', 'type': 'date'}),
-            'address': forms.TextInput(attrs={'class': 'input-field'}),
-            'city': forms.TextInput(attrs={'class': 'input-field'}),
-            'pincode': forms.TextInput(attrs={'class': 'input-field'}),
+            'address': forms.TextInput(attrs={'class': 'input-field', 'id': 'id_address'}),
+            'city': forms.TextInput(attrs={'class': 'input-field', 'id': 'id_city'}),
+            'pincode': forms.TextInput(attrs={'class': 'input-field', 'id': 'id_pincode'}),
             'instructions': forms.Textarea(attrs={'class': 'input-field', 'rows': 3}),
         }
 
