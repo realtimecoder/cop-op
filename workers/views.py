@@ -4,12 +4,54 @@ from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
-from catalog.models import Service
+from catalog.models import Service, ServiceCategory
 from payments.models import Payment
-from .models import WorkerProfile, WorkerServiceOffering, WorkerBlockedDate, WorkerCategoryChangeRequest, SocietyInvite
+from .models import (
+    WorkerProfile, WorkerServiceOffering, WorkerBlockedDate,
+    WorkerCategoryChangeRequest, SocietyInvite, SocietyJoinRequest, Society
+)
 from .forms import (WorkerOnboardingForm, WorkerDocumentForm, WorkerProfileEditForm,
                      WorkerCategoryChangeRequestForm, WorkerBlockedDateForm)
-from .geo import annotate_workers_with_distance, is_configured as maps_configured
+from .geo import annotate_workers_with_distance, filter_workers_by_distance, is_configured as maps_configured
+from bookings.models import BulkAssignment, BulkServiceRequest
+
+def society_list_for_workers(request):
+    """Lists all available societies for a verified worker to join."""
+    if not request.user.is_authenticated or request.user.role != 'worker':
+        return redirect('core:home')
+
+    profile = get_object_or_404(WorkerProfile, user=request.user)
+    if not profile.is_verified:
+        messages.warning(request, "{% trans 'You must be verified before joining a society.' %}")
+        return redirect('workers:my_dashboard')
+
+    societies = Society.objects.all().order_by('name')
+    return render(request, 'workers/society_list.html', {
+        'societies': societies,
+        'profile': profile
+    })
+
+
+def request_society_join(request, society_id):
+    """Allows a worker to request to join a specific society."""
+    if request.user.role != 'worker':
+        return redirect('core:home')
+
+    profile = get_object_or_404(WorkerProfile, user=request.user)
+    society = get_object_or_404(Society, id=society_id)
+
+    if profile.society:
+        messages.error(request, "{% trans 'You are already a member of a society.' %}")
+        return redirect('workers:worker_society_list')
+
+    # Check if a request already exists
+    if SocietyJoinRequest.objects.filter(worker=profile, society=society).exists():
+        messages.info(request, "You have already requested to join this society.")
+        return redirect('workers:worker_society_list')
+
+    SocietyJoinRequest.objects.create(worker=profile, society=society)
+    messages.success(request, f"Your request to join {society.name} has been submitted. The society operator will review it.")
+    return redirect('workers:worker_society_list')
 
 
 def worker_list_for_service(request, service_id, request_id=None):
@@ -26,12 +68,30 @@ def worker_list_for_service(request, service_id, request_id=None):
     workers are annotated with real road distance/ETA via the Distance
     Matrix API and can be sorted by genuine nearest-first order."""
     service = get_object_or_404(Service, id=service_id, is_active=True)
+    # Filter: Verified, Available, linked to a society, and offers the specific service
+    filters = {
+        'worker__verification_status': WorkerProfile.VerificationStatus.VERIFIED,
+        'worker__is_available_now': True,
+        'worker__society__isnull': False,
+        'worker__offerings__service': service,
+        'worker__user__role': 'worker',
+    }
+
+    if request.user.is_authenticated:
+        # Exclude the logged-in user's own worker profile if it exists
+        filters['worker__user__id__not'] = request.user.id
+
     offerings = WorkerServiceOffering.objects.filter(
-        service=service, worker__verification_status=WorkerProfile.VerificationStatus.VERIFIED
+        service=service,
+        worker__verification_status=WorkerProfile.VerificationStatus.VERIFIED,
+        worker__society__isnull=False,
+        worker__user__role='worker'
     ).select_related('worker', 'worker__user')
 
-    sort = request.GET.get('sort', 'recommended')
+    # Apply the exclusion filter to the workers list derived from offerings
     workers = [o.worker for o in offerings]
+    if request.user.is_authenticated:
+        workers = [w for w in workers if w.user_id != request.user.id]
 
     customer_lat = request.GET.get('lat')
     customer_lng = request.GET.get('lng')
@@ -53,6 +113,12 @@ def worker_list_for_service(request, service_id, request_id=None):
             customer_lat = float(customer_lat)
             customer_lng = float(customer_lng)
             workers, geo_available = annotate_workers_with_distance(customer_lat, customer_lng, workers)
+
+            # --- STRICT DISTANCE FILTERING ---
+            workers = filter_workers_by_distance(workers, customer_lat, customer_lng)
+            # ---------------------------------
+            # ---------------------------------
+
         except ValueError:
             customer_lat = customer_lng = None
     else:
@@ -61,8 +127,17 @@ def worker_list_for_service(request, service_id, request_id=None):
             w.duration_min = None
             w.duration_text = None
 
+    sort = request.GET.get('sort', 'recommended')
     if sort == 'nearest' and geo_available:
-        workers.sort(key=lambda w: (w.distance_km is None, w.distance_km or 0))
+        def get_tier(w):
+            dist = getattr(w, 'distance_km', None)
+            if dist is None: return 4
+            if dist <= 3: return 1
+            if dist <= 5: return 2
+            if dist <= 10: return 3
+            return 4
+
+        workers.sort(key=lambda w: (get_tier(w), w.distance_km or 999, -w.average_rating))
     elif sort == 'rating':
         workers.sort(key=lambda w: w.average_rating, reverse=True)
     elif sort == 'experience':
@@ -92,6 +167,28 @@ def worker_public_profile(request, worker_id):
 
 
 @login_required
+def society_profile(request, society_id):
+    """Displays a detailed profile of a cooperative society."""
+    society = get_object_or_404(Society, id=society_id)
+
+    # Get some statistics for the profile
+    worker_count = society.workers.count()
+    avg_rating = society.average_rating
+
+    # Get the categories of services this society's workers provide
+    categories = ServiceCategory.objects.filter(
+        workers__society=society
+    ).distinct()
+
+    return render(request, 'workers/society_profile.html', {
+        'society': society,
+        'worker_count': worker_count,
+        'avg_rating': avg_rating,
+        'categories': categories,
+    })
+
+
+@login_required
 def onboarding(request):
     """First-time setup only. Once a worker already has categories saved,
     we send them to the profile page instead — from there, any further
@@ -117,7 +214,7 @@ def onboarding(request):
             return redirect('workers:documents')
     else:
         form = WorkerOnboardingForm(instance=profile)
-    return render(request, 'workers/onboarding.html', {'form': form})
+    return render(request, 'workers/onboarding.html', {'form': form, 'profile': profile})
 
 
 @login_required
@@ -150,6 +247,11 @@ def my_dashboard(request):
                 .select_related('service', 'customer', 'payment', 'review')
                 .order_by('-created_at')[:30])
 
+    # Fetch bulk assignments for this worker
+    bulk_assignments = (BulkAssignment.objects.filter(worker=profile)
+                        .select_related('bulk_request__service', 'bulk_request__institution')
+                        .order_by('-assigned_at')[:30])
+
     total_income = Payment.objects.filter(
         booking__worker=profile, status=Payment.Status.SUCCESS
     ).aggregate(total=Sum('worker_payout'))['total'] or 0
@@ -163,7 +265,7 @@ def my_dashboard(request):
     ).select_related('society')
 
     return render(request, 'workers/my_dashboard.html', {
-        'profile': profile, 'bookings': bookings, 'total_income': total_income,
+        'profile': profile, 'bookings': bookings, 'bulk_assignments': bulk_assignments, 'total_income': total_income,
         'pending_category_request': pending_category_request,
         'blocked_dates': profile.blocked_dates.filter(date__gte=timezone.localdate()).order_by('date'),
         'pending_invites': pending_invites,
@@ -295,6 +397,7 @@ def worker_insurance(request):
         'profile': profile,
         'insurance': insurance_data,
     })
+
 
 @login_required
 def accept_society_invite(request, invite_id):
