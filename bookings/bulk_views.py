@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse, HttpResponseForbidden
+from django.conf import settings
 
 from accounts.models import User, Notification
 from workers.models import WorkerProfile, WorkerServiceOffering
@@ -201,46 +202,6 @@ def start_bulk_work(request, request_id):
 
 @login_required
 @user_passes_test(_is_institution, login_url='core:home')
-def approve_bulk_fulfillment(request, request_id):
-    """Approves partial fulfillment of a bulk request."""
-    bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
-    if bulk.status != BulkServiceRequest.Status.AWAITING_APPROVAL:
-        return redirect('bookings:bulk_request_detail', request_id=request_id)
-
-    bulk.status = BulkServiceRequest.Status.ASSIGNED
-    bulk.save(update_fields=['status'])
-
-    if bulk.assigned_society and bulk.assigned_society.operator:
-        Notification.objects.create(
-            user=bulk.assigned_society.operator,
-            message=f"Bulk Request #{bulk.id} for {bulk.service.name} has been accepted by the institution. Please proceed with worker coordination.",
-            link=f"/bookings/bulk/{request_id}/"
-        )
-
-    messages.success(request, "Partial fulfillment accepted. Workers assigned.")
-    return redirect('bookings:bulk_request_detail', request_id=request_id)
-
-
-@login_required
-@user_passes_test(_is_institution, login_url='core:home')
-def reject_bulk_fulfillment(request, request_id):
-    """Rejects partial fulfillment and returns the request to the queue."""
-    bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
-
-    if bulk.status == BulkServiceRequest.Status.AWAITING_APPROVAL:
-        bulk.status = BulkServiceRequest.Status.REQUESTED
-        bulk.assigned_society = None
-        bulk.assignments.all().delete()
-        messages.info(request, "Partial fulfillment rejected. Request returned to the queue for other societies.")
-    else:
-        bulk.status = BulkServiceRequest.Status.REJECTED
-        messages.info(request, "Bulk request rejected.")
-
-    bulk.save()
-    return redirect('bookings:my_bulk_requests')
-
-@login_required
-@user_passes_test(_is_institution, login_url='core:home')
 def rapid_bulk_book(request, request_id):
     """Algo-driven Rapid Book for Bulk Requests."""
     bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
@@ -293,3 +254,212 @@ def rapid_bulk_book(request, request_id):
     bulk.save(update_fields=['status'])
     messages.success(request, f"Rapid Book successful! {count} workers have been assigned. They will be notified to accept.")
     return redirect('bookings:bulk_request_detail', request_id=request_id)
+
+
+@login_required
+@user_passes_test(_is_institution, login_url='core:home')
+def approve_bulk_fulfillment(request, request_id):
+    """Approves partial fulfillment of a bulk request."""
+    bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
+    if bulk.status != BulkServiceRequest.Status.AWAITING_APPROVAL:
+        return redirect('bookings:bulk_request_detail', request_id=request_id)
+
+    bulk.status = BulkServiceRequest.Status.ASSIGNED
+    bulk.save(update_fields=['status'])
+
+    if bulk.assigned_society and bulk.assigned_society.operator:
+        Notification.objects.create(
+            user=bulk.assigned_society.operator,
+            message=f"Bulk Request #{bulk.id} for {bulk.service.name} has been accepted by the institution. Please proceed with worker coordination.",
+            link=f"/bookings/bulk/{request_id}/"
+        )
+
+    messages.success(request, "Partial fulfillment accepted. Workers assigned.")
+    return redirect('bookings:bulk_request_detail', request_id=request_id)
+
+
+@login_required
+@user_passes_test(_is_institution, login_url='core:home')
+def reject_bulk_fulfillment(request, request_id):
+    """Rejects partial fulfillment and returns the request to the queue."""
+    bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
+
+    if bulk.status == BulkServiceRequest.Status.AWAITING_APPROVAL:
+        bulk.status = BulkServiceRequest.Status.REQUESTED
+        bulk.assigned_society = None
+        bulk.assignments.all().delete()
+        messages.info(request, "Partial fulfillment rejected. Request returned to the queue for other societies.")
+    else:
+        bulk.status = BulkServiceRequest.Status.REJECTED
+        messages.info(request, "Bulk request rejected.")
+
+    bulk.save()
+    return redirect('bookings:my_bulk_requests')
+
+
+@login_required
+def make_bulk_payment(request, request_id):
+    """Razorpay payment for Bulk Requests."""
+    bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
+    existing_payment = getattr(bulk, 'payment', None)
+    razorpay_ready = razorpay_client.is_configured()
+
+    if existing_payment and existing_payment.status == Payment.Status.SUCCESS:
+        return redirect('bookings:bulk_request_detail', request_id=request_id)
+
+    if bulk.status != BulkServiceRequest.Status.ASSIGNED:
+        messages.error(request, "Payment can only be made after workers are assigned.")
+        return redirect('bookings:bulk_request_detail', request_id=request_id)
+
+    if (existing_payment and existing_payment.status == Payment.Status.PENDING
+            and existing_payment.razorpay_order_id and razorpay_ready):
+        order = {
+            'id': existing_payment.razorpay_order_id,
+            'amount': int(existing_payment.amount * 100),
+            'currency': 'INR',
+        }
+        return render(request, 'bookings/bulk_razorpay_checkout.html', {
+            'bulk': bulk, 'payment': existing_payment, 'order': order,
+            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        })
+
+    if request.method == 'POST':
+        method = request.POST.get('method', Payment.Method.UPI)
+        amount = bulk.total_amount
+
+        if razorpay_ready:
+            order = razorpay_client.create_order(amount, receipt=f"bulk-{bulk.id}")
+            if order:
+                payment, _created = Payment.objects.get_or_create(
+                    bulk_request=bulk,
+                    defaults={'method': method, 'amount': amount, 'status': Payment.Status.PENDING,
+                                'razorpay_order_id': order['id']}
+                )
+                if not _created:
+                    payment.method = method
+                    payment.amount = amount
+                    payment.status = Payment.Status.PENDING
+                    payment.razorpay_order_id = order['id']
+                    payment.is_simulated = False
+                    payment.save(update_fields=['method', 'amount', 'status', 'razorpay_order_id', 'is_simulated'])
+                return render(request, 'bookings/bulk_razorpay_checkout.html', {
+                    'bulk': bulk, 'payment': payment, 'order': order,
+                    'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+                })
+            messages.warning(request, "Could not reach Razorpay — falling back to simulated payment.")
+
+        payment = Payment(bulk_request=bulk, method=method, amount=amount, status=Payment.Status.SUCCESS,
+                           is_simulated=True)
+        payment.compute_settlement()
+        payment.settled_at = timezone.now()
+        payment.save()
+        Invoice.objects.create(payment=payment, invoice_number=Invoice.generate_number(bulk.id))
+        bulk.status = BulkServiceRequest.Status.PAYMENT_SETTLED
+        bulk.save(update_fields=['status'])
+
+        from payments.models import Wallet
+        labour_per_worker_total = bulk.labour_charge * bulk.duration_days
+        assignments = bulk.assignments.all()
+        for assignment in assignments:
+            worker_wallet, _ = Wallet.objects.get_or_create(user=assignment.worker.user)
+            payout = (labour_per_worker_total * Decimal(str(assignment.worker.payout_percentage)) / Decimal('100')).quantize(Decimal('0.01'))
+            worker_wallet.credit(payout, transaction_type='bulk_earning', reference=f"Payment {payment.reference_id}")
+            assignment.payout_amount = payout
+            assignment.save(update_fields=['payout_amount'])
+
+        if assignments.exists():
+            society_op = assignments.first().worker.society.operator if assignments.first().worker.society else None
+            if society_op:
+                society_wallet, _ = Wallet.objects.get_or_create(user=society_op)
+                society_wallet.credit(payment.cooperative_fee, transaction_type='cooperative_fee', reference=f"Payment {payment.reference_id}")
+
+        messages.success(request, "Payment successful (simulated). Invoice generated.")
+        return redirect('bookings:bulk_request_detail', request_id=bulk.id)
+
+    return render(request, 'bookings/make_bulk_payment.html', {'bulk': bulk, 'razorpay_ready': razorpay_ready})
+
+
+@login_required
+@require_POST
+def bulk_payment_callback(request, request_id):
+    """Verifies Razorpay payment for Bulk Requests."""
+    bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
+    payment = get_object_or_404(Payment, bulk_request=bulk)
+
+    order_id = request.POST.get('razorpay_order_id')
+    payment_id = request.POST.get('razorpay_payment_id')
+    signature = request.POST.get('razorpay_signature')
+
+    if razorpay_client.verify_payment_signature(order_id, payment_id, signature):
+        payment.razorpay_payment_id = payment_id
+        payment.razorpay_signature = signature
+        payment.status = Payment.Status.SUCCESS
+        payment.compute_settlement()
+        payment.settled_at = timezone.now()
+        payment.save()
+        Invoice.objects.get_or_create(payment=payment, defaults={
+            'invoice_number': Invoice.generate_number(bulk.id)})
+        bulk.status = BulkServiceRequest.Status.PAYMENT_SETTLED
+        bulk.save(update_fields=['status'])
+
+        from payments.models import Wallet
+        labour_per_worker_total = bulk.labour_charge * bulk.duration_days
+        assignments = bulk.assignments.all()
+        for assignment in assignments:
+            worker_wallet, _ = Wallet.objects.get_or_create(user=assignment.worker.user)
+            payout = (labour_per_worker_total * Decimal(str(assignment.worker.payout_percentage)) / Decimal('100')).quantize(Decimal('0.01'))
+            worker_wallet.credit(payout, transaction_type='bulk_earning', reference=f"Payment {payment.reference_id}")
+            assignment.payout_amount = payout
+            assignment.save(update_fields=['payout_amount'])
+
+        if assignments.exists():
+            society_op = assignments.first().worker.society.operator if assignments.first().worker.society else None
+            if society_op:
+                society_wallet, _ = Wallet.objects.get_or_create(user=society_op)
+                society_wallet.credit(payment.cooperative_fee, transaction_type='cooperative_fee', reference=f"Payment {payment.reference_id}")
+
+        messages.success(request, "Payment verified successfully. Invoice generated.")
+    else:
+        payment.status = Payment.Status.FAILED
+        payment.save(update_fields=['status'])
+        messages.error(request, "Payment verification failed.")
+    return redirect('bookings:bulk_request_detail', request_id=bulk.id)
+
+
+@login_required
+@user_passes_test(_is_institution, login_url='core:home')
+def submit_bulk_review(request, request_id):
+    """Single feedback for all workers assigned to a bulk request."""
+    bulk = get_object_or_404(BulkServiceRequest, id=request_id, institution=request.user)
+    if bulk.status not in (BulkServiceRequest.Status.PAYMENT_SETTLED, BulkServiceRequest.Status.WORK_COMPLETED):
+        messages.error(request, "Only settled or completed bulk requests can be reviewed.")
+        return redirect('bookings:bulk_request_detail', request_id=request_id)
+
+    if request.method == 'POST':
+        rating = int(request.POST.get('rating', 5))
+        comment = request.POST.get('comment', '')
+
+        assignments = bulk.assignments.all()
+        for assignment in assignments:
+            from reviews.models import Review
+            Review.objects.update_or_create(
+                bulk_assignment=assignment,
+                defaults={
+                    'booking': None,
+                    'customer': request.user,
+                    'worker': assignment.worker,
+                    'rating': rating,
+                    'comment': f"[Bulk] {comment}",
+                }
+            )
+            worker = assignment.worker
+            all_ratings = worker.reviews.all()
+            worker.average_rating = round(sum(r.rating for r in all_ratings) / all_ratings.count(), 2)
+            worker.save(update_fields=['average_rating'])
+
+        bulk.status = BulkServiceRequest.Status.RATED
+        bulk.save(update_fields=['status'])
+        messages.success(request, "Thank you for your feedback. All workers have been rated.")
+        return redirect('bookings:bulk_request_detail', request_id=request_id)
+
+    return render(request, 'bookings/submit_bulk_review.html', {'bulk': bulk})
