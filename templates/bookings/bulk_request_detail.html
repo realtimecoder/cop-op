@@ -27,26 +27,47 @@
         <h3 class="mt-4">{% trans "Assigned workers" %} ({{ assignments.count }}/{{ bulk.workers_required }})</h3>
         <div class="table-wrap">
           <table class="data-table">
-            <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Status" %}</th><th>{% trans "Payout" %}</th></tr></thead>
+            <thead><tr><th>{% trans "Worker" %}</th><th>{% trans "Status" %}</th><th>{% trans "Payout" %}</th><th class="text-right">{% trans "Action" %}</th></tr></thead>
             <tbody>
               {% for a in assignments %}
               <tr>
                 <td>{{ a.worker.user.get_full_name|default:a.worker.user.phone_number }}</td>
                 <td>{% if a.is_completed %}<span class="badge badge-verified">{% trans "Completed" %}</span>{% else %}<span class="badge badge-warning">{% trans "In progress" %}</span>{% endif %}</td>
                 <td style="font-family:var(--font-mono)">{% if a.payout_amount %}₹{{ a.payout_amount }}{% else %}—{% endif %}</td>
+                <td class="text-right">
+                  {% if is_assigned_worker and a.worker.user == request.user and not a.is_completed %}
+                    {% if bulk.status == 'in_progress' or bulk.status == 'assigned' %}
+                      <form method="post" action="{% url 'bookings:mark_bulk_assignment_complete' bulk.id a.id %}" style="display:inline;">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% trans "Mark Complete" %}</button></form>
+                    {% endif %}
+                  {% endif %}
+                </td>
               </tr>
-              {% empty %}<tr><td colspan="3" class="muted">{% trans "No workers assigned yet." %}</td></tr>{% endfor %}
+              {% empty %}<tr><td colspan="4" class="muted">{% trans "No workers assigned yet." %}</td></tr>{% endfor %}
             </tbody>
           </table>
         </div>
+
+        {% if is_assigned_worker and bulk.status == 'assigned' %}
+        <div class="alert alert-info mt-3" style="padding:12px; font-size:0.85rem;">
+          <svg style="width:14px;height:14px;margin-right:6px;vertical-align:middle;" class="icon"><use href="#icon-info"/></svg>
+          {% trans "The society admin has assigned you to this request. You can mark your work as complete once you finish." %}
+        </div>
+        {% endif %}
 
         <div class="flex gap-1 mt-3" style="flex-wrap:wrap;">
           {% if is_institution %}
             {% if bulk.status == 'requested' or bulk.status == 'claimed' %}
             <form method="post" action="{% url 'bookings:cancel_bulk_request' bulk.id %}">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">{% trans "Cancel request" %}</button></form>
             {% endif %}
-            {% if bulk.status == 'in_progress' %}
+            {% if bulk.status == 'awaiting_approval' %}
+            <form method="post" action="{% url 'bookings:approve_bulk_fulfillment' bulk.id %}" style="display:inline;">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Accept Partial Fulfillment" %}</button></form>
+            <form method="post" action="{% url 'bookings:reject_bulk_fulfillment' bulk.id %}" style="display:inline;">{% csrf_token %}<button class="btn btn-outline btn-sm" type="submit">{% trans "Reject" %}</button></form>
+            {% endif %}
+            {% if bulk.status == 'work_completed' %}
             <form method="post" action="{% url 'bookings:confirm_bulk_completion' bulk.id %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Confirm work is done" %}</button></form>
+            {% endif %}
+            {% if bulk.status == 'customer_confirmed' %}
+            <a href="{% url 'bookings:make_bulk_payment' bulk.id %}" class="btn btn-accent btn-sm">{% trans "Proceed to Payment" %}</a>
             {% endif %}
           {% endif %}
           {% if is_assigned_society_operator %}
@@ -55,6 +76,9 @@
             {% endif %}
             {% if bulk.status == 'assigned' and bulk.is_fully_staffed %}
             <form method="post" action="{% url 'bookings:start_bulk_work' bulk.id %}">{% csrf_token %}<button class="btn btn-accent btn-sm" type="submit">{% trans "Mark as in progress" %}</button></form>
+            {% endif %}
+            {% if bulk.status == 'in_progress' %}
+            <form method="post" action="{% url 'bookings:society_confirm_bulk_completion' bulk.id %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">{% trans "Confirm All Work Completed" %}</button></form>
             {% endif %}
           {% endif %}
         </div>
